@@ -7,9 +7,9 @@ const siteMetadata = {
     '分享前、後端程式開發的心得與技術文章、Side Projects 與小工具，另外也會分享一些閱讀心得 ✌️✌️✌️',
   language: 'zh-TW',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://phdev-dev.vercel.app',
+  siteUrl: 'https://phdev.dev/',
   siteRepo: 'https://github.com/penghuachen/phdev.dev',
-  siteLogo: '/static/images/logo.png',
+  siteLogo: '/static/images/logo.svg',
   socialBanner: '/static/images/twitter-card.png',
   mastodon: '',
   email: 'kids5346@gmail.com',
