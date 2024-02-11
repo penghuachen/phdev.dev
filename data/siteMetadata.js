@@ -10,7 +10,7 @@ const siteMetadata = {
   siteUrl: 'https://phdev.dev/',
   siteRepo: 'https://github.com/penghuachen/phdev.dev',
   siteLogo: '/static/images/logo.svg',
-  socialBanner: '/static/images/logo.svg',
+  socialBanner: '/static/images/logo.png',
   mastodon: '',
   email: 'kids5346@gmail.com',
   github: 'https://github.com/penghuachen',
