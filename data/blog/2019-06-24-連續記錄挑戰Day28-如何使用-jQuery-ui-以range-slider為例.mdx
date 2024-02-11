@@ -11,22 +11,22 @@ summary: ''
 
 ## jQuery 來源
 
-使用方式有兩種: 
+使用方式有兩種:
 
 
-<span style="color:#f00;">引入順序需要先引入**jQuery的js檔案**後才引入**jQuery-ui的js檔案**，否則會報錯</span>
+引入順序需要先引入**jQuery的js檔案**後才引入**jQuery-ui的js檔案**，否則會報錯
 
 - 透過cdn引入 :
-  ```js 
-  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+```js
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
   ```
-  ```js 
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+```js
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   ```
-  ```html 
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+```html
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   ```
-  
+
 - 透過將jQuery source code下載後儲存，並在專案中引入使用
 
 ## 使用 jQuery的 range slider
@@ -42,13 +42,13 @@ summary: ''
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>jQuery UI Slider - Range slider</title>
-  
+
 <!--   引入jQuery source code and css  -->
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="/resources/demos/style.css">
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  
+
 <!--  slider設定相關數值的程式部分  -->
   <script>
   $( function() {
@@ -67,15 +67,15 @@ summary: ''
   </script>
 </head>
 <body>
- 
+
 <p>
   <label for="amount">Price range:</label>
   <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
 </p>
- 
+
 <div id="slider-range"></div>
- 
- 
+
+
 </body>
 </html>
 

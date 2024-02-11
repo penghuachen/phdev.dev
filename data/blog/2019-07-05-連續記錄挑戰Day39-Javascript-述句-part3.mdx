@@ -28,7 +28,7 @@ Ex:
     }
   }
   /*
-    catch區塊透過 e 這個區域變數承接try區塊中所丟出的例外情況的訊息，而且除了值以外，也可以承接Error物件的內容。 
+    catch區塊透過 e 這個區域變數承接try區塊中所丟出的例外情況的訊息，而且除了值以外，也可以承接Error物件的內容。
     而這裡的e為try區塊 throw的 numInput
   */
   catch (e) {
@@ -39,13 +39,13 @@ Ex:
     finally區塊所包含的述句永遠會被執行。
     當try區塊以下列方式終止時，也會執行。
     1. 抵達區塊結尾正常結束
-    2. 因為break / continue / return  
+    2. 因為break / continue / return
     3. catch有接到錯誤訊息
   */
 
   /*
     狀況題：當使用try/catch/finally時，全域有撰寫一程式碼為 console.log('test')，試看執行時的情況。
-    
+
     1. 抵達區塊結尾正常結束 : try > finally ，外部 console.log不執行
     2. 因為break / continue / return  :
       - 正常情況結束 ： try > finally ，外部 console.log不執行
@@ -64,14 +64,16 @@ Ex:
 
 ## 其他述句
 
-### with 
+### with
 
 可以更容易讀取深層巢狀的物件階層。
 
 - 語法：
+ ```javascript
     with(object){
         statement
     }
+  ```
 - 在strict模式中被禁用，而在非strict中也應該盡可能不要用到。因為使用with的程式碼很難優化。
 
 Ex:
@@ -108,7 +110,7 @@ let WangFamily = {
 with (WangFamily) {
   console.log(father.name);
   console.log(father.age);
-  
+
   //設定中斷點
   debugger;
 }

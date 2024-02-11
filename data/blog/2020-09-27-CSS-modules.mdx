@@ -23,7 +23,7 @@ CSS modules 是另外一種可以用來設定元件樣式的方式，但這個�
 
 **這是一項不可逆的指令**，一旦執行後就無法再將這個專案回到使用 `npm run eject` 之前的狀態。
 
-```bash=
+```shell
 npm run eject
 ```
 
@@ -39,23 +39,20 @@ npm run eject
 
 這邊需要注意的部分是在 **css-loader 的版本問題，在 3.0.0 的版本後，對於 `localIdentName` 的配置上不太一樣，這部分來看看文件 [3.0.0 (2019-06-11)](https://github.com/webpack-contrib/css-loader/blob/master/CHANGELOG.md#300-2019-06-11)的 README:**
 
-> ...略
-> modules option now can be {Object} and allow to setup CSS Modules options:
-> - localIdentName option was removed in favor modules.localIdentName option
-> ...略
+> **modules option now can be `{Object}` and allow to set up CSS Modules options:- localIdentName option was removed in favor modules.localIdentName option**
 
 這代表在使用上原本的寫法是這樣:
 
 ```javascript
 // ...略
-{
+const settings = {
   use: {
   loader: 'css-loader',
     options: {
       sourceMap: true,
       importLoaders: 2,
-      localIdentName: '[name]__[local]___[hash:base64:5]', 
-      modules: true 
+      localIdentName: '[name]__[local]___[hash:base64:5]',
+      modules: true
     }
   }
 }
@@ -66,7 +63,7 @@ npm run eject
 
 ```javascript
 // ...略=
-{
+const settings = {
   use: {
   loader: 'css-loader',
     options: {
@@ -75,6 +72,7 @@ npm run eject
       modules: {
         localIdentName: '[name]__[local]__[hash:base64:5]'
       },
+    }
   }
 }
 // ...略
@@ -87,7 +85,7 @@ npm run eject
 在 create-reate-app 的 webpack.config.js 中，應該會看到類似如下的程式碼:
 
 ```javascript
-{
+const settings = {
   test: cssRegex,
   exclude: cssModuleRegex,
   use: getStyleLoaders({
@@ -103,14 +101,14 @@ npm run eject
   // Remove this when webpack adds a warning or an error for this.
   // See https://github.com/webpack/webpack/issues/6571
   sideEffects: true,
-},
+}
 ```
 
 完成 webpack 的重新配置後，記得要重啟專案才會生效哦！
 
 接著我們先將 Card 元件建立起來:
 
-```jsx=
+```jsx
 import React from 'react';
 import styles from './index.css';
 
@@ -128,9 +126,9 @@ export default Card;
 
 如果透過 `console` 查看 `styles` 的值，會得到如下的呈現:
 
-```javascript
-{
-  Card-div: "index__Card__M1d8z"
+```jsx
+const styles = {
+  "Card-div": "index__Card__M1d8z"
 }
 ```
 
@@ -138,7 +136,7 @@ export default Card;
 
 最後讓我們在元件中使用 css module 的方式來設定樣式吧!
 
-```css=
+```css
 /* card.css */
 .Card-div {
   border: 1px solid #8d8d8d;
@@ -169,7 +167,7 @@ export default Card;
 // ... 略
 // Adds support for CSS Modules (https://github.com/css-modules/css-modules)
 // using the extension .module.css
-{
+const config = {
   test: cssModuleRegex,
   use: getStyleLoaders({
     importLoaders: 1,
@@ -178,9 +176,9 @@ export default Card;
       getLocalIdent: getCSSModuleLocalIdent,
     },
   }),
-},
+}
 // Opt-in support for SASS (using .scss or .sass extensions).
-// By default we support SASS Modules with the
+// By default, we support SASS Modules with the
 // extensions .module.scss or .module.sass
 ```
 
@@ -188,7 +186,7 @@ export default Card;
 
 這裡我們額外建立一個 `CardTwo` 元件，讓這個元件的樣式設定和前一個相同:
 
-```jsx=
+```jsx
 import React from 'react';
 import styles from './index.module.css';
 
