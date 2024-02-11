@@ -1,0 +1,104 @@
+---
+title: 連續記錄挑戰Day21-transition-初探-part1
+date: "2019-06-17 18:46:47"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# css 大全 -transition(轉場) 初探 part1
+
+## 用途 : **讓元素狀態改變時使屬性值的數值逐步的變化**
+
+能讓css屬性在數值變化時有"活起來"的效果(使用程式改變ID、class時亦是。)通常用在和使用者的互動上。
+
+
+## 轉場屬性：
+
+### transition-property:可以指定特定的css屬性名稱才能有轉場的效果，亦可以同時指定css屬性名稱使用
+
+|語法 |數值 | 適用於 |
+|-   |-    |-      |
+|transition-property|none、all、property-name| 所有元素以及 :before、:after偽元素 |
+
+問題:如何確定有使用到轉場效果的css屬性名稱?
+
+答案:透過js監聽事件的方法，可以獲得相關的資訊，程式碼如下：
+ 
+ ```html
+    //使用監聽事件查看使用transition時有變動的css屬性(搭配console查看)
+    <div class="box"></div>
+ ```
+ 
+ ```css
+    .box{
+      width:50px;
+      height:50px;
+      background:#ccc;
+      //設定 width,height,background,padding皆有變化，且時間為0.5s
+      transition-property:width,height,background,padding;
+      transition-duration:0.5s;
+      padding:10px;
+    }
+    .box:hover{
+      width:100px;
+      height:100px;
+      background:#ada;
+      padding:20px;
+    }
+ ```
+
+ ```javascript
+    // transitionend event:用於監聽有使用到transition時。
+    var el = document.querySelector(".box");
+    el.addEventListener("transitionend",test,false);
+    function test(e){
+      console.log(e.propertyName);
+    }
+ ```
+    
+附上測試連結： [測試範例ㄧ](https://codepen.io/kids5346/pen/VJerGR)
+
+### transition-duration：轉場時所需要花費的時間，設定值是由逗號隔開的數值串列，代表了時間長度。
+
+|語法 |數值 | 適用於 |
+|-   |-    |-      |
+|transition-duration|s(秒)、ms(毫秒)| 所有元素以及 :before、:after偽元素 |
+
+**當transition-duration沒有被設定(或者數值沒有大於0)且transition-delay亦沒有設定正值，則transition-property會被視為沒有宣告**
+
+備註：關於多個屬性個數以及多個週期個數設定值:
+1. 屬性個數與宣告的週期個數不符：瀏覽器會有額外的規則處理不符合的情況
+2. 屬性個數 > 週期個數: 重複宣告的週期
+3. 週期個數 > 屬性個數: 忽略額外的週期個數
+
+附上第2點的測試程式碼：
+
+```html
+
+    //測試二：transition-duration:屬性個數 > 週期個數時
+    <div class="box1"></div>
+
+```
+
+```css
+    .box1{
+      width: 50px;
+      height: 50px;
+      background: #ccc;
+      padding: 10px;
+
+      /*屬性個數被設定的秒數依序為 :width(.2s),height(1s),background(.2s),padding(1s)*/
+      transition-property:width,height,background,padding;
+      transition-duration:.2s,1s ;
+    }
+
+    .box1:hover{
+      width: 100px;
+      height: 100px;
+      background: #ada;
+      padding: 20px;
+    }
+```
+
+附上測試連結： [測試範例二](https://codepen.io/kids5346/pen/VJerGR)

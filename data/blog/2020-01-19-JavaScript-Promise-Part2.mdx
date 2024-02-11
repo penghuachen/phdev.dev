@@ -1,0 +1,195 @@
+---
+title: JavaScript Promise-Part2
+date: "2020-01-19 21:30:57"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+## `Promise.resolve()`
+
+先來看看一段 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve)的解釋:
+
+
+>Promise.resolve(value) 方法回傳一個以 value 判定結果的 Promise 物件。若 value 是個 thenable (例如，具有 "then"方法)，則回傳的 promise 將依其結果採取其最終狀態；若 value 是 promise，則作為呼叫 Promise.resolve 之結果；其他情形都將回傳以 value 實現的 promise。
+
+有點繞舌，不過大致重點如下:
+
+1. `Promise.resolve()` 接受三種形式的值: `value`、`promise`、`thenable`。
+2.  如果是 `Promise.resolve(value)`，會得到一個以 `value` 做為判定成功(resolve)或失敗(reject)的一個 `Promise` 物件。
+3.  如果是 `Promise.resolve(promise)`，則會呼叫該 `promise` 成功執行且完成的結果 
+4.  如果是 `Promise.resolve(thenable)`，則會以 `thenable` 的最終狀態作為結果。
+
+
+接下來，來針對第2、3、4點來做些測試的例子吧！
+
+- 測試例子一: `Promise.resolve(value)`
+
+```javascript
+Promise.resolve('Success').then(value => console.log(value));
+```
+
+當 `Promise.resolve(value)` 的 `value` 是一個值時，透過 `then()` 取得的就是那個 `value` 的值 `Success`
+
+
+![Day27-1](https://i.imgur.com/7RBzwIS.png)
+
+
+- 測試例子二: `Promise.resolve(promise)`
+
+```javascript
+const runTime = times => {
+  return new Promise((resolve, reject)=> resolve(times))
+}
+
+Promise.resolve(runTime(5)).then(value => console.log(value));
+```
+
+當 `Promise.resolve(promise)` 執行的是另一個 `Promise` 物件時，會先呼叫該`Promise` 物件後，再透過 `then()` 取得該`Promise` 物件成功且完成的值 `5`
+
+![Day27-2](https://i.imgur.com/5vOxC0L.png)
+
+- 測試例子三: `Promise.resolve(thenable)`
+
+```javascript
+const thenable = {
+  then: resolve => {
+    throw new TypeError('Throwing Error');
+    resolve('Resolving');
+  }
+};
+
+const promise2 = Promise.resolve(thenable);
+promise2
+.then(v => console.log(v))
+.catch(err => console.log(err));
+```
+
+當 `Promise.resolve(thenable)` 執行的是一個 `thenable` 時，會依照該 `thenable` 的最終狀態決定最後的結果，所以透過 `then()` 會取得值 `Throwing Error`。
+
+
+![Day27-3](https://i.imgur.com/uj70gch.png)
+
+再看看另一個 `thenable` 的測試:
+
+```javascript
+const thenable = {
+  then: resolve => {
+    resolve('Success');
+  }
+};
+
+const promise2 = Promise.resolve(thenable);
+promise2
+.then(v => console.log(v))
+.catch(err => console.log(err));
+```
+
+
+當 `Promise.resolve(thenable)` 執行的是一個 `thenable` 時，會依照該 `thenable` 的最終狀態決定最後的結果，所以透過 `then()` 會取得值 `Success`。
+
+
+![[Day27-4](https://i.imgur.com/rs9gsHL.png)
+
+## `Promise.reject()`
+
+> MDN : 靜態函式 Promise.reject 回傳一個被拒絕的 Promise。由於除錯目的及選擇性錯誤捕捉（selective error catching），使用一個 instanceof Error 作為 reason 是很有幫助的。
+
+直接來看個測試例子:
+
+```javascript
+Promise.reject(new Error('fail'))
+.then(res => console.log(res))
+.catch(err => console.log(err));
+```
+
+`Promise.reject()` 會回傳操作後失敗的結果，這裡透過 `catch` 接住 `reject` 的值 `fail` 。
+
+![Day27-5](https://i.imgur.com/uG1YcSP.png)
+
+
+
+## `Promise.race()`
+
+> MDN: Promise.race(iterable) 方法回傳一個 promise 物件，此 promise 物件會於 iterable 引數中任一個 promise 轉為 resolve 或 rejected 時立即轉變成 resolve 或 rejected，並且接收其成功值或失敗訊息。
+
+意思是在使用這個語法時，只要其中有一個 `Promise` 物件 執行了 `resolve` 或者 `reject` ，就馬上轉為那個 `Promise` 物件的狀態(`resolve` 或者 `reject`)，並取得它的成功或者失敗的值。
+
+這裡透過 `setTimeout` 來看看 `promise.race()` 的用途:
+
+```javascript
+const doneWork = (person,times) => {
+  return new Promise((resolve,reject)=> {
+    setTimeout(() => {
+        resolve(`${ person } 先完成了工作!`);
+    },times);
+  });
+}
+
+Promise.race([doneWork('Bill',2000),doneWork('Jack',3000)])
+.then(res => console.log(res));
+```
+
+這裡要做的事情是，得到第一個成功抵達的人的訊息，之後的都不需要獲得。
+
+而 `promise.race()` 用於將第一個 `resolve` 或者 `reject` 的 `Promise` 物件的成功或者失敗的值接收，所以可以得到值為 `Bill 先完成了工作!` (因為Bill的秒數比較快)。
+
+
+![Day27-6](https://i.imgur.com/fwsJxFc.png)
+
+
+## `Promise.all()`
+
+> Promise.all() 方法回傳一個 Promise 物件，當引數 iterable 中所有的 promises 都被實現（resolved），或引數 iterable 不含任何 promise 時，被實現。或以第一個被拒絕的 promise 的原因被拒絕。
+
+意思是要所有的 `Promise` 物件都 `resolve` 才會回傳，但如果有任一個 `Promise` 物件 `reject` 則就回傳第一個 `reject` 的失敗訊息。
+
+此外會以陣列的方式儲存每一個 `Promise` 物件的值。
+
+這裡透過 `setTimeout` 來看看 `promise.all()` 的用途
+
+```javascript
+const doneWork = (person,times) => {
+  return new Promise((resolve,reject)=> {
+    setTimeout(() => {
+        resolve(`${ person } 完成了工作!`);
+    },times);
+  });
+}
+
+Promise.all([doneWork('Bill',3000),doneWork('Jack',2000)])
+.then(res => console.log(res));
+```
+
+![Day27-7](https://i.imgur.com/KIxSK0e.png)
+
+
+
+## `Promise ` chain
+
+如果我們有需要==一個緊接著一個地==執行非同步函式，這個時候就會建立所謂的 `Promise` 鏈。
+
+直接來看看測試的例子:
+
+```javascript
+const doneWork = (person,times) => {
+  return new Promise((resolve,reject) => {
+    setTimeout(() => {
+        resolve(`${ person } 完成了工作!`);
+    },times);
+  });
+}
+
+doneWork('Bill',4000)
+.then(res => {
+  console.log(res);
+  return doneWork('Jack',3000);
+})
+.then(res => {
+  console.log(res);
+});
+```
+
+第一個被執行的非同步函式是 `doneWork('Bill',4000)`，且在取得值 `Bill 完成了工作!` 之後回傳另一個非同步函式 `doneWork('Jack',3000)` 並取得值 `Jack 完成了工作!`。
+
+![Day27-8](https://i.imgur.com/5PFtve7.png)

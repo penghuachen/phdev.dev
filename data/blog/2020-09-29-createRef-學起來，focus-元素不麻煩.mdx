@@ -1,0 +1,134 @@
+---
+title: createRef 學起來，focus 元素不麻煩
+date: "2020-09-29 10:40:18"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+# createRef 學起來，focus 元素不麻煩
+
+在開發的時候，我們常常會遇到一個需求，**當點擊某段文字或區塊時，可以聚焦(focus) 在 input 元素上。**
+
+
+而這只是其中一個我們常遇到的開發情境，這時候我們應該怎麼做呢? 我們可以透過幾種方式來達到這個需求:
+
+1. 透過原生 Web API 的方式
+2. 在 class-based component 中使用 `createRef()`
+3. 在 function component 中使用 `useRef()`
+
+而在 function component 中使用 `useRef()` 的方式則留待學習 React hooks 的時候學習囉!
+
+接著，讓我們來看看怎麼使用吧!
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/wizardly-bush-jdxz7?file=/src/App.js)。
+
+## 透過原生 Web API 的方式
+
+在 React 中由於就是在寫 JavaScript，所以可以透過原生 Web API的方式取得 dom 元素，並且透過 `focus()` 的方式 focus 在元素上。
+
+這邊我們透過前面提到的情境，點擊某段文字時，可以聚焦(focus) 在 `input` 元素上的方式來看看怎麼達成。
+
+```jsx=
+// App.js
+import React, { Component } from "react";
+import "./styles.css";
+
+class App extends Component {
+  focusInputByWebAPI = () => {
+    document.querySelector("#input-1").focus();
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <h2 onClick={this.focusInputByWebAPI}>原生 Web API - 點擊本段文字</h2>
+        <input id="input-1" type="text" name="" />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+在原生 JS 中我們可以透過幾種選取 dom 的方式來取得 dom，而 `document.querySelector("#input-1")` 就是其中一種，我們透過這個方式取得後在呼叫 `focus` 方法來聚焦在 input 元素上。
+
+## 在 class-based component 中使用 callback refs, createRef()
+
+前面提到的是一種可以實現的方式，但是其實 React 有額外提供了其他種選擇給我們使用，而這部分依據版本的不同有著不同的用法：
+
+### 在 React 16.3 版之前
+
+透過在 ref 寫一個 callback，**將 React component 的 instance 或 HTML DOM 作為他的參數傳入，就可以透過這種方式儲存在別的地方使用**。
+
+這種方式**透過在這個 instance 綁上 input 元素**，就可以在點擊事件被觸發時，使用這個元素
+
+我們將上方的 code 改寫:
+
+```jsx=
+import React, { Component } from "react";
+import "./styles.css";
+
+class App extends Component {
+  focusInputByRefCallback = () => {
+    this.inputEl.focus();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <h2 onClick={this.focusInputByRefCallback}>Class-besed Componet: ref callbacks - 點擊本段文字</h2>
+        <input ref={ el => this.inputEl = el } type="text" name="" />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+### 在 React 16.3 版之後
+
+在這個版本之後， React 提供了一個方式可以更簡便並且管理這些需要使用 ref 的元素：透過 createRef()，透過這個方式**會建立一個Ref，並藉由 ref 屬性被寫在 React element 中而可以取得這些元素。**
+
+而這些元素我們可以**透過 current 中取得**，來改寫一下上面的例子：
+
+這邊需要注意一個細節，**一定要透過在 constructor 中調用 React.createRef() 的方式，才可以取得元素。**
+
+```jsx=
+import React, { Component } from "react";
+import "./styles.css";
+
+class App extends Component {
+  constructor() {
+    super();
+    this.myRef = React.createRef();
+  }
+
+  focusInputBycreateRef = () => {
+    this.myRef.current.focus();
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <h2 onClick={this.focusInputBycreateRef}>
+          Class-besed Componet: createRef - 點擊本段文字
+        </h2>
+        <input ref={this.myRef} type="text" name="" />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+以上就是今天對於 createRef 的學習，明天繼續努力！
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Refs 和 DOM](https://zh-hant.reactjs.org/docs/refs-and-the-dom.html)

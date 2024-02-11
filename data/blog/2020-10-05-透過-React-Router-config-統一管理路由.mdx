@@ -1,0 +1,211 @@
+---
+title: 透過 React Router config 統一管理路由
+date: "2020-10-05 10:19:56"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 透過 React Router config 統一管理路由
+
+前幾天我們學習到了如何在元件中使用 Router 來導航，而今天要學習的部分則是如何透過**集中管理所有路由的方式實現導航到各個頁面的方式**。
+
+
+而這個方式就是在配置一個 router 的 config 檔案。
+
+今天會透過兩個範例來理解這個部分:
+
+1. 只有一層路由的 Router 配置
+2. 具有巢狀路由的 Router 配置
+
+接著就趕緊今天的進度吧!
+
+## 基礎 Router config 配置
+
+首先要學習的部分是配置只有一層路由的頁面切換，相信大家都已經有基本的概念了，所以這邊就直接來看看如何透過集中管理路由的方式達成:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/blissful-dubinsky-q9lr7?file=/src/App.js)。
+
+首先先建立一個用來管理路由的檔案:
+
+```jsx=
+// router/index.js
+import React from "react";
+
+// 重點觀察位置
+const routes = [
+  {
+    path: "/car",
+    component: React.lazy(() => import("../components/Car"))
+  },
+  {
+    path: "/airplane",
+    component: React.lazy(() => import("../components/Airplane"))
+  }
+];
+
+export default routes;
+```
+
+這邊有幾個重點:
+
+1. 將畫面上需要的路由統一設定於此，而這邊設定了 `/car`, `/airplane` 兩個元件的路由
+2. 另外透過懶加載(lazy load)的方式引入元件。
+3. 將 routes 匯出提供其他元件可以使用。
+
+基本上上述的配置就已經完成了集中路由管理的設定，接著我們到元件中配置路由。
+
+```jsx=
+// App.js
+// 重點觀察位置
+import React, { Suspense } from "react";
+import "./styles.css";
+import { NavLink, Route, Switch } from "react-router-dom";
+import routes from "./router";
+
+export default function App() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <div className="App">
+        <h1>基礎 Router config 配置</h1>
+        <nav>
+          <NavLink to="/car">Car</NavLink>
+          <NavLink to="/airplane">Airplne</NavLink>
+        </nav>
+        {/* 重點觀察位置 */}
+        {routes.map((route, index) => {
+          // console.log(route);
+
+          return (
+            <Switch>
+              <Route
+                key={index}
+                path={route.path}
+                // 重點觀察位置
+                render={(props) => <route.component {...props} />}
+              />
+            </Switch>
+          );
+        })}
+      </div>
+    </Suspense>
+  );
+}
+```
+
+路由的配置基本上與前幾天提到的相差不遠，但這裡透過 `map` 方法依據 `routes` 中的元素進行 `Route` 的建立。
+
+此外需要注意的是，由於在 router 中使用了懶加載的方式，所以在 App.js 中需要將 dom 內容放置於 `<Suspense` 元件之中，才可以正常運作。
+
+這部分熟悉之後，接著我們再多些變化，配置具有巢狀路由的 Router 配置。
+
+## 在 Router config  中配置巢狀路由
+
+接著我們透過上面的[測試範例](https://codesandbox.io/s/blissful-dubinsky-q9lr7?file=/src/App.js)，額外新增一個具有巢狀路由需求的配置到範例中。
+
+首先是集中管理路由 router 檔案:
+
+```jsx=
+// router/index.js
+import React from "react";
+
+// 重點觀察位置
+const routes = [
+  {
+    path: "/car",
+    component: React.lazy(() => import("../components/Car"))
+  },
+  {
+    path: "/airplane",
+    component: React.lazy(() => import("../components/Airplane"))
+  },
+  {
+    path: "/nested",
+    component: React.lazy(() => import("../components/Nested")),
+    routes: [
+      {
+        path: "/cmp-1",
+        component: React.lazy(() => import("../components/CmpOne"))
+      },
+      {
+        path: "/cmp-2",
+        component: React.lazy(() => import("../components/CmpTwo"))
+      }
+    ]
+  }
+];
+
+export default routes;
+```
+
+這邊可以看到新增了一個新的 Nested 元件路徑以及在這個元件中的子元件路徑。
+
+接著為了讓 Nested 元件中可以取得 routes 的內容，所以這邊我們還需要在 App.js 中將 routes 傳入:
+
+
+```jsx=
+// App.js
+<Switch>
+  {routes.map((route, index) => {
+    // console.log(route);
+    return (
+      <Route
+        key={index}
+        path={route.path}
+        // 重點觀察位置
+        render={(props) => (
+          <route.component {...props} routes={route.routes} />
+        )}
+      />
+    );
+  })}
+</Switch>
+```
+
+這邊的 `route.routes` 就是將子元件的資訊傳入至 Nested 中，接著我們就可以在 Nested 元件中配置路由囉！
+
+```jsx=
+// Nested.js
+
+import React, { Component } from "react";
+import { NavLink, Route, Switch } from "react-router-dom";
+export default class Nested extends Component {
+  render() {
+    // console.log(this.props);
+
+    return (
+      <div>
+        <h1>Nested Component</h1>
+        <nav>
+          <NavLink to={this.props.match.url + "/cmp-1"}>cmp-1</NavLink>
+          <NavLink to={this.props.match.url + "/cmp-2"}>cmp-2</NavLink>
+        </nav>
+        <Switch>
+          {/* 重點觀察位置 */}
+          {this.props.routes.map((route, index) => {
+            return (
+              <Route
+                key={index}
+                path={this.props.match.url + route.path}
+                render={(props) => {
+                  // console.log(this.props.match.url + route.path);
+                  return <route.component {...props} />;
+                }}
+              />
+            );
+          })}
+        </Switch>
+      </div>
+    );
+  }
+}
+```
+
+在 Nested 元件中，可以看到我們一樣透過 map 將傳入的 `routes` 內容迭代後建立 `<Route>` 元件，而路徑的配置則於前面的篇幅已經提過，透過 `this.props.match.url` 的方式取得後再於該巢狀元件的路徑組合，這樣就可以成功匹配巢狀元件的內容。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Router config](https://reactrouter.com/web/example/route-config)

@@ -1,0 +1,133 @@
+---
+title: '使用 fetch() 來介接 api 吧! '
+date: "2020-01-24 20:02:57"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+## 關於 fetch() 
+
+先來看看 MDN 是如何介紹的:
+
+
+> [MDN](https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API/Using_Fetch)
+> Fetch API 提供了工具使操作 http pipeline 更加容易, 像是日常會用到的發送和接送資料都可以使用。並且有 global 的 fetch() 可以直接呼叫, 使開發能夠用更簡潔的語法取得非同步資料。
+> 以往都是依賴 XMLHttpRequest。 但相較下 Fetch 使用上更容易，並被廣泛使用在 Service Workers。Fetch 在設定 HTTP 相關的設定時, 也提供可讀性比較好的方法, 這些設定包括 CORS 以及其他 header。
+
+
+從這裡可以得到一個結論: 透過 ==`fetch()` 取得非同步資料的過程會比使用 `XMLHttpRequest` 物件還要來的更加容易、簡單。==
+
+`fetch()` 方法有一個必填的參數:==要請求的網址==，且使用 `fetch()` 的話，==無論請求成功或失敗都一定得到一個 `promise` 的回應==。
+
+然後 `fetch()` 回傳的為一個包含 `Response` 的 `promise` 物件，這個物件中定義了我們可以使用的方法。
+
+ 
+且因為剛有提到，**無論請求成功或失敗都一定得到一個 `promise` 的回應**，所以 `fetch()` 會透過 `then()` 、 `catch` 來接收成功取得的非同步的資料或者請求失敗時的錯誤訊息。
+
+
+## 使用 fetch()
+
+先來看看一個測試的例子:
+
+```javascript
+const endPoint = 'https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json';
+
+fetch(endPoint);
+```
+
+可以看到 `fetch()` 會得一個 `Promise` 的物件。
+
+![Day28-1](https://i.imgur.com/WPHsePk.png)
+
+
+再來我們要透過 `then()` 取得資料，並先透過 `clone()` 的方法複製一份後再透過 `json()` 方法將其轉為 JSON 格式。
+
+```javascript
+const endPoint = 'https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json';
+
+fetch(endPoint)
+  .then(res => res.clone().json())
+  .then(data => console.log(data))
+  .catch(err => console.log('error'));
+```
+
+預期可以得到一個格式為 JSON 的資料，再來就可以針對那些資料做操作囉
+
+## 實作: 透過 fetch 介接高雄市資料開放平臺的 open data
+
+1. 撰寫HTML、CSS部分
+```html
+<!-- css part -->
+<style>
+  body {
+    background: #f0d0d0;
+  }
+  h1 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 48px;
+  }
+  .charge-list {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+  .charge-list li {
+    box-sizing: border-box;
+    flex: 0 1 24%;
+    padding: 10px;
+    margin: 0 1% 2% 0;
+    border-radius: 10px;
+    transition: all .4s;
+  }
+  .charge-list li:hover {
+    margin-top: -1%;
+  }
+  .charge-list li:nth-child(n) {
+    background: #aaaadd;
+  }
+  .charge-list li:nth-child(2n) {
+    background: #ddddaa;
+  }
+  .charge-list li:nth-child(3n) {
+    background: #dad;
+  }
+  .charge-list li:nth-child(3n+1) {
+    background: #aaf;
+  }
+</style>
+```
+```html
+<!-- html -->
+<ul class="charge-list"></ul>
+```
+
+2. 透過 fetch 介接 open data
+
+```javascript
+const endPoint = 'https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json';
+
+fetch(endPoint)
+  .then(res => res.clone().json())
+  .then(chargeStation => createDomElement(chargeStation))
+  .catch(err => console.log('error'));
+```
+
+3. 將指定的資料內容(位置、地址)渲染到HTML頁面中
+
+```javascript
+function createDomElement(chargeStation) {
+  const domElements = charge.map(place => {
+    return `
+    <li>
+      <p class="location">位置： ${ place.Location }</p>
+      <p class="address">地址：${ place.Address }</p>
+    </li>
+  `;
+  }).join("");
+  
+  const chargeList = document.querySelector('.charge-list');
+  chargeList.innerHTML = domElements;
+}
+```

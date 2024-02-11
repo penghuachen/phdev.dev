@@ -1,0 +1,227 @@
+---
+title: 什麼是 JSX
+date: "2020-09-18 09:16:21"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 什麼是 JSX?
+
+今天 React 好朋友要帶我看看在 React 中很常使用的語法: **JSX**，這個語法是一個 JavaScript 的語法擴充，而且是在寫 React 的時候，官方推薦使用的語法。
+
+
+JSX 語法的重點在於**允許我們在 JS 的檔案中使用 HTML 的標籤，並且使用 JSX 語法建立的是「==一個 React 的 element==」，此外這樣的標籤語法比起 HTML，更貼近於 JavaScript。**
+
+趕緊來看看怎麼使用吧！
+
+## 怎麼使用 JSX 語法
+
+### 使用 JSX 的基本方式
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/jsx-demo-jvwfr)。
+
+在 React 中，我們可以這麼寫：
+
+```jsx=
+const element = <p>Hello World!</p>;
+```
+
+而上面方式就是一個簡單使用 JSX 語法的方式。
+
+
+### 將變數傳入 JSX 語法中
+
+接著，由於我們是在 JavaScript 中撰寫，所以我們可以**在 JSX 語法撰寫的程式碼中寫入 JavaScript 表達式**，如同下面程式碼中的 `name`:
+
+以下擷取範例來自官方文件: [在 JSX 中嵌入 Expression
+](https://zh-hant.reactjs.org/docs/introducing-jsx.html#embedding-expressions-in-jsx)
+
+```jsx=
+// 將變數 name 傳入至 element 中的方式，在 JSX 中是被允許的。
+const name = 'Josh Perez';
+const element = <p>Hello, {name}</p>;
+
+ReactDom.render(
+  element,
+  document.getElementById('root')
+);
+```
+
+### 在 JSX 中執行函式
+
+當然也可以在 JSX 中執行一個函式並得到一個回傳的結果值：
+
+```jsx=
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Harper',
+  lastName: 'Perez'
+};
+
+const element = (
+  <h1>
+    Hello, {formatName(user)}!
+  </h1>
+);
+
+ReactDom.render(
+  element,
+  document.getElementById('root')
+);
+```
+
+而這邊需要提醒的是變數 `element` 的值被 `()` 括起來，但 `()` 並不是 JSX 語法的一環，而是當我們有多行 JSX 的語法時，需要**透過括號的方式來避免自動分好補足的麻煩。**
+
+### 在條件判斷回傳中使用 JSX
+
+在某些條件下，我們需要不同的 DOM，而 JSX 語法也允許我們將其作為參數並透由函式回傳。
+
+```jsx=
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+function getGreeting(user) {
+  return user
+    ? <p>Hello, {formatName(user)}!</p>
+    : <p>Hello, Stranger.</p>;
+}
+
+const user = {
+  firstName: 'Harper',
+  lastName: 'Perez'
+};
+
+const element = getGreeting(user);
+
+ReactDom.render(
+  element,
+  document.getElementById('root')
+);
+```
+
+例如 `const element = getGreeting(user);` 的 `user` 傳入為 `undefind`，所以會取得 `getGreeting` 回傳值為 `<p>Hello, Stranger.</p>`。
+
+
+關於 JSX 的使用就先到這裡，接著要來看看使用 JSX 的一些限制
+
+## 使用 JSX 時需要注意的限制
+
+### HTML 屬性在 JSX 中的表示方式
+
+A、首先第一點是由於 **React DOM 使用 camelCase 作為屬性命名規範**，這代表像是說在 HTML 中的 `tabindex`，在 JSX 中則必須寫成 `tabIndex`。
+
+B、接著第二點是像是在 HTML 中的 **`class`, `label` 的 `for`，由於在 JS 中是保留字(preserve word)**，所以需要額外改寫成 **`className` 與 `htmlFor`**。
+
+C、但是凡事總是會有例外，諸如 `aria-*`, `data-*` 則**不需要使用 camelCase 作為屬性命名規範**
+
+以上 React 會幫我們將上述提到的部分在編譯時轉換成在 HTML DOM 上其對應的屬性。
+
+### JSX 一定要有一個根元素(one single root element)
+
+在使用 JSX 的時候，**是至少需要一個根元素的**，否則就會報錯。
+
+
+## 副檔名要用 .js 還是 .jsx?
+
+關於 JSX 部分最後要提的是一個也許在研究過程中會遇到的困惑:
+
+**「在 React 中為什麼有些檔案的副檔名除了 .js 之外還有 .jsx 呢？」**
+
+這個問題我也是很困惑，索性就爬文查看看差異處在哪，然後就找到了這一篇 [stackoverflow](https://stackoverflow.com/questions/46169472/reactjs-js-vs-jsx/46169521#46169521) 的發問，摘錄出最佳回答的回覆:
+
+> There are however some other considerations when deciding what to put into a .js or a .jsx file type. Since JSX isn't standard JavaScript one could argue that anything that is not "plain" JavaScript should go into its own extensions ie., .jsx for JSX and .ts for TypeScript for example
+
+大致重點在於**使用 .jsx 作為副檔名的判斷依據在於認為是否為標準的 Javascript。**
+
+由於 JSX 並不是標準的 Javascript，所以就透過以 .jsx 為副檔名來管理這類的檔案。
+
+就好像使用 Typescript 會用 .ts 的副檔名一樣。
+
+所以在實作上都可以成功運作，但怎麼管理就讓大家自己思考囉!
+
+## `React.createElement()`
+
+今天最後要提的部分是 `React.createElement()` ， **JSX 可以說是這個語法的語法糖**， 因為在官方文件的描述中有提到：
+
+> Babel 將 JSX 編譯為呼叫 React.createElement() 的程式。
+
+此外，這個語法提供了三個參數可以使用:
+
+```jsx=
+React.createElement(
+  type,
+  [props],
+  [...children]
+);
+```
+
+| 參數  |說明| 是否必填  |
+|------|------|------|
+| type | 設定 HTML 標籤 | 必填  |
+| props | 設定屬性 | 選填 |
+| children | 設定子節點 | 選填 |
+
+接著讓我們來將上面的程式碼透過 `React.createElement()` 改寫：
+
+首先是剛剛在上方透過 JSX 語法方式所寫的程式碼：
+
+```jsx=
+const element = <p>Hello World!</p>;
+```
+
+接著是透過 `React.createElement()` 所寫的程式碼：
+
+```jsx=
+React.createElement(
+  'p',
+  null,
+  'Hello World'
+);
+```
+
+那如果今天想要呈現如下的 DOM 結構呢?
+
+```html
+<div class="container">
+  <p>這是一個子節點</p>
+</div>
+```
+
+這樣的話，如果以使用 `React.createElement()` 達成目的的話，就需要調用 `React.createElement()` 兩次來建立：
+
+```jsx=
+// 建立一個 p 標籤
+const element = React.createElement(
+  'p',
+  null,
+  '這是一個子節點'
+);
+
+// 建立一個 div 標籤，並有一個 p 標籤的子節點
+const element2 = React.createElement(
+ 'div',
+ { className: 'container' },
+ element
+);
+```
+
+今天的學習應該可以解惑昨天部分程式碼了吧！
+
+透過 JSX 語法的方式可以讓我們寫出更好維護的 HTML 架構，輕鬆許多呢!
+
+明天 React 好朋友要帶我們了解關於「React Element」與「React Component」的相異之處。
+
+程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+明天見～
+
+## 相關資源
+
+- [在 JSX 中嵌入 Expression
+](https://zh-hant.reactjs.org/docs/introducing-jsx.html#embedding-expressions-in-jsx)

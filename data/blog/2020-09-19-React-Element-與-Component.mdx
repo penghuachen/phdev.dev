@@ -1,0 +1,268 @@
+---
+title: React Element 與 Component
+date: "2020-09-19 10:36:39"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# React Element 與 Component
+
+今天 React 好朋友要帶我了解:
+
+1. 什麼是 **React Element**。
+2. **Component** 的建立與使用的方式。
+
+事不宜遲，趕緊學習吧!!
+
+
+
+## React Element
+
+首先要了解的部分是 React Element，先來看看官方怎麼定義一個 React 應用程式的最小組成:
+
+> 建立 React 應用程式最小的單位是 element。
+
+我們透過 JSX 語法所建立的 element，只是一個**單純的物件(Object)**，但有一個很重要的觀念在於 「**React 透過 React DOM ，比對當前 HTML 上的 DOM 與我們建立的 React Element，如果有不同就會將當前 HTML 上的 DOM 更新來符合 React Element 目前的結構」。**
+
+此外需要先建立的觀念是: **React Element 並不一定是 component，但是 component 是由 React Element 而組成的。**
+
+### 將 React Element 渲染到 DOM 中
+
+了解了什麼是 React Element 與它和 component 的關係後，接著我們要看看如何將 React Element 渲染到 DOM 中。
+
+在 React 中，我們可以透過調用下面這個方法來達成：
+
+```javascript
+ReactDOM.render(element, container[, callback])
+```
+
+- `element` 是我們要準備**渲染到 DOM 上的 React Element**
+- `container` 則是我們指定**要放入的 DOM 節點**。
+
+以[官方文件範例程式碼](https://zh-hant.reactjs.org/docs/rendering-elements.html#rendering-an-element-into-the-dom)為例：
+
+```html
+<div id="root"></div>
+```
+
+```jsx=
+const element = <h1>Hello, world</h1>;
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+```
+
+我們將建立好的 React Element(`<h1>Hello, world</h1>`) 放入到 `root` DOM 節點中，如此一來就可以在網頁中看到囉。
+
+### 更新 React Element
+
+更新 React Element 有幾種方式: 
+
+1. 每次都重新建立一個新的 React Element，然後透過再次呼叫 `ReactDOM.render()` 方法更新畫面。
+2. 透過**更新 state 中的資料更新畫面。** 
+
+
+第一點這裡以[官方文件範例程式碼](https://zh-hant.reactjs.org/docs/rendering-elements.html#updating-the-rendered-element)為例：
+
+```jsx=
+// UpdateTime.js
+
+function tick() {
+  const element = (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>It is {new Date().toLocaleTimeString()}.</h2>
+    </div>
+  );
+  ReactDOM.render(element, document.getElementById('root'));
+}
+
+setInterval(tick, 1000);
+```
+
+從上方這個程式碼可以看到 `setInterval` 每秒調用 `ReactDOM.render()` 重新將 React Element 再次地放到 `root` DOM 節點中。
+
+而第二點則可以從兩個角度下手:
+
+- Class-based Component
+- Fucntion Component
+
+這邊提供兩種元件(Component)更新的方式，而這些更新方式與生命週期相關的部分會於後續的天數多做了解。
+
+首先是 Class-based Component 的部分，這邊擷取 TimerOne Component 的程式碼:
+
+```jsx=
+// TimerOne.js
+import React, { Component } from "react";
+
+export default class TimerOne extends Component {
+  state = {
+    date: new Date()
+  };
+
+  componentDidMount() {
+    this.updateTimer();
+  }
+
+  updateTimer() {
+    setInterval(() => {
+      this.setState({
+        date: new Date()
+      });
+    }, 1000);
+  }
+
+  render() {
+    return <div>現在時間是: {this.state.date.toLocaleTimeString()}</div>;
+  }
+}
+```
+
+透過生命週期方法 `componentDidMount` 於元件掛載時(mounted)，執行更新 Timer 的函式 `updateTimer`
+
+此時 `updateTimer` 會觸發**在 Class-besed Component 中用來更新 state 的 `setState` 方法**，並於更新 state 後重新渲染(render)畫面。
+
+接著是 `Function Component` 的部分，擷取 TimerTwo Component 的程式碼:
+
+```jsx=
+import React, { useState, useEffect } from "react";
+
+const TimerTwo = () => {
+  const [state, setState] = useState({
+    date: new Date()
+  });
+
+  useEffect(() => {
+    updateTimer();
+  });
+
+  const updateTimer = () => {
+    setInterval(() => {
+      setState({
+        date: new Date()
+      });
+    }, 1000);
+  };
+
+  return <div>現在時間是: {state.date.toLocaleTimeString()}</div>;
+};
+
+export default TimerTwo;
+```
+
+透過 React Hook 方法 `useEffect` 於元件掛載時(mounted)，執行更新 Timer 的函式 `updateTimer`
+
+此時 `updateTimer` 會觸發**在 Class-besed Component 中用來更新 state 的 `setState` 方法**，並於更新 state 後重新渲染(render)畫面。
+
+這邊額外需要提的部分是為什麼會需要額外呼叫 `toLocaleTiemString()`
+
+原因在於我們透過 `new Date()` 拿到的其實是 Date 這個物件，而在 React 中如果直接將這個物件設在 `{}` 中的話，會得到如下的錯誤:
+
+![](https://i.imgur.com/06fewoq.png)
+
+所以才需要透過呼叫 `toLocaleTiemString()` 將值轉為字串才可以。
+
+## Component 的建立與使用
+
+接著要來學習的是 React 的重點之一: 元件(Component)，整個 React 應用程式是基於一個個元件(Component)才能搭建而成的，而如何更好的使用元件(Component)就是一門需要學習的課題了。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/react-component-0prku)。
+
+### 建立 Function Component 與 Class Component 
+
+建立 Function Component 最簡單的方式就是**撰寫一個 Javascript function**，如官方提供的範例程式碼:
+
+```jsx=
+const Welcome  = (props) => {
+  return <p>Hello, {props.name}</p>;
+};
+```
+
+上面的 function `Welcome` 會回傳用來描述畫面的 React Element，並且也接受一個代表**屬性(properties)的物件**，符合上述的條件，因此也被稱為是 function component。
+
+而 Function Component 在 React Hook 之前也被稱為 Stateless Component，原因在於在 React Hook 之前， **Function Component 是沒有辦法透過 state 儲存狀態的，必須要透過 Class-based Component 才可以。**
+
+另外建立 Class Component 最簡單的方式則是透過 ES6 Class 來定義:
+
+```jsx=
+// ClassBasedComponent.js
+
+import { Component } from 'React';
+
+class Welcome extends Component {
+  render() {
+    return <p>Hello, {this.props.name}</p>;
+  }
+}
+```
+
+透過繼承自 React 中的 Component 類別來建立一個 Class Component。
+
+這邊需要注意的是兩者在**使用 `props` 的方式。**
+
+了解了基本建立元件的方式後，接著我們來看看怎麼渲染它
+
+### Component 的渲染
+
+在前一篇學習文章 [什麼是 JSX?](https://hackmd.io/GH2o4ahAR-6UPbwAdTJw3Q) 中，我們撰寫了如下的 React element:
+
+```jsx=
+const element = <p>Hello World!</p>;
+```
+
+但其實 React element ==也可以用在我們自定義的元件(Component)上，並且同時會將屬性(JSX 與 children)== 傳進這個元件(Component)中。
+
+意思是透過 **`props`** 我們可以在元件(Component)中使用如下的屬性:
+
+1. 自定義或者現有的 HTML 屬性
+2. `children`
+
+而這個部分在[文件](https://zh-hant.reactjs.org/docs/components-and-props.html#rendering-a-component)中其實描述的也很詳細:
+
+```jsx=
+// FunctionComponentOne.js
+import React from "react";
+
+const WelcomeOne = (props) => {
+  return <p>Hello, {props.name}</p>;
+};
+
+export default WelcomeOne;
+```
+
+`<WelcomeOne name="Sara" />` 是我們自定義的元件(Component)，並且當我們設定了一個自定義的屬性 `name="Sara"` 時，React 會以 `{name: 'Sara'}` 的方式作為 `props` 傳入元件(Component)，如此一來才能在 function `WelcomeOne` 中透過 `props.name` 取得值。
+
+而另一個值得一提的是 `children` ，這邊我們先學習簡單的使用方式，我們將上述的程式碼稍微改寫一下：
+
+```jsx=
+// FunctionComponentTwo.js
+import React from "react";
+
+const WelcomeTwo = (props) => {
+  return (
+    <>
+      <h1>Hello, {props.name}</h1>
+      <p>{props.children}</p>
+    </>
+  );
+};
+
+export default WelcomeTwo;
+```
+
+`children` 其中一種使用方式是允許我們在自定義的元件標籤中寫入值，如同上方的 `Hello World!`，而這也同樣會以 `{name: 'Sara', children: 'Hello World!'}` 作為 `props` 傳入到元件中。
+
+
+最後要提到的是 **無論是  Function Component 或者 Class Component，對於修改自己的 props 都是不被允許的，在使用上一定要特別注意。**
+
+今天學習了 React Element 和 Component 的差異，明天繼續往前邁進。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+
+## 參考來源
+
+- [Render Element](https://zh-hant.reactjs.org/docs/rendering-elements.html#updating-the-rendered-element)

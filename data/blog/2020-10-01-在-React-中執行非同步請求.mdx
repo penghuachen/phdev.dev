@@ -1,0 +1,182 @@
+---
+title: 在 React 中執行非同步請求
+date: "2020-10-01 07:27:23"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 在 React 中執行非同步請求
+
+今天要學習的部分是在 React 中透過 axios 來操作非同步請求的 CRUD，
+
+
+為了減少在學習時還要為了找尋可以練習 CRUD 的資源，這邊我們就透過 JSONPlaceholder 這一套來練習 CRUD 的部分，可以更專注於本章篇幅的學習主軸。
+
+不過首先，我們先學 axios 這個套件的一些使用方式吧!
+
+## Axios 是什麼與如何使用
+
+axios 是一套基於 promise 的 http 庫，是可以用來發送非同步請求的 library。
+
+以往在前端開發時，常常會透過以下方式來發送非同步請求:
+
+- XMLHttpRequest
+- Fetch
+- jQuery 的 $ajax
+
+然而由於 axios 的出現，讓我們在做非同步請求時，可以透過更簡單的方式來執行。
+
+相關的知識點可以透過[文件](https://github.com/axios/axios)來理解，蠻容易懂的。
+
+接著讓我們來看看怎麼搭配 JSONPlaceholder 來達成一個基本的 CRUD，這邊我們先透過一個簡化過的例子:
+
+備註: 將透過 input 輸入取得值之類相關的操作簡化，專注於當拿到值之後準備透過各種 methods 發送請求的部分：
+
+這個部分可以搭配測試範例以及 JSONPlaceholder 的請求格式一起閱讀，此外，這邊只會挑出 CRUD 的函式出來理解。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/great-monad-eoqgd?file=/src/App.js)。
+
+## 在 React 中使用 axios 
+
+首先是當我們需要在畫面上顯示從遠端取得的資料時會使用到的方法，**GET**，來看看這一段程式碼：
+
+```jsx=
+// Get method
+getPostHandler = async () => {
+  const { data } = await axios.get(
+    "https://jsonplaceholder.typicode.com/posts/1"
+  );
+  this.setState({
+    post: {
+      title: data.title,
+      body: data.body
+    }
+  });
+};
+```
+
+來看看 axios 中 get 的其中一種使用方式：
+
+```javascript
+axios.get(url[, config])
+```
+
+使用 axios 發送請求的寫法其實很多種，端看自己的喜好。
+
+撇除掉用於更新 state 的 this.setState，使用 Get 方法取得資料基本上只要**寫入請求的 url** ，即可拿取對應的資料回來(不考慮跨域問題。)
+
+沒意外的話，你可以成功看到畫面如下:
+
+![](https://i.imgur.com/7BwwrkL.png)
+
+接著是更新 post 的資料:
+
+```jsx=
+  // Patch method
+  updatePostHandler = async () => {
+    const { data } = await axios.patch(
+      "https://jsonplaceholder.typicode.com/posts/1",
+      {
+        // body request...
+        title: "new Title",
+        body: "new body content"
+      },
+      {
+        // header configuration
+        headers: {
+          "Content-type": "application/json"
+        }
+      }
+    );
+    this.setState({
+      post: {
+        title: data.title,
+        body: data.body
+      }
+    });
+  };
+```
+
+```javascript
+axios.patch(url[, data[, config]])
+```
+
+更新會透過 **pacth** 的方式進行，這邊需要注意的是除了**請求的 url 之外，我們還需要額外將要更新的資料寫在 body 中，以及資料的格式必須要設定在 header 中**，才能讓遠端知道更新的資料與資料格式為何。
+
+所以預期成功更新的話，會得到如下的畫面：
+
+![](https://i.imgur.com/XcPgfUQ.png)
+
+接著是新增一筆 post 的資料，我們額外在 state 中命名為 newPost:
+
+```jsx=
+  // Post method
+  addPostHandler = async () => {
+    const { data } = await axios.post(
+      "https://jsonplaceholder.typicode.com/posts",
+      {
+        // body request...
+        title: "Another new Title",
+        body: "Another new body content"
+      },
+      {
+        // header configuration
+        headers: {
+          "Content-type": "application/json"
+        }
+      }
+    );
+    this.setState({
+      newPost: {
+        title: data.title,
+        body: data.body
+      }
+    });
+  };
+```
+
+```javascript
+axios.post(url[, data[, config]])
+```
+
+用法與 patch 基本上無意，差別在於方法的使用差異而已，預期可以得到如下畫面：
+
+![](https://i.imgur.com/gkAwhRE.png)
+
+最後則是刪除一筆 post 的資料:
+
+```jsx=
+ // Delete method
+  deletePostHandler = async () => {
+    const { data } = await axios.delete(
+      "https://jsonplaceholder.typicode.com/posts/1"
+    );
+
+    this.setState({
+      post: data,
+      deletePost: true
+    });
+  };
+```
+
+```javascript
+axios.delete(url[, config])
+```
+
+delete 的使用與 get 基本上無異，如果成功刪除後，預期可以得到如下畫面:
+
+![](https://i.imgur.com/SYZtHWm.png)
+
+以上是在 React component 中透過 axios 所做的非同步請求的方式
+
+今天的學習就到這邊囉!
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Axios](https://github.com/axios/axios)
+- [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
+

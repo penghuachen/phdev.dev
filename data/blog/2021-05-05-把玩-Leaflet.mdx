@@ -1,0 +1,282 @@
+---
+title: 把玩 Leaflet
+date: "2021-05-05 14:25:58"
+tags: ['Javascript', 'map']
+draft: false
+summary: ''
+---
+
+![](https://i.imgur.com/JRqzMRD.png)
+
+## 前言
+
+Leaflet 是一套開源的地圖服務，此外這套服務在網頁端與手機端都可以有良好的使用者體驗。
+
+
+如果讀者在之前有嘗試過 Google 的地圖服務，那麼在使用這套服務時相信不會遇到太大的問題，因為使用方式上並不會有太迥異的做法。
+
+但如果是第一次接觸地圖服務的讀者，那麼也不用擔心，筆者今天會依據 [Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/) 的篇幅一步步測試文章中提到的部分。
+
+不得不說的是，[Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/) 的內容真的很淺顯易懂，只要願意花心思好好看完，對於 Leaflet 的基礎應用就可以上手囉！
+
+而快速入門的篇幅大概可以歸納出以下的範圍，這裡整理出來方便讀者梳理文章的重點：
+1. 透過 CDN 引入 Leaflet 服務
+2. 建立第一個地圖(Map)
+3. 使用圖層服務設定地圖風格
+4. 在地圖上畫出範圍(range)：以圓形(circle)和多邊形(polygon)為例
+5. 設定第一個 marker 與使用 popup
+6. 在整體地圖與 marker 建立可以觸發的點擊(click)事件
+
+而本篇幅會依據使用情境的增加，逐步的更新上來，所以有興趣把玩 Leaflet 的讀者可以持續追蹤哦！
+
+## 透過 CDN 引入 Leaflet 服務
+
+文件中其實寫的很清楚，只是需要特別注意的是**引入的順序**:
+1. Leaflet 的 CSS
+2. Leaflet 的 Javascript
+
+引入這兩個檔案之後，後續就可以引入自己的 Javascript 與 CSS 囉
+
+- CSS
+```html
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+```
+
+- Javascript
+
+```html
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+```
+
+到這裡，我們已經將 Leaflet 的地圖服務引入到專案裡囉，接著要初始化一個地圖
+
+## 建立第一個地圖(Map)
+
+首先，我們需要準備一個用來建立的地圖時使用的容器
+
+```html
+<!-- you can change id name whatever you want!-->
+<div id="mapid"></div>
+```
+
+然後給予這個容器一個高度，這樣才能顯示地圖：
+
+```css=
+#mapid { height: 600px; }
+```
+
+到這裡我們已經準備好一個地圖，接著我們要設定這個地圖初始化時的座標位置：
+
+```javascript
+var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+```
+
+這邊搭配 [API 文件](https://leafletjs.com/reference-1.7.1.html) 查看，可以知道 `L.map` 用來初始化一個 map 實例，而 `setView` 可以用來設定中心點與初始 zoom 的值。
+
+此外文件有提到一件事情是筆者覺得很方便的部分：
+> Note that setView call also returns the map object — most Leaflet methods act like this when they don’t return an explicit value, which allows convenient jQuery-like method chaining.
+
+**意思是如果調用的 method 不是會明確回傳一個值的 method，那麼就會回傳一個 map 的物件(這個物件包含許多 methods)，便於我們透過像是 jQuery 那樣使用 method chaining 的寫法使用這些方法**，真的是很便利！
+
+這邊舉個後面會提到的例子，剛剛這段話的實際寫法大概如下：
+
+```javascript
+// method chaining 的寫法
+var popup = L.popup()
+  .setLatLng([51.5, -0.09])
+  .setContent("I am a standalone popup.")
+  .openOn(mymap);
+```
+
+這個時候我們已經建立了地圖與設定後初始縮放(zoom)與中心點了，如果照著設定的讀者應該會發現此時的地圖長這樣：
+
+![](https://i.imgur.com/oLW7IjE.png)
+
+看起來好像壞掉了對吧？ 不要擔心，接下來讓我們把地圖的內容呈現出來吧！
+
+### 使用圖層(tile layer)服務設定地圖風格
+
+設計之前有幾個很重要的觀念，要知道 Leaflet 允許我們用不同的圖層服務來作為地圖內容呈現，意思是我們透過**抽換圖層**的方式能讓這個地圖的風格擁有非常多的風格
+
+此外，使用這些圖層服務需要了解使用時有什麼需要注意的地方
+
+最後是使用這些服務基本上與使用 Google 地圖服務類似，都需要一個 key，只是 Google 地圖的 key 除了讓我們可以正常使用地圖外，更重要的是作為收費的重要參數，**而 Leaflet 在此則是需要取得圖層服務的 `access_token` 作為使用這些圖層的判定**
+
+而文件使用 [mapbox](https://www.mapbox.com/) 的圖層服務，所以我們必須先取得剛剛提到的  `access_token`  後續才能使用這個圖層(tile layer)，建立一個  `access_token` 的方式則參考 [request an access token](https://www.mapbox.com/studio/account/tokens/)。
+
+接著我們將圖層應用到我們的地圖上：
+
+```javascript
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'your.mapbox.access.token'
+}).addTo(mymap);
+```
+
+這邊快速提一下這些參數的定義，詳細的設定則要到 API 文件中查看。
+
+- 使用 [URL template](https://leafletjs.com/reference-1.7.1.html#tilelayer-url-template) 設定
+- `attribution`: 標注貢獻者
+- `maxZoom`: 最大縮放參數，超過則以 `maxZoom` 的值為準
+- `id`: 圖層服務的圖層 style 的對應 id， 可參考 [Mapbox styles](https://docs.mapbox.com/api/maps/styles/#mapbox-styles)
+- `tileSize`: 每一圖格的大小，預設是 256
+- `zoomOffset`: 縮放偏移量
+- `accessToken`： 存取該圖層服務的 token
+
+關於 `tileSize` 與 `zoomOffset` 的設定可以參考 [mapbox - Leaflet implementations](https://docs.mapbox.com/help/troubleshooting/migrate-legacy-static-tiles-api/#leaflet-implementations) 提到的 warning:
+
+> Warning
+By default, the modern Static Tiles API returns a 512×512 map tile, instead of the 256×256 that Mapbox classic styles returned. If you do not include the tileSize: 512 and zoomOffset: -1 options, your map will still load but labels, icons, and other features may appear much smaller than expected.
+
+如果照著設定的讀者應該可以成功看到地圖的內容囉：
+
+![](https://i.imgur.com/kYzRkZi.png)
+
+接著我們要來開始在地圖上加上一些東西了！
+
+### 在地圖上畫出範圍(range)：以圓形(circle)和多邊形(polygon)為例
+
+以畫出一個圓形(circle)和多邊形(polygon)為例，要調用的方法如下：
+- 圓形(circle): `L.circle(<LatLng> latlng, <Circle options> options?)`
+- 多邊形(polygon): `L.polygon(<LatLng[]> latlngs, <Polyline options> options?)`
+
+相關的設定可以參考文件，這邊筆者只有替換地圖的座標而已：
+
+```javascript
+// 圓形(circle)
+var circle = L.circle([22.9990296,120.2106981], {
+  color: "#f00",
+  fillColor: "#f03",
+  fillOpacity: 0.5,
+  radius: 500
+}).addTo(mymap);
+```
+
+![](https://i.imgur.com/fmIrAHm.jpg)
+
+```javascript
+// 多邊形(polygon)
+var polygon = L.polygon([
+  [22.9990296,120.2106981],
+  [22.9990541,120.204132],
+  [23.0038765,120.2100078],
+]).addTo(mymap);
+```
+
+![](https://i.imgur.com/OUlVfDN.jpg)
+
+
+### 設定第一個 marker 與使用 popup
+
+了解如何設定範圍之後，接著要來看看最常使用的設定：建立 marker
+
+首先先看看 marker 要調用的方法：
+`L.marker(<LatLng> latlng, <Marker options> options?)`
+
+接著看如何使用：
+```javascript
+var marker = L.marker([22.9990296,120.2106981]).addTo(mymap);
+```
+
+![](https://i.imgur.com/TH0AKFH.png)
+
+那麼假設我有多組資料需要呈現多個 marker 呢？
+
+其實不難，可以參考以下設計：
+
+```javascript
+const data = [
+  { lat: 22.9990296, lng: 120.2106981 },
+  { lat: 22.9991296, lng: 120.2116981 },
+  { lat: 22.9992296, lng: 120.2126981 },
+];
+
+data.forEach(item => {
+  L.marker([item.lat, item.lng]).addTo(mymap);
+})
+```
+
+![](https://i.imgur.com/5YupCAY.png)
+
+了解如何設定 marker 後，接著還有一個很常搭配使用的設定，那就是 popup 的資訊視窗
+
+而操作 popup 的顯示、關閉與資訊內容有幾種方式：
+
+1. 只能在 marker 上使用的方法： `.bindPopup()`
+2. 可應用在整個地圖的方法： `L.popup()`
+
+在 `.bindPopup()` 中我們可以設定要呈現的內容，以範例為例：
+
+搭配 `.openPopup()` 可以一開始就顯示 popup
+
+```javascript
+marker.bindPopup("<b>Hello world!</b> I am a popup.").openPopup();
+```
+
+![](https://i.imgur.com/OUlKOIY.png)
+
+而透過 `L.popup()` 則可以透過 method chaining 的方式使用多個 method 設定，這裡依序設定了座標(`setLatLng`)、要顯示的內容(`setContent`)與在地圖上打開 popup 的方法(`openOn`)
+
+來看看如何使用:
+
+```javascript
+var popup = L.popup()
+  .setLatLng([22.9990396,120.2206991])
+  .setContent("I am a standalone popup.")
+  .openOn(mymap);
+```
+
+![](https://i.imgur.com/SthHdfB.jpg)
+
+
+### 在整個地圖與 marker 建立可以觸發的點擊(click)事件
+
+文件最後學習的是如何觸發事件，而這裡則是透過 `on` 的方式觸發事件，這裡以點擊事件為例：
+
+首先是一個只在 marker 上點擊時才觸發的事件：
+
+```javascript
+var marker2 = L.marker([22.9990296,120.2006981]).addTo(mymap);
+
+marker2.on('click', onMarkerClick);
+function onMarkerClick(e) {
+  L.popup()
+    .setLatLng(e.latlng)
+    .setContent("You clicked the map at " + e.latlng.toString())
+    .openOn(mymap);
+}
+```
+
+另外一個是點擊地圖任何一處都可以被觸發的事件:
+
+```javascript
+var mymap = L.map('map').setView([22.9990296,120.2106981], 16);
+mymap.on('click', onMapClick);
+function onMapClick(e) {
+  alert("You clicked the map at " + e.latlng);
+}
+```
+
+以上是 [Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/) 提到的入門內容，如果讀者們有理解的話，基本就可以做一些基礎的應用囉！
+
+### 測試範例
+
+測試範例，[點擊前往](https://codesandbox.io/s/leaflet-t0pjf)。
+
+## 參考
+
+- [leafletjs](https://leafletjs.com/)
+- [Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/)
+- [API document](https://leafletjs.com/reference-1.7.1.html)
+- [mapbox](https://www.mapbox.com/)
+- [mapbox - Leaflet implementations](https://docs.mapbox.com/help/troubleshooting/migrate-legacy-static-tiles-api/#leaflet-implementations)
+- [request an access token](https://www.mapbox.com/studio/account/tokens/)

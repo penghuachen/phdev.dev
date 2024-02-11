@@ -1,0 +1,203 @@
+---
+title: 連續記錄挑戰Day23-CSS3 的 Flexbox 以及適用場景？
+date: "2019-06-19 20:06:45"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+藉由這題面試的機會，剛好將目前學習到的flex知識做個整理一同放上來。
+
+
+# 請解釋一下 CSS3 的 Flexbox 以及適用場景？ 
+
+## What is flex? 什麼是flex?
+- 是一種全新的佈局方式，建立了有別於IFC及BFC的佈局方式：FFC(Flex Formatting Context)，在FFC的佈局中當**容器**設定為flex時，其**下一層的元素**會變為彈性項目(flex item)。
+- 彈性項目(flex item)會依照設定的語法平均獲得容器的空間剩餘量(flex-grow)，或者縮小自己以適應容器的大小(flex-shrink)。
+- flex讓元素在二維空間的排序上(**如水平排列或者困擾許久的垂直排列**)變得簡單許多。
+
+
+## What is flex properties? 關於flex的特性?
+
+- FFC 中有些原本用於BFC中的屬性會是無效的:
+    - clear / float 
+    - vertical align
+    - :first-line / :first-letter
+    - column
+    - 設定為flex的容器不會有margin-collapse
+    
+## How to use flex ? 如何使用flex語法？
+
+- 主軸(main axis)  & 次軸 (cross axis):
+    **前提**：那就是預設書寫模式是由左至右(LTR)，由上至下的方式(也就是設定 writing-mode:horizontal-tb)
+    - ![](https://i.imgur.com/jVmW4TZ.png)
+
+- 在容器設定的語法：
+    - display: flex / inline-flex
+    - flex-wrap 
+        - wrap / wrap-reverse / nowrap / initial / inherit
+    - flex-direction
+        - row / row-reverse / column / column-reverse / initial / inherit
+    - justify-content
+        - flex-start / flex-end / center / space-around / space-between / initial / inherit
+    - align-items
+        - flex-start / flex-end / center / space-around / space-between / **stretch** / **baseline** / initial / inherit
+    - align-content
+        - flex-start / flex-end / center / space-around / space-between /  **stretch** / initial / inherit
+
+        p.s  粗體字為特定語法才有的設定
+
+- 在元素設定的語法：
+    - align-self
+        - flex-start / flex-end / center / space-around / space-between / **stretch** / **baseline** / **auto(Default)** / initial / inherit 
+    - flex  
+      - flex-basis
+          - 決定設定值為寬/高的依據： **主軸是誰**
+          - 主軸row: 寬
+          - 主軸column: 高
+          - 優先性： flex-basis > width;
+          - flex-basis:auto 則大小為元素本身大小
+          - <div style="color:red;">如果有設定 min/max-width的話，則還是會依照min/max-width設定值去跑。</div>
+  - flex-shrink (寫個例子)
+      - **當子層寬度總和大於父層時，且不允許折行的情況下**，會依照比例的縮小，符合父層空間
+      - 計算方式
+          - 當寬度值為固定時，並且有給shrink的值時：
+              - 先得到總共超出多少空間
+              - 超出空間 * 各區塊shrink後的權重總和
+              - ( 超出空間 * 各區塊shrink ／  超出空間 * 各區塊shrink後的權重總和 ) * 超出寬度
+              - 用原本item的寬度 - 每個區塊應被扣除的寬度＝等於實際寬度
+              - Ex : 
+              ```html
+                  <div class="container">
+                      <div class="box box1"></div>
+                      <div class="box box2"></div>
+                  </div>
+              ```
+              ```html
+                  .container{
+                      width:500px;
+                      background:#ccc;
+                      display:flex;
+                  }
+                  
+                  .box{
+                      width:300px;
+                      height:50px;
+                  }
+                  
+                  .box1{
+                      background:#ada;
+                      flex-shrink:2;
+                  }
+                  
+                  .box2{
+                      background:#aad;
+                      flex-shrink:1;
+                  }
+                  
+                  /*
+                      套入上述計算方式：
+                      1. 先得到總共超出多少空間
+                          300*2 - 500 = 100(px)
+                      2. 超出空間 * 各區塊shrink後的權重總和 = 100*2 + 100*1 = 300
+                      3. 得到box1 = 300 - 200 / 300 * 100 = 233.33(px)
+                      4. 得到box2  = 300 - 100 / 300 * 100 = 266.66(px)
+                  
+                  */
+              ```
+                
+  - flex-grow
+      - 依照比例獲得相對的空間大小(**當子層空間總和不超過父層時**)
+      - row:分配寬
+      - column:分配高
+      - 計算方式：
+          - 實際寬度 + 多出空間 * 各元素flex-grow值/flex-grow值總和
+          - **若是flex-grow值總和 < 1，則不會將多出的空間完全分配給各元素**
+          - <div style="color:red;"> 會受到max-width影響，如果超過max-width的寬度，則以max-width優先</div>
+          - Ex : 
+              ```html
+                  <div class="container">
+                      <div class="box box1"></div>
+                      <div class="box box2"></div>
+                  </div>
+              ```
+              ```html
+                  .container{
+                      width:500px;
+                      background:#ccc;
+                      display:flex;
+                  }
+                  
+                  .box{
+                      width:200px;
+                      height:50px;
+                  }
+                  
+                  .box1{
+                      background:#ada;
+                      flex-grow:2;
+                  }
+                  
+                  .box2{
+                      background:#aad;
+                      flex-grow:1;
+                  }
+                  
+                  /*
+                      套入上述計算方式：
+            box1 = 200 + 100 * 2 / 3 = 266.66(px)
+            box2 = 200 + 100 * 1 / 3 = 233.33(px)
+                  
+                  */
+              ```
+  - auto (same as 0 1 auto)
+  - initial (Same as 0 1 auto)
+  - none(Same as 0 0 auto)
+  - inherit
+  - order 
+  - 數值越小，排序越前面
+  - 0(default)
+         
+## The relationship between flex and writing-mode? flex和書寫模式的之間的關係？
+
+
+### 總結：書寫方向的設定會影響flex-direction的方向
+
+
+
+### 用來設定書寫方向的語法有 writing-mode / direction / text-orientation / html dir attribute
+
+- writing-mode
+    - ![](https://i.imgur.com/AObp1MH.png)
+- direction
+    - ![](https://i.imgur.com/2JuM9yQ.png)
+    - ![](https://i.imgur.com/HgJepCH.png)
+- text-orientation
+- html dir
+#### 比較1  : flex 的主/次軸方向
+
+![](https://i.imgur.com/jVmW4TZ.png)
+
+可以透過 row / row-reverse / column / column-reverse更改flex-item的排序方向
+
+但這張圖有一個前提：那就是預設書寫模式是由左至右(LTR)，由上至下的方式(也就是設定 writing-mode:horizontal-tb)
+
+
+
+#### 比較2  : 英文與日文的書寫
+
+![](https://i.imgur.com/C3FVs8G.png)
+
+從這張圖可以看出即使同樣設定 flex-flow : row wrap 的狀況下，各國文字書寫方向習慣的不同，透過設定writing-mode的語法，就會導致 flex-item的排序方向改變
+
+#### 比較3  : margin-collpase在 writing-mode設定變更時的差別
+
+書寫方向為水平時，依照區塊元素正常排序的方式，會有margin collpase的情況，會導致margin top/bottom 有重疊的情形。 
+
+但是當書寫方向改為垂直時，會使 margin collpase的情況變成是left / right的部分會重疊
+
+![](https://i.imgur.com/Eg56b7z.png)
+
+所以書寫方向的語法會顛覆原本網頁排序的方向
+
+> [w3.org-writing mode](https://www.w3.org/TR/css-flexbox-1/)

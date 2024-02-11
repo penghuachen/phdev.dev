@@ -1,0 +1,219 @@
+---
+title: CSS modules
+date: "2020-09-27 10:36:38"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# CSS modules
+
+CSS modules 是另外一種可以用來設定元件樣式的方式，但這個部分需要修改 webpack 中的設定，所以今天就來看看怎麼修改以及需要注意的細節吧！
+
+
+### Webpack 設定藏在哪裡?
+
+如果是透過 `npx create-react-app` 建立的專案，**webpack 的設定預設是隱藏起來的**，所以這時候要透過這個指令打開:
+
+這個指令的用途在於將所有 webpack 配置的部分顯示出來，這對於我們如果需要額外有客製化(如 webpack 的設定)時可以使用。
+
+但有個在使用上的前提，依據官方的描述:
+
+> Note: this is a one-way operation. Once you eject, you can’t go back!
+
+**這是一項不可逆的指令**，一旦執行後就無法再將這個專案回到使用 `npm run eject` 之前的狀態。
+
+```bash=
+npm run eject
+```
+
+還有這邊要注意的是在執行這個指令之前需要先將專案 commit 起來後才可以執行，否則會出現提示先完成當前專案的修改後再執行的訊息。
+
+執行之後，觀察一下專案中 `package.json` 這隻檔案，會發現 create-creat-app 多了很多的配置，此外也會出現 config、scripts 這兩個資料夾。
+
+由於沒辦法預測使用者究竟會需要哪些配置，所以才會預先安裝了這麼多套件與設定在 create-react-app 中。
+
+接著，我們要修改一下 webpack 的設定:
+
+## 修改 webpack 中 css-loader 的設定
+
+這邊需要注意的部分是在 **css-loader 的版本問題，在 3.0.0 的版本後，對於 `localIdentName` 的配置上不太一樣，這部分來看看文件 [3.0.0 (2019-06-11)](https://github.com/webpack-contrib/css-loader/blob/master/CHANGELOG.md#300-2019-06-11)的 README:**
+
+> ...略
+> modules option now can be {Object} and allow to setup CSS Modules options:
+> - localIdentName option was removed in favor modules.localIdentName option
+> ...略
+
+這代表在使用上原本的寫法是這樣:
+
+```javascript
+// ...略
+{
+  use: {
+  loader: 'css-loader',
+    options: {
+      sourceMap: true,
+      importLoaders: 2,
+      localIdentName: '[name]__[local]___[hash:base64:5]', 
+      modules: true 
+    }
+  }
+}
+// ...略
+```
+
+**在 3.0.0 的版本後要調整成如下的寫法:**
+
+```javascript
+// ...略=
+{
+  use: {
+  loader: 'css-loader',
+    options: {
+      sourceMap: true,
+      importLoaders: 2,
+      modules: {
+        localIdentName: '[name]__[local]__[hash:base64:5]'
+      },
+  }
+}
+// ...略
+```
+
+**其中 `localIdentName` 的意思是在使用 css module 下要產生的 class 名稱**，而 `'[name]__[local]__[hash:base64:5]'` 則是產生後的格式，以這個格式而言，會是如下呈現:
+
+`index__Card__M1d8z`
+
+在 create-reate-app 的 webpack.config.js 中，應該會看到類似如下的程式碼:
+
+```javascript
+{
+  test: cssRegex,
+  exclude: cssModuleRegex,
+  use: getStyleLoaders({
+    importLoaders: 1,
+    sourceMap: isEnvProduction && shouldUseSourceMap,
+    // 新增這一行
+    modules: {
+      localIdentName: '[name]__[local]__[hash:base64:5]'
+    },
+  }),
+  // Don't consider CSS imports dead code even if the
+  // containing package claims to have no side effects.
+  // Remove this when webpack adds a warning or an error for this.
+  // See https://github.com/webpack/webpack/issues/6571
+  sideEffects: true,
+},
+```
+
+完成 webpack 的重新配置後，記得要重啟專案才會生效哦！
+
+接著我們先將 Card 元件建立起來:
+
+```jsx=
+import React from 'react';
+import styles from './index.css';
+
+console.log(styles)
+
+const Card = () => (
+  <div className={styles.Card}>
+    <h1>This is a card.</h1>
+    <p>card content...</p>
+  </div>
+);
+
+export default Card;
+```
+
+如果透過 `console` 查看 `styles` 的值，會得到如下的呈現:
+
+```javascript
+{
+  Card-div: "index__Card__M1d8z"
+}
+```
+
+如果可以成功看到這段結果，這代表已經可以像是使用物件特性(property)般那樣使用 `Card-div` 了
+
+最後讓我們在元件中使用 css module 的方式來設定樣式吧!
+
+```css=
+/* card.css */
+.Card-div {
+  border: 1px solid #8d8d8d;
+  border-radius: 10px;
+  margin: 20px auto;
+  text-align: center;
+  width: 900px;
+}
+
+@media (max-width: 700px) {
+  .Card-div {
+    width: 500px;
+  }
+}
+```
+
+這裡簡單設定了 `Card` 元件的樣式以及在裝置尺寸小於 `700px` 時會將寬度修改為 `500px`。
+
+沒意外的話應該可以成功看到樣式設定後的結果囉
+
+![](https://i.imgur.com/tiiXLd6.png)
+
+## 透過 file.modules.css 的方式使用 css module
+
+最後要提的部分是，如果是透過 create-react-app 建立起來的專案，還在 webpack 的設定中應該會發現這一段設定與註解：
+
+```javascript
+// ... 略
+// Adds support for CSS Modules (https://github.com/css-modules/css-modules)
+// using the extension .module.css
+{
+  test: cssModuleRegex,
+  use: getStyleLoaders({
+    importLoaders: 1,
+    sourceMap: isEnvProduction && shouldUseSourceMap,
+    modules: {
+      getLocalIdent: getCSSModuleLocalIdent,
+    },
+  }),
+},
+// Opt-in support for SASS (using .scss or .sass extensions).
+// By default we support SASS Modules with the
+// extensions .module.scss or .module.sass
+```
+
+這代表我們可以透過將 `index.css` 檔案名稱修改為 `index.module.css`，一樣可以向前面那樣將 css 當作 property 來使用。
+
+這裡我們額外建立一個 `CardTwo` 元件，讓這個元件的樣式設定和前一個相同:
+
+```jsx=
+import React from 'react';
+import styles from './index.module.css';
+
+console.log(styles)
+
+const CardTwo = () => (
+  <div className={styles.Card}>
+    <h1>This is a card two.</h1>
+    <p>card content...</p>
+  </div>
+);
+
+export default CardTwo;
+```
+
+需要注意的是 css 檔案與剛剛不同，變成了 index.module.css。
+
+而如果喜歡撰寫 scss 的開發者，這個方式一樣適用哦，只需要將檔名更改為 index.module.scss 即可
+
+關於 css module 的學習就先這樣囉！
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Webpack changelog](https://github.com/webpack-contrib/css-loader/blob/master/CHANGELOG.md#300-2019-06-11)
+- [npm run eject](https://create-react-app.dev/docs/available-scripts/#npm-run-eject)

@@ -1,0 +1,103 @@
+---
+title: Setting up for TDD
+date: "2022-06-24 18:45:17"
+tags: ['Vue2', 'Unit Test']
+draft: false
+summary: ''
+---
+
+透過 [Vue Testing HandBook](https://lmiller1990.github.io/vue-testing-handbook/v3/) + [Vue Test Utils](https://test-utils.vuejs.org/) 學習如何在 vue3 中撰寫單元測試。
+
+# Setting up for TDD
+
+## prerequisite
+
+專案採用 vite 建立，但由於不採用 vitest 作為框架的單元測試工具，這邊要額外以下工具到專案中：
+
+1. [jest](https://jestjs.io/)
+2. [jest-environment-jsdom](https://www.npmjs.com/package/jest-environment-jsdom)
+3. [vue3-jest](https://github.com/vuejs/vue-jest)
+4. [babel-jest](https://www.npmjs.com/package/babel-jest)
+5. [test-utils](https://test-utils.vuejs.org/)
+6. [@babel/preset-env](https://www.npmjs.com/package/@babel/preset-env)
+
+```bash=
+npm install --save-dev jest
+npm install --save-dev jest-environment-jsdom
+npm install --save-dev @vue/vue3-jest@28 (參考 repo 當下最新版本而定)
+npm install --save-dev babel-jest 
+npm install --save-dev @vue/test-utils@next
+npm install --save-dev @babel/preset-env
+```
+
+還要設定以下的 config:
+
+### jest.config.js
+```javascript
+// 可以透過 jest --init 設定基礎選項
+// 以下為主要設定內容
+
+// ...
+// The test environment that will be used for testing
+testEnvironment: 'jsdom',
+// A map from regular expressions to paths to transformers
+    
+transform: {
+    '^.+\\.vue$': '@vue/vue3-jest',
+    '^.+\\js$': 'babel-jest'
+}
+
+// A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
+moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1'
+},
+// An array of file extensions your modules use    
+moduleFileExtensions: ['vue', 'js', 'json', 'jsx', 'ts', 'tsx', 'node'],
+// ...
+```
+
+### babel.config.js
+```javascript
+module.exports = { presets: ['@babel/preset-env'] };
+```
+
+## 撰寫第一個測試 for `Greeting` 元件
+
+測試重點：
+1. 可以成功渲染 `Greeting` 元件
+2. 確定 `greeting` 的值為 `"Vue and TDD"`
+
+```javascript
+// Greeting.spec.js
+import { mount } from '@vue/test-utils';
+import Greeting from '@/components/Greeting.vue';
+
+describe('Greeting.vue', () => {
+  it('renders a greeting', () => {
+    const wrapper = mount(Greeting);
+
+    expect(wrapper.text()).toMatch('Vue and TDD');
+  });
+});
+```
+
+```htmlembedded=
+// Greeting.vue
+<template>
+  <div>
+    {{ greeting }}
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'Greeting',
+
+  data() {
+    return {
+      greeting: 'Vue and TDD'
+    };
+  }
+};
+</script>
+```

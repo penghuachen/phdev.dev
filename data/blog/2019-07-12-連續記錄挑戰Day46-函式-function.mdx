@@ -1,0 +1,284 @@
+---
+title: 連續記錄挑戰Day46-函式-function
+date: "2019-07-12 21:42:16"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+# 函式(function)
+
+函式(function)可以用在計算後得到某個值，也可以用於自定義某個任務。
+
+關於定義函式的幾種方式，讓我們繼續接著往下看
+
+
+## 定義函式(function)的方式
+
+以下有幾種方式可以定義函式，而每一種方式都有自己對應的稱呼方式。
+
+
+### 函式陳述式(function statements)
+
+在學習函式陳述式(function statements)之前，要先來了解關於陳述式的意思。
+
+陳述式就像句子，而我們透過執行句中的設定，使得某些事情發生。
+
+如同下方的程式碼，我們宣告了變數 `a` 以及設定了一個 `if` 條件句，而這每一行都是一個陳述式，也就是剛剛提到的句子，這些句子會決定程式要執行的行為。
+
+```javascript
+var a = 3;
+if(a > 5){...}
+```
+
+將上述所提的概念用在函式上就成了 ==函式陳述式==，如下:
+
+這個函式陳述式說明了如果執行時，會得到 `Hello!` 的值。
+
+```javascript
+function sayHi(){
+  console.log('Hello!');
+}
+```
+
+看完函式陳述式怎麼宣告，接下來要看看怎麼使用它
+
+其實使用的方式也很簡單，透過 `函式名稱()` 這樣就代表我們想要執行這個函式中我們定義的程式碼內容。
+
+拿上面的例子來測試，會得到:
+
+```javascript
+function sayHi(){
+  console.log('Hello!');
+}
+
+sayHi();
+```
+
+當然我們也可以透過傳遞參數，讓這個函式能有更多的運用:
+
+```javascript
+function sayHi(person){
+  console.log(`Hello! ${person}`);
+}
+
+sayHi('Bill');
+```
+
+將 `Bill` 傳入到函式中，函式的內容就會找到與參數相同的名稱 `person` 並將 `Bill` 的值透過 `person` 給  `console.log(...);` 中的 `person` 使用
+
+再來我們來看看兩個測試例子:
+
+```javascript
+var a = 3;
+
+function test(a){
+  a = 5;
+  console.log(a);
+}
+
+test(a);
+console.log(a);
+```
+
+因為 ==傳值(call by value)== 的關係，所以即使傳入到函式中的 變數 `a` 的值被更改，在全域的 `a` 也不會因此而被更改(兩者處於不同的記憶體空間)。 
+
+![](https://i.imgur.com/5wXZKpX.png)
+
+
+```javascript
+var person = { name: "Bill" };
+
+function test(person){
+  person.name = "Jack";
+  console.log(person);
+}
+
+test(person);
+console.log(person);
+```
+
+因為 ==傳參考(call by reference)== 的緣故，傳入到函式中的 `person` 物件當特性值被更改時會導致在全域的 `person` 物件也被更改(兩者指向同一個記憶體位址)。
+
+![](https://i.imgur.com/U49LdQB.png)
+
+### 函式表達式(function expression)
+
+函式表達式(function expression) 可以將函式儲存在變數中，而這樣子的函式可以不需要函式名稱，也稱為匿名函式。使用方式如下:
+
+```javascript
+var totalSum = function(number,number2){
+  return number + number2;
+}
+
+console.log(totalSum);
+console.log(totalSum(1,2));
+```
+
+從第一個結果可以看到變數 `totalSum` 儲存了一個匿名函式，所以當執行 `變數名稱()` 就可以取得這個變數儲存的函式運算後的值。
+
+而這個值我們必須透過 `return` 的方式將值傳回 `totalSum`。
+
+
+![](https://i.imgur.com/jJ6KuVV.png)
+
+當用於遞迴時，這個匿名函式就可以有函式名稱。
+
+如下方儲存於`result` 變數中的 `factorial` 函式。
+
+當執行 `result(5)` 時就可以得到值 `120`
+
+```javascript
+var result = function factorial(number){
+	if(number === 1)
+		return number;
+	return number * factorial(number - 1);
+}
+
+result(5);
+```
+
+### 函式建構式(function constructor) 與 new
+
+函式建構式可以用於建立物件原型(也稱為模板)，關於建立時有一些可以先知道的部分:
+
+- 作為建構式的名稱，習慣上開頭會用大寫表示
+- 透過建構式建立的模板:，可重複被運用於建立每一個不同的物件
+- 建構式應該透過自身的 `prototype` 建立方法而不應該直接寫入到模板中
+
+接下來看看如何建立模板:
+
+```javascript
+function Person(name,age,habbit){
+  this.name = name;
+  this.age = age;
+  this.habbit = habbit;
+}  
+
+const personA = new Person('Bill',23,'Read books');
+console.log(personA);
+const personB = new Person('Jack',30,'Play tennis');
+console.log(personB);
+```
+
+首先先定義好模板 `Person` ，並新增這個模板需要的特性。
+之後透過 `new` 關鍵字的方式建立物件，這邊需要注意的是 `this` 會指向透過 `new` 建立的物件。 
+
+而透過建立的模板，可以建立多個有相同特性的不同物件。
+
+![](https://i.imgur.com/BrfTnyK.png)
+
+那如果我們需要新增一個方法給這個模板呢？
+
+這裡可能會覺得為什麼不直接於一開始建立模板時就將方法也新增進去，
+
+但其實這麼做會有個問題，那就是造成佔據太多的記憶體空間。
+
+來看看測試的例子:
+
+先將方法直接在模板中建立
+
+```javascript
+function Person(name,age,habbit){
+  this.name = name;
+  this.age = age;
+  this.habbit = habbit;
+  this.sayHi = function(){
+    console.log("Hi");
+  };
+}  
+
+const personA = new Person('Bill',23,'Read books');
+console.log(personA);
+const personB = new Person('Jack',30,'Play tennis');
+console.log(personB);
+```
+
+可以看到每一個物件都從模板中繼承了 `sayHi` 這個方法，
+
+但是 `sayHi` 方法可以被重複使用，二來是這樣的寫法會造成記憶體需要多保留這些重複建立的方法，
+
+也就造成了多餘的記憶體空間的浪費了
+
+![](https://i.imgur.com/80b4Jzi.png)
+
+所以更好的方式是額外透過 `prototype` 語法將方法新增到模板，也就是這個原型物件上:
+
+```javascript
+function Person(name,age,habbit){
+  this.name = name;
+  this.age = age;
+  this.habbit = habbit;
+}  
+
+const personA = new Person('Bill',23,'Read books');
+const personB = new Person('Jack',30,'Play tennis');
+Person.prototype.sayHi = function(){
+  return "Hi";
+}
+
+console.log(personA);
+console.log(personB);
+console.log(personB.sayHi());
+console.log(Person.prototype);
+```
+
+從圖中可以看到，新建立的 `personA`、`personB` 物件並沒有 `sayHi` 這個方法，但是可以在 `Person` 模板
+中看到`sayHi` 這個方法，如此一來就能讓每個物件一樣能夠使用 `sayHi` ，但是記憶體卻只需要保留一個空間給它。
+
+![](https://i.imgur.com/s6mplsq.png)
+
+
+### IIFE(Immediately Invoked Function Expression) 立即函式
+
+立即函式，顧名思義就是會馬上執行的函式。
+
+JavaScript 引擎看到立即函式就會立刻編譯這個 function。
+
+而立即函式透過在函式外用 `()` 包住整個函式，可以達到避免裡面的變數污染到全域環境變數的效用。
+
+來看個測試例子:
+
+```javascript
+(function(){
+  var a = 3;
+  console.log(3);
+})()
+```
+
+如同前面對於立即函式的描述，所以會馬上得到結果為 `3` 的值。
+
+
+### arguments物件
+
+`arguments` 物件是函式中的物件，是函式中可以調用的方法，可以用於儲存傳入的值。
+
+但 `arguments` 物件是類陣列(array-like)物件，所以如果需要透過陣列的方式操作，則需要轉為陣列才可以。
+
+來看看測試例子
+
+```javascript
+let test = function(a,b,c){
+  console.log(arguments); 
+};
+
+test(5,10,15);
+```
+
+可以看到 `arguments` 物件除了將傳入的值存於一個類陣列(array-like)中，還包含了其他的方法(如 `callee`等)。
+
+![](https://i.imgur.com/PbcIiIt.png)
+
+所以如果需要透過陣列的方式操作的話則必須還要做些處理:
+
+```javascript
+let test = function(a,b,c){
+  let ary = Array.prototype.slice.call(arguments);
+  console.log(ary); 
+};
+
+test(5,10,15);
+```
+
+透過 `Array.prototype.slice.call()` 可以將 `arguments` 物件轉為陣列型別。
+
+![](https://i.imgur.com/6vCglVo.png)

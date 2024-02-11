@@ -1,0 +1,232 @@
+---
+title: 連續記錄挑戰Day38-Javascript-述句-part2
+date: "2019-07-04 20:06:13"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+
+# 述句(statements) part2
+
+
+Outline:
+
+- 宣告述句
+    - var 
+    - function
+- 條件句
+    - if
+    - switch
+- 迴圈
+    - while
+    - do/while
+    - for
+    - for/in 
+- 跳躍句
+    - break
+    - continue
+    - return
+    - throw
+    - try/catch/finally
+- 其他述句
+    - with
+    - debugger
+    - 'use strict'
+
+ 
+
+## 迴圈 
+
+透過條件的限定，當條件符合時，重複執行某段程式碼。
+
+### while 
+
+條件符合時會執行迴圈中的內容
+
+- 語法：
+  ```js
+      //當expression為true時，執行statement
+      //statement中一定要有個會隨著每次執行時而改變的變數，不然會造成無窮迴圈
+      while(expression){
+          statement
+      }
+  
+  ```
+  Ex1:
+
+  ```js
+
+      /*當b=5時，跳出while迴圈*/
+      var b = 0;
+      while(b<5){
+      /*b 隨著每次執行時而改變，不然會造成無窮迴圈*/
+          console.log(b);
+          b++;
+      }    
+
+  ```
+    
+### do/while
+
+程式碼會先執行一次後在依照條件判斷是否要繼續執行
+
+```js
+
+  /* 先執行一次console.log(b)後在依照條件判斷下次是否執行*/
+  
+  var b = 0;
+  do{
+      console.log(b);
+      b++;
+  }while(b<1);
+
+```
+
+### for
+
+條件符合時會執行迴圈中的內容
+
+- 語法：
+
+```js
+  /*
+      initialize:初始化值，是個述句
+      condition : 條件判斷
+      increment: initialize變數的增量
+  */
+  
+  for(initialize;condition;increment){
+      statement
+  }
+```
+
+Ex:
+
+```js
+  for(var i=0;i<5;i++){
+      console.log(i);
+  }
+```
+
+
+### for/in
+
+可以用於走訪陣列與物件屬性
+
+- 語法
+
+```js
+ for(variable in object){
+     statement
+ }
+
+```
+
+
+Ex1: 走訪物件屬性，並取得物件屬性值
+
+```js
+
+var x ={a:1,b:2,c:3,d:{e:1}};
+
+var o;
+
+for(o in x){
+    //1,2,3
+    console.log(x[o]);
+}
+
+```
+
+Ex2: 走訪陣列，並取得陣列值
+
+```js
+var a = [1,2,4,{c:1},5]
+
+var o ;
+
+for(o in a){
+    //1,2,4,{c:1},5
+    console.log(a[o]);
+}
+
+```
+
+## 跳躍句
+
+### break
+
+作用是跳離switch或迴圈(當迴圈沒必要完全執行完成時)
+
+```js
+var a = [1,2,3];
+for(var i = 0; i < a.length;i++){
+    if(a[i] == 2) {
+        console.log('找到目標數字:2，跳離');
+        break;
+    }
+}
+
+```
+
+### continue
+
+類似break，但break是跳離迴圈，而**continue會中斷不符合條件的部分，並往下繼續執行**
+
+Ex1:
+```js
+var data = [1, 2, 3, 4];
+for (var i = 0; i < data.length; i++) {
+  if (data[i] == 2) continue;
+  // 1,2,4
+  console.log(data[i]);
+}
+
+```
+
+### return 
+
+- 只能出現在函式中
+- 使用時會回傳運算式的值給caller
+- 在函式中任意位置都可以使用return，但要注意的是，當程式碼執行到return處就會回到呼叫者處。
+- 可以用於中斷函式的進行。
+
+Ex:
+
+```js
+    function square(x){return x*x;}
+    var answer = square(3);
+    console.log(answer);
+```
+
+Ex: 中斷函式
+
+```js
+    //只會顯示數字9，函式被中斷
+    function square(x){
+        return x*x;
+        console.log('測試在return後能不能顯示');
+    }
+    var answer = square(3);
+    console.log(answer);
+```
+
+### throw
+
+當成是發生錯誤時，可以透過建立一個新的Error物件將相關錯誤訊息顯示
+
+```js
+  function test(x){
+      if(x < 0){
+          //透過Error將儲存相關錯誤訊息並顯示
+          throw new Error('不能是負值！');
+      }
+      else {
+          console.log(x);
+      }
+  }
+
+  test(-2);
+```

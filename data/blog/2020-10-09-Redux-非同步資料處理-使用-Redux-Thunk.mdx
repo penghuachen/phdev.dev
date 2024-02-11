@@ -1,0 +1,234 @@
+---
+title: Redux 非同步資料處理 - 使用 Redux Thunk
+date: "2020-10-09 10:34:35"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# Redux 非同步資料處理 - 使用 Redux Thunk
+
+在 Redux 中我們只能處理**同步的資料**，並**不允許處理非同步的邏輯**。
+
+
+但是在實務上我們常常需要透過串接 api 的方式請求一個非同步的資料到我們的專案中使用，這時候應該怎麼辦呢?
+
+這時候有幾個方式可以選擇，而今天要學習的是透過 Redux Thunk Middleware 來處理非同步相關的邏輯。
+
+不過在這之前，我們需要先了解 **Middleware** 的定義，以及我們是在什麼時間點運用它。
+
+讓我們接著下去學習吧!
+
+## Middleware 是什麼?
+
+Middleware 的中文意思是「中介軟體」、「中介層」，而在專案開發中，我們可以在特定的流程中透過 Middleware 的方式**額外進行一些處理後才往下進行後續的流程。**
+
+這邊舉個大家常用的套件， [axios](https://github.com/axios/axios)，相信大家不會很陌生，在串接 api 時我們很常使用到。
+
+而 axios 中有一個 [Interceptors](https://github.com/axios/axios#interceptors) 就是一個 middleware 的例子，我們先看看它的使用方式：
+
+```javascript
+// Add a request interceptor
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    return config;
+  }, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  });
+
+// Add a response interceptor
+axios.interceptors.response.use(function (response) {
+    // Any status code that lie within the range of 2xx cause this function to trigger
+    // Do something with response data
+    return response;
+  }, function (error) {
+    // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // Do something with response error
+    return Promise.reject(error);
+  });
+```
+
+透過 `interceptors` 允許我們在**發送請求、接收請求時額外做一些想要的處理之後，才將請求發送、接收。**
+
+接著我們將這個概念套用到 Redux 中，剛剛提到由於 Redux 本身不能處理非同步的邏輯，所以這裡就需要透過 middleware 的方式讓我們可以撰寫非同步的邏輯。
+
+首先來看看在 Redux 中如何使用 middlelware，我們設定一個情境:建立一個用來取得目前 dispatch 的 action 與下一個 state 的 log 。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/charming-cookies-g551j?file=/src/App.js)。
+
+
+先建立一個 `logger` 的 middleware:
+
+其中 `next` 用來將 `action` 交給下一個 middleware 或者是 reducer，執行後續的處理。
+
+而這裡我們可以透過 `store.getState()` 取得目前 Redux 中 state 儲存的狀態。
+
+```javascript
+// middleware/index.js
+const logger = store => {
+  return next => {
+    return action => {
+      console.log('middleware', action);
+      const result = next(action);
+      console.log('middleward next state', store.getState());
+      return result;
+    }
+  }
+};
+```
+
+然後我們要調用 redux 的 `applyMiddleware`，並作為 `creatStore` 的參數:
+
+```jsx=
+// index.js
+// ...略
+import { logger } from "./store/middleware";
+
+const store = createStore(rootReducer, applyMiddleware(logger));
+```
+
+此時我們已經完成 middleware 的設定與應用了。
+
+為了方便觀察，這邊我們額外加上一個點擊事件：
+
+App Component:
+
+```jsx=
+// App.js
+import React from "react";
+import "./styles.css";
+import { connect } from "react-redux";
+function App(props) {
+  return (
+    <div className="App">
+      <h1 onClick={props.changeText}>{props.text}</h1>
+      <p>請打開 console 查看</p>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) => {
+  return {
+    text: state.text
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    changeText: () => {
+      dispatch({ type: "CHANGETEXTHANDLER" });
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+rootReducer Component:
+
+```javascript
+const initialState = {
+  text: "Hello Redux!"
+};
+
+export const rootReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "CHANGETEXTHANDLER":
+      return {
+        text: "Change text!"
+      };
+    default:
+      return state;
+  }
+};
+```
+
+當我們點擊文字時，會得到如下的結果：
+
+![](https://i.imgur.com/ouYb4iE.png)
+
+以上是使用 middleware 的方式，接著我們要來看如何使用 Redux Thunk Middleware 囉
+
+## 使用 Redux Thunk Middleware
+
+這邊我們提供一個改寫上方測試範例的例子，[點擊前往](https://codesandbox.io/s/muddy-dawn-jfd9z?file=/src/index.js)。
+
+首先我們需要先安裝這個[套件](https://github.com/reduxjs/redux-thunk)：
+
+```bash=
+npm install redux-thunk
+```
+
+接著我們要引入這個套件作為我們的 middleware:
+
+```javascript
+// ...略
+import thunk from "redux-thunk";
+const store = createStore(rootReducer, applyMiddleware(logger, thunk));
+```
+
+建立一個 actions 資料夾用來管理 actions:
+
+```javascript
+// action/index.js
+export const changeTextHandler = () => {
+  return {
+    type: "CHANGETEXTHANDLER"
+  };
+};
+
+export const asyncChangeTextHandler = () => {
+  return (dispatch) => {
+  // 模擬非同步行為
+    setTimeout(() => {
+      dispatch(changeTextHandler());
+    }, 2000);
+  };
+};
+```
+
+將 actions 給予統一名稱 actionCreators，取代掉前一個範例 dispatch 的 action
+
+```jsx=
+// app.js
+import React from "react";
+import "./styles.css";
+import { connect } from "react-redux";
+import * as actionCreators from "./store/action";
+function App(props) {
+  return (
+    <div className="App">
+      <h1 onClick={props.changeText}>{props.text}</h1>
+      <p>請打開 console 查看</p>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) => {
+  return {
+    text: state.text
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    changeText: () => {
+      dispatch(actionCreators.asyncChangeTextHandler());
+    }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+這個時候當我們再次點擊文字時，應該會發現文字在延遲兩秒之後才會改變，而這也代表我們成功設定了一個非同步邏輯的測試範例囉。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+明天見
+
+## 資源
+
+- [Redux Thunk Middleware](https://github.com/reduxjs/redux-thunk)
+- [Redux Middleware](https://redux.js.org/advanced/middleware)
+- [axios](https://github.com/axios/axios)

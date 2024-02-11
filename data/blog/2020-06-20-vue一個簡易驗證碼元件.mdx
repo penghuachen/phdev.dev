@@ -1,0 +1,129 @@
+---
+title: vue一個簡易驗證碼元件
+date: "2020-06-20 18:41:59"
+tags: ['vue2']
+draft: false
+summary: ''
+---
+
+![](https://i.imgur.com/Lf6sGeC.gif)
+
+
+這陣子剛好因為專案需求，所以需要做一個==簡訊驗證碼==的功能，於是就嘗試自己手刻了一個簡易的四碼輸入驗證的元件，於是順道做了個學習與開發的記錄。
+
+
+## 元件功能
+
+為了挑戰一下，所以稍微在製作這個元件上多做了些事情，功能如下:
+
+1. ==過濾數字以外的所有字符(包含特殊字符)==，僅可輸入數字。
+2. 如果輸入為非數字，則==停留在當前欄位，直到輸入符合條件的值==。
+3. 輸入符合的值，==自動跳至下一個欄位==，提高使用者體驗。
+4. 修改欄位中的值，會==自動將值選取(select)起來==，提高使用者體驗
+
+## 實作重點記錄
+
+### 限制欄位值的輸入長度
+
+這邊透過 `<input type="text" maxlength="1">` 控制輸入的欄位值只能**一位數**。
+
+依據 [MDN](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/Input) 中提到關於 `maxlength` 的定義: 「==可以限定設定輸入值的長度==」。所以我們可以達成這個目的。
+
+這邊需要注意的是如果 ==你是使用`<input type="number" maxlength="1">`的方式的話==，是無法設定 `maxlength`的，在使用上需要注意。
+
+起初在開發時筆者也是使用 `<input type="number" maxlength="1">` 的方式進行開發，但後來為什麼改成用 `<input type="text" maxlength="1">` ，這會於稍後的採坑記錄中會提到。
+
+### 透過正規式過濾數字以外的所有字符(包含特殊字符)，僅可輸入數字
+
+由於要過濾到所有非數字的字符，所以這邊我透過==正規式==的方式進行欄位值的過濾。
+
+
+如果符合則不替換，否則替換成 `''`，相信讀者都可以理解這個部分。
+
+```javascript
+checkInputValue(value) {
+  return value.replace(/[^\d]/g, '');
+}
+```
+
+### 透過 vue 的`$refs` 選取到 input 的節點
+
+在 vue 中有一個語法可以讓我們如同在寫原生 JavaScript 時使用 `document.querySelector` 的方式來選取 dom，那就是 `$refs`。
+
+使用的方式也很簡單，如下方程式碼：
+
+```html
+<!-- 請在 vue 中使用 -->
+<input type="text" :ref="index" @click="getInputDom">
+```
+
+```javascript
+// ... 略
+methods: {
+ getInputDom() {
+  console.log(this.$ref.index);
+ }
+}
+```
+
+說明部分可以前往 vue 的文件查看: [vue $refs](https://cn.vuejs.org/v2/api/#vm-refs)
+
+透過這個方式我們可以在觸發事件時，指定我們要取得的 dom，也就達成了功能中 2,3 點的需求。
+
+### 透過 `HTMLInputElement.select()` 方式選取到 input 中的值
+
+最後要提到的部分是如何==在點擊 input 欄位時，若是欄位中有值，可以直接選取到這個值。==
+
+這個部分就要透過 `HTMLInputElement.select()` 的語法來達成，根據 [MDN HTMLInputElement.select()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/select) 的定義： 「可以選取到 input、 textarea 中的值」。
+
+以上為這個驗證碼元件的開發重點記錄，相信讀者應該都可以理解的XD
+
+## 踩坑記錄
+
+最後是開發過程中採坑的部分，最主要遇到的坑有二：
+
+1. 使用 input type="number" 
+2. input, keyboard(keyup, keydown, keypress) 事件的觸發順序
+
+### 使用 input type="number"
+
+1. 首先，於前面的篇幅有提到，當 input type="number" 時，是不支援 `maxlength` 屬性的，而這也是後續才從 MDN 上的內容查得。
+2. 其次是當使用 input type="number" 時，需要注意的是 ==e,E,+,-,.== 作為的輸入值，這些值在輸入時依然可以被輸入，並不會因為設定 type="number" 而無法輸入，原因在搜尋後從這篇 stackoverflow 可以得到：[Why does the html input with type “number” allow the letter 'e' to be entered in the field?](https://stackoverflow.com/questions/31706611/why-does-the-html-input-with-type-number-allow-the-letter-e-to-be-entered-in) 解答，這篇講的很詳細，所以就不在此多做贅述。
+3. 最後需要特別注意的是當 input type="number" 時，透過 `e.target.value` 會拿到的並不是 ==e,E,+,-,.== 這幾個值，而是==空字串(`''`)==，請讀者在使用時需要特別留意。至於原因則可以查看這篇 Github 上的 issue 可以得到：[input[type='number'] event.target.value changes to empty string when . or , pressed and onChange not emitted when . and , used](https://github.com/facebook/react/issues/13752)
+
+
+### input, keyboard(keyup, keydown, keypress) 事件的觸發順序
+
+最後要來提的是關於事件的觸發先後順序，重點就是:
+
+- input 比 keyup 早
+- input 比 keydown 晚
+- input keypress 筆者認為是幾乎同時(如果有誤，麻煩留言跟我說，thanks!)
+
+如果有興趣的人可以嘗試從這段程式碼中觀察行為的差異:
+
+```html
+<!--請在 vue 中使用，並透過改變事件: keypress, keyup, keydown 查看差別-->
+<input type="text" @input="inputEvent" @keyup="keyboardEvent">  
+```
+
+```javascript
+// ... 略
+methods: {
+  inputEvent() {
+    console.log('input event first!!');
+  },
+  keyboardEvent() {
+    console.log('keyboard event first!!');
+  }
+}
+```
+
+相關程式碼可以從 Github 中查看， [點擊前往](https://github.com/penghuachen/sms-verify-demo)。
+
+## 來源
+
+- [HTMLInputElement.select()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/select)
+- [The Input (Form Input) element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input)
+- [input[type='number'] event.target.value changes to empty string when . or , pressed and onChange not emitted when . and , used](https://github.com/facebook/react/issues/13752)
+- [Why does the html input with type “number” allow the letter 'e' to be entered in the field?](https://stackoverflow.com/questions/31706611/why-does-the-html-input-with-type-number-allow-the-letter-e-to-be-entered-in)

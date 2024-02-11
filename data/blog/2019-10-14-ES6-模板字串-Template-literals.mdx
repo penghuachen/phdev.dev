@@ -1,0 +1,102 @@
+---
+title: ES6 模板字串(Template literals)
+date: "2019-10-14 11:40:27"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# ES6 模板字串(Template literals)
+
+今天要來學習的部分是 ES6 好用的語法，**模板字串(Template literals)**
+
+這個語法大大增加了開發的效率，是個非常好用的技巧，讓我們趕緊學起來吧！
+
+
+## ES6之前新增字串的方式
+
+在ES6之前我們新增字串的方式是透過 `' '` 以及 `+` 作為字串間串連的橋樑，程式碼大致如下:
+
+```javascript
+var name = "Bill";
+console.log('Hi, my name is:' + name);
+```
+
+透過上述的方式可以讓變數的值與字串搭配運用。
+
+但如果今天字串的內容是一段HTML架構呢?
+
+```html
+  var className = container;
+  var string  = '<div class="'+ className +'"></div>'
+```
+
+如果字串是一組HTML架構時，這時候可讀性跟開發效率肯定就不會太好。
+
+不過自從有了ES6 的模板字串(Template literals)後，這個問題就大幅度的被改善囉
+
+## ES6之後新增字串的方式
+
+關於使用模板字串(Template literals)有幾種常見的方式:
+
+```javascript
+//1. 第一種
+`string text`
+
+//2. 第二種
+`string text line 1
+ string text line 2`
+
+//3. 第三種
+`string text ${expression} string text`
+```
+
+> [模板字串(Template literals)](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Template_literals#語法)
+
+簡單透過一個反引號，就可以輕鬆的將 HTML 架構呈現:
+
+```javascript
+var string = `
+  <ul class="list">
+    <li>123</li>
+    <li>456</li>
+    <li>789</li>
+    <li>101</li>
+  </ul>
+`;
+```
+
+那如果有變數時，這時候只需要透過 `${...}` 就可以輕鬆將需要的變數放入到字串中囉：
+
+```javascript
+var className = "list-li";
+var string = `
+  <ul class="list">
+    <li class=${className}>123</li>
+    <li class=${className}>456</li>
+    <li class=${className}>789</li>
+    <li class=${className}>101</li>
+  </ul>
+`;
+```
+
+但其實 `${...}` 的好用之處可不只這些，從 MDN 提供的語法來看可以發現，剛剛用於放入變數的地方，其實是可以放入一個表達式(expression)的，換句話說，我們也可以這麼使用:
+
+```javascript
+var a = 1;
+var b = 2;
+console.log(`Total : ${a + b}`);
+```
+
+` ${a + b}` 中的 `a + b` 是一個表達式(expression)，所以可以使用。
+
+或者我們也可以放入條件判斷：
+
+```javascript
+function buyCar(name,money){
+  console.log(`${name} ${(money > 500000) ? 'can buy a car.':'can not afford it.'}`)
+}
+
+buyCar('Jack',700000);
+```
+

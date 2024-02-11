@@ -1,0 +1,43 @@
+---
+title: "連續記錄挑戰Day04 - #3-Push Button"
+date: "2019-05-31 20:48:04"
+tags: ['把玩CSS', 'CSSBattle']
+draft: false
+summary: ''
+---
+
+# Target #3 - Push Button
+
+![CSSBattle](https://i.imgur.com/wfsKMGr.png)
+
+## 撰寫思維
+
+1. 撰寫的區塊分為下方完成圖中的 4 個部分。
+
+2. 對於方塊以及圓形部分的垂直置中，都是透過 flex 語法調整到需求的位置(垂直置中的需求)
+
+    - justify-content:center 此語法可以讓 flex-item 在**主軸**的方向**使彈性元素置中於容器中間。**
+    - align-items:center 此語法可以讓 flex-item 在**次軸**的方向**使彈性元素置中於容器中間。**
+
+
+
+
+## 最後結果
+
+![Push Button](https://i.imgur.com/WTzk0rM.png)
+
+附上 codepen(CSSBattle 目前無法透過附上連結看到別人所寫的程式碼，所以我另外寫在 codepen 方便點擊。可直接複製貼上即可查看結果)
+
+[#3 Push Button](https://codepen.io/kids5346/pen/oRQmQO)
+
+第三關也是使用 flex 的語法完成，基本上此次的挑戰都會用 flex 做排版，而比起上一篇 [連續記錄挑戰 Day03 - #2 - Carrom](https://penghuachen.github.io/2019/05/30/%E9%80%A3%E7%BA%8C%E8%A8%98%E9%8C%84%E6%8C%91%E6%88%B0Day03-2-Carrom/)，此次除了使用 justify-content 這個語法之外，另外還使用了 aligin-items。aligin-items 就是用來讓我們在次軸做設定時使用，而設定上和 justify-content 無異，差別只在於 justify-content 用在主軸，而 aligin-items 用在次軸罷了。
+
+比起以往許多垂直置中的方法，flex 真的是非常的好用！也是排版的聖品啊～，而在 flex 目前已經支援度頗高的情況下，這幾乎已經是必學的排版技巧了。在此附上 flex 的支援度： [can i use - flex](https://caniuse.com/#search=flex)
+
+除了 IE9 之前的版本之外，基本上都可以使用了，真的很棒！
+
+第三關不算太難，重點在於如何看待這個圖案。目前自己是用了一個長方形+三個圓型完成，也許之後會有更好的寫法，但目前就先這樣子囉 XD
+
+明天繼續迎接新的一關!! Keep Moving
+
+  

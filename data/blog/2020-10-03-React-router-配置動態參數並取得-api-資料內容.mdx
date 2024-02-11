@@ -1,0 +1,240 @@
+---
+title: React router 配置動態參數並取得 api 資料內容
+date: "2020-10-03 00:56:20"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# React router 配置動態參數並取得 api 資料內容
+
+今天的篇幅要來學習透過**切換動態參數的方式並取得 api 的資料內容後，渲染在網頁上。**
+
+
+這部分我們延續昨天的 [測試範例](https://codesandbox.io/s/quiet-mountain-glw7z)，並改寫成透過 call api 的方式將資料替換成取得的資料。
+
+另外還要學習如何透過 `<NavLink>` 以外的方式達到同樣的目的。
+
+## 改寫測試範例並配置路由的動態參數
+
+首先我們先將昨天的程式碼改寫，讓兩個作為導航用的按鈕都會切換到同一個元件(PageA)，並且取得 props 中 router 提供的相關參數:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/immutable-water-gtwdl?file=/src/App.js)。
+
+```jsx=
+import React from "react";
+import "./styles.css";
+import PageA from "./containers/PageA";
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  NavLink,
+  Redirect
+} from "react-router-dom";
+
+export default function App() {
+  return (
+    <div className="App">
+      <Router>
+        <h2>使用 NavLink</h2>
+        <nav>
+          <ul>
+            <li>
+              <NavLink to="/PageA/1" activeClassName="active">
+                PageA, id: 1
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/PageA/2" activeClassName="active">
+                PageA, id: 2
+              </NavLink>
+              <Redirect to="/PageA/1" />
+            </li>
+          </ul>
+        </nav>
+        <Switch>
+          <Route path="/PageA/:id" component={PageA} />
+        </Switch>
+      </Router>
+    </div>
+  );
+}
+```
+
+透過設定 `<NavLink to="/PageA/1">` 配置**當路由路徑為 `/PageA/1` 的時候，會渲染 PageA 且 `id = 1` 的內容**，但是這樣還不夠，所以我們還要額外搭配 `<Route path="/PageA/:id" component={PageA} />` 的方式才能成功導航，這邊的 **`:id`就是用來讓我們動態傳遞參數用的**。
+
+透過 `:id` 的方式，當路由路徑符合 `/PageA/1` (或者任意數字時)，即可成功匹配。
+
+成功導航後，接著我們要取得剛剛提到的 `route` 的一些資訊，這個部分我們必須將昨天寫的方式:
+
+```jsx=
+<Route path="/PageA">
+  <PageA />
+</Route>
+```
+
+改寫成:
+
+```jsx=
+<Route path="/PageA/:id" component={PageA} />
+```
+
+這樣我們才能在 `PageA` 元件中**透過 `props` 取得 `route` 的資訊。**
+
+而 route 總共會取得三個 props:
+
+1. `match`
+2. `location`
+3. `history`
+
+而這邊我們會需要用到的部分則是 `match`，接著我們透過在 `pageA` 中取得 `match` 的值:
+
+```jsx=
+import React, { Component } from "react";
+import "./index.css";
+
+import axios from "axios";
+
+export default class PageA extends Component {
+  state = {
+    post: {
+      title: "",
+      body: ""
+    }
+  };
+
+  // you can see route information here...
+  componentDidMount() {
+    console.log(this.props.match);
+    const { id } = this.props.match.params;
+    this.getPostHandler(id);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.match.params.id !== prevProps.match.params.id) {
+      const { id } = this.props.match.params;
+      this.getPostHandler(id);
+    }
+  }
+
+  getPostHandler = async (id) => {
+    const { data } = await axios.get(
+      `https://jsonplaceholder.typicode.com/posts/${id}`
+    );
+
+    this.setState({
+      post: {
+        title: data.title,
+        body: data.body
+      }
+    });
+  };
+
+  render() {
+    return (
+      <div className="page-a">
+        <h1>Page A Title: {this.state.post.title}</h1>
+        <p>Page A content {this.state.post.body}</p>
+        <p>id: {this.props.match.params.id}</p>
+      </div>
+    );
+  }
+}
+```
+
+在 `componentDidMount` 中，觀察 `this.props` 的 `match` 可以取得如下的內容：
+
+![](https://i.imgur.com/DT4nezj.png)
+
+此時我們就可以透過 `params` 中的 `id` 來作為 call api 的參數，並在取得 response 後將資料呈現在畫面上囉。
+
+
+
+接著，還記得在前面提到我們要透過 `<NavLink>` 以外的方式達成同樣的目的嗎?
+
+這部分我們就需要學習透過 `history` 這個物件中的 `push` 來達成目的。
+
+讓我們繼續往下學習吧!
+
+## 如何取得 `history` 物件
+
+取得 `history` 物件的幾種方式:
+
+1. 透過 HOC 元件： `withRouter`
+2. 透過 `<Route>` 的 `render` 方法
+
+首先先來看看使用 `withRouter` 的方式
+
+我們接著在剛剛的 [測試範例](https://codesandbox.io/s/immutable-water-gtwdl?file=/src/App.js) 中新增一個按鈕:
+
+```jsx=
+// Button.js
+
+import React, { Component } from "react";
+import "./index.css";
+import { withRouter } from "react-router-dom";
+
+class Button extends Component {
+  render() {
+    return (
+      <button
+        className="btn"
+        onClick={() => this.props.history.push("/pageA/3")}
+      >
+        PageA, id: 3
+      </button>
+    );
+  }
+}
+
+export default withRouter(Button);
+```
+
+透過 `withRouter` 這個作為 HOC 的元件，我們在 export `Button` 時，可以透過 `withRouter` 包住 `Button` 並獲得 `route` 相關的 `props`: `match`, `location`, `history`。
+
+這個我們就可以使用 `history` 中的 `push`，導航至要前往的元件內容。
+
+接著是透過 `<Route>` 的 `render` 方法，一樣在剛剛的測試範例中新增一個按鈕:
+
+```jsx=
+import React, { Component } from "react";
+import "./index.css";
+import { Route } from "react-router-dom";
+
+class Button2 extends Component {
+  render() {
+    return (
+      <Route
+        render={({ history }) => (
+          <button className="btn" onClick={() => history.push("/pageA/4")}>
+            PageA, id: 4
+          </button>
+        )}
+      />
+    );
+  }
+}
+
+export default Button2;
+```
+
+在 `<Route>` 的 `render` 方法中，我們一樣可以獲得 `route` 相關的 `props`: `match`, `location`, `history`，進而取得 push 這個方法。
+
+最後要提的部分是關於**重導向 `Redirect`**，在上面的程式碼中使用了最簡單的使用方式:
+
+```jsx=
+<Redirect to="/PageA/1" />
+```
+
+當頁面刷新時，透過 Redirect 可以將頁面導向到指定的位置。
+
+明天接續 React Router 的主題，來看看如何實現巢狀路由。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [React Router](https://reactrouter.com/web/guides/quick-start)

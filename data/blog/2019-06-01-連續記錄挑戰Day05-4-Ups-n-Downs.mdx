@@ -1,0 +1,46 @@
+---
+title: "連續記錄挑戰Day05 - #4-Ups n Downs"
+date: "2019-06-01 15:53:04"
+tags: ['把玩CSS', 'CSSBattle']
+draft: false
+summary: ''
+---
+
+# Target #4 - Ups n Downs
+
+![CSSBattle](https://i.imgur.com/n9mMaOo.png)
+
+## 撰寫思維
+
+1. 撰寫的區塊使用三個 div 區塊並加上 border-radius 語法撰寫圓角效果。
+
+2. 使用偽元素::after 寫出方形區塊並透過絕對定位的方式讓每一個方形區塊可以蓋住不要呈現的部分，如下方示意圖中的編號 1/2/3 的部分。
+
+![Ups n Downs](https://i.imgur.com/O6avfov.png)
+
+3. 使用 flex 語法將區塊垂直及水平置中於容器正中間。
+
+
+## 最後結果
+
+![Ups n Downs](https://i.imgur.com/lOrSMUj.png)
+
+附上 codepen(CSSBattle 目前無法透過附上連結看到別人所寫的程式碼，所以我另外寫在 codepen 方便點擊。可直接複製貼上即可查看結果)
+
+[#4 Ups n Downs](https://codepen.io/kids5346/pen/joXwNw)
+
+第四關有使用到偽元素(pseudo element) ::after，要特別說明一下特性：
+
+-   偽元素目前總共有: **::first-line / ::first-letter / ::selection / ::before / ::after **
+-   是元素之一，會出現在 DOM 的結構之中
+-   使用偽元素::before / ::after 時需要注意的部分是一定要設定 **content** 這個屬性，可以是空值，也可以在裡面塞入要顯示的字串。(但是如果是需要透過 js 等語言操作的字串資料的話，則應該要避免將字串透過偽元素的語法呈現。)
+-   具有 inline 的特性
+
+> REF : [MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/::after)
+> REF : [W3School](https://www.w3schools.com/css/css_pseudo_elements.asp)
+
+偽元素可以應用的地方很多，如果會運用的話可以大大的減少使用區塊/行內元素的次數！
+
+明天繼續迎接新的一關!! Keep Moving
+
+  

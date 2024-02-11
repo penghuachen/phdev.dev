@@ -1,0 +1,153 @@
+---
+title: '連續記錄挑戰Day41-物件-Object-part1'
+date: "2019-07-07 19:09:36"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 物件(object)
+
+今天要學習的是物件(Object)，事不宜遲，開始學習吧！
+
+
+## 物件的特性與存取
+
+在物件中，每個特性都有一組對應的名稱(key)與值(value)，如下式程式碼的 **name** 與 **Bill**。
+
+要注意的是==物件中的特性並不是用`;`的方式區隔，而會以`,`的隔開每個特性。==
+```javascript
+// name為名稱，而Bill為值。
+var obj = {
+    name: 'Bill',
+    habbit: 'play computer'
+};
+```
+
+對於物件特性的取值方式則有兩種:
+
+- 透過 `.`的 ==特性存取==
+- 透過`[""]`的==鍵值存取==
+
+
+Ex:透過 `.` 的方式**取值**
+```javascript
+var obj = {
+    name: 'Bill',
+    habbit: 'play computer'
+};
+console.log(obj.name);
+```
+
+Ex2:透過 `[""]` 的方式**取值**
+```javascript
+var obj = {
+    name: 'Bill',
+    habbit: 'play computer'
+};
+console.log(obj["habbit"]);
+```
+
+而存值的方式也不困難，如下:
+
+Ex:透過 `.` 的方式**存值**
+```javascript
+var obj = {};
+obj.name = 'Bill';
+console.log(obj);
+```
+
+Ex2:透過 `[""]` 的方式**存值**
+```javascript
+var obj = {};
+obj["habbit"] = 'play computer';
+console.log(obj);
+```
+
+## 物件的方法
+
+用比較簡單的方式來講，就是==在物件中使用函式(function)，就稱為使用物件的方法。==
+
+Ex: 調用obj物件的方法 `sayHi()`
+```javascript
+var obj = {
+    name:'Bill',
+    sayHi:function(){
+        console.log(`Hello! ${this.name}`);
+    }
+}
+
+obj.sayHi();
+```
+
+關於物件的基本運用大概就到這裡囉，再來要提到關於物件比較深入的部份。
+
+
+## 原型(prototype)與原型鏈(prototype chain)
+
+所有的物件都有原型屬性(prototype)，而這個屬性參考到一個proto的物件。
+
+來看看某個物件的原型物件
+
+```javascript
+const obj = {};
+console.log(obj);
+```
+
+![](https://i.imgur.com/lr6E9CG.png)
+
+從上圖可以看到剛剛所提到的，proto這個物件。
+
+再來讓我們透過例子理解==原型鏈==的概念:
+
+這邊要注意的是這樣的寫法只適用於測試，實務運用會導致==瀏覽器效能降低==。
+
+Ex. 透過 `__proto__` 將 `obj` 物件做為原型物件 assign(指定給) `obj2` 物件
+
+```javascript
+const obj = {
+  sayHi: function() {
+    console.log('Hello!');
+  }
+}
+
+const obj2 = {};
+
+obj2.__proto__ = obj;
+obj2.sayHi();
+```
+
+在 `obj` 原型鏈搜尋sayHi()方法的過程如下:
+1. `obj2` 物件在自己的特性找不到 `sayHi` 這個方法時，會往原型物件中尋找該方法
+2. 發現在下一層的原型物件中找到 `sayHi` 這個方法(因為剛剛已經將 `obj` 物件當作原型物件傳給obj2)
+3. `obj2` 使用 `sayHi` 這個方法並回傳Hello
+
+之所以能夠不斷==往原型物件尋找特性==，就是因為==原型鏈(prtotype chain)的概念==。
+
+就像是一條鏈子串接著， 一個物件連接著一個物件。
+
+以上面的例子而言，可以得到這樣子的圖:
+
+![](https://i.imgur.com/heJtAMR.png)
+
+
+那如果當原型物件與物件自身都有同樣的屬性時，會是得到怎麼樣的結果呢?
+
+以這個例子來說明:
+```javascript
+const obj = {
+  name:"Bill",
+  sayHi:function(){
+    console.log('Hello!');
+  }
+}
+
+const obj2  = {
+  name:"John"
+};
+
+console.log(obj2.name);
+```
+可以發現獲得的值是 `obj2` 特性 `name` 的值 John。所以可以知道:
+
+==物件會由原型鏈最上方開始尋找，當符合條件時就停止，所以會找到John的名字而不是Bill這個名字==

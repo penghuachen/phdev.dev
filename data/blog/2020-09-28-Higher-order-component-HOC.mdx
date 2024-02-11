@@ -1,0 +1,257 @@
+---
+title: Higher order component(HOC)
+date: "2020-09-28 10:41:09"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+# Higher order component(HOC)
+
+今天要學習的部分是 Higher order component，這是一種可以複用元件邏輯的高階技術。
+
+但除了複用元件的邏輯之外，也可以用於增強樣式、元件內容等等，在正常的情況下，不會對於原本的元件有任何的修改。
+
+
+像是前幾天學習到的 styled component 其實就有使用到這個概念
+
+接著讓我們用一個情境來學習這個部分吧!
+
+## 如何使用 Higher order component(HOC)
+
+首先 Higher order component(HOC) 並不是使用了 React 的任何 API ，這個部分我們可以透過官方的定義來理解:
+
+> a higher-order component is a function that takes a component and returns a new component
+
+**僅僅是一個函式，且傳入一個元件，會回傳一個被包裝後的元件回來。**
+
+先來看看一個簡單的使用情境: 透過 HOC 的方式包裝一個按鈕(Button)改變它的背景顏色。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/magical-elbakyan-cryr4?file=/src/App.js)。
+
+備註： 為了理解 HOC 的方式才使用 HOC 的方式來理解。
+
+首先我們先建立一個 `BaseButton` 元件
+
+```jsx=
+//  BaseButton.js
+import React from "react";
+import "./index.css";
+
+const BaseButton = () => {
+  return <button>BaseButton</button>;
+};
+
+export default BaseButton;
+```
+
+接著我們建立一個要用來包裝這個 `BaseButton` 元件的 `WrapComponent`，並且透過一個 div 包住，此外我們先設定成要將 Button 背景顏色改成藍色，文字顏色改成白色。
+
+
+
+```jsx=
+import React from 'react';
+import '.index.css';
+
+const WithButtonBgAndColor = (WrapComponent) => {
+  return props => (
+    <div className="btn-container">
+      <WrapComponent />
+    </div>
+  );
+};
+
+export default WithButtonBgAndColor;
+```
+
+HOC 設置好之後，接著這邊可以有幾種寫法：
+
+第一種，**將 `BaseButton` 引入到這個 HOC 函式中，我們在 `WithButtonBgAndColor` 中傳入 `BaseButton` 元件並且 `export` 出去，這樣在 App.js 中使用時會得到一個被包裝後的元件**：
+
+```jsx=
+// WithButtonBgAndColor.js
+
+import React from "react";
+import ".index.css";
+
+import BaseButton from "../../components/BaseButton/"; // 要被包裝的 BaseButton
+
+const WithButtonBgAndColor = (WrapComponent) => {
+  return props => (
+    <div className="btn-container">
+      <WrapComponent />
+    </div>
+  );
+};
+
+export default WithButtonBgAndColor(BaseButton);
+```
+
+還記得一開始提到 HOC 定義嗎?
+
+「**僅僅是一個函式，且傳入一個元件，會回傳一個被包裝後的元件回來。**」。
+
+從這邊可以看到我們在 `WithButtonBgAndColor` 中回傳了一個元件。
+
+而由於這邊我們 `export` 時是回傳一個元件，`所以這邊要使用大寫的方式寫成WithButtonBgAndColor`
+
+接著讓我們在 App.js 中使用：
+
+```jsx=
+// App.js
+
+import React from "react";
+import "./styles.css";
+import BaseButton from "./components/BaseButton/";
+import WithButtonBgAndColor from './HOC/WithButtonBgAndColor';
+
+export default function App() {
+  return (
+    <div className="App">
+      <BaseButton />
+      <WithButtonBgAndColor />
+    </div>
+  );
+}
+```
+
+除了上述的方式外，我們也可以這麼寫
+
+將 `withButtonBgAndColor` 函式在 App.js 中引入，並包裝 `BaseButton` 後取得一個被包裝後的元件
+
+至於為什麼要把 `const AnotherButtonBgAndColor = 
+withButtonBgAndColor(BaseButton);
+` 寫在 App.js 之外呢，這部分在文件中有提到：
+
+**1. 每一次 render 都會重新建立一個新的 `WrapComponet` 元件**
+**2. 由於每次都是新的元件，所以 React 的 diff 算法會將舊的元件移除，並掛載新的元件，導致元件的狀態和子元件等都會丟失。**
+**3. 應該在定義元件的外部建立 HOC ，這樣就只會被創建一次。**
+
+
+```jsx=
+// withButtonBgAndColor.js
+import React from "react";
+import "./index.css";
+
+const withButtonBgAndColor = (WrapComponent) => {
+  return (props) => (
+    <div className="btn-container-1">
+      <WrapComponent />
+    </div>
+  );
+};
+
+export default withButtonBgAndColor;
+```
+
+```jsx=
+// App.js
+
+import React from "react";
+import "./styles.css";
+import BaseButton from "./components/BaseButton/";
+// 請注意 WithButtonBgAndColor 和 withButtonBgAndColor 的差異
+// 回傳一個元件
+import WithButtonBgAndColor from "./HOC/WithButtonBgAndColor";
+// 是一個函式
+import withButtonBgAndColor from "./HOC/withButtonBgAndColor";
+
+const AnotherButtonBgAndColor = withButtonBgAndColor(BaseButton);
+
+export default function App() {
+  return (
+    <div className="App">
+      <h2>基本的 Button</h2>
+      <BaseButton />
+      <h2>HOC - 直接包裝後回傳一個被包裝後的 Button</h2>
+      <WithButtonBgAndColor />
+      <h2>HOC - 呼叫函式後回傳一個被包裝後的 Button</h2>
+      <AnotherButtonBgAndColor />
+    </div>
+  );
+}
+
+```
+
+但我們**一定有需要依據值的不同而取得不同的內容**，這個時候又該怎麼做呢?
+
+所以這邊我們將情境修改一下，我們透過動態傳入的值，來取得不同的 button 背景與文字顏色
+
+備註： 撰寫的方式很多種，這裡我們透過像是**使用一般在函式使用的方式般傳入參數來達成**，當然我們也可以透過傳入 props 的方式達到。
+
+首先，我們一樣先建立一個按鈕 `AnotherBaseButton`
+
+```jsx=
+// AnotherBaseButton
+import React from "react";
+import "./index.css";
+
+const AnotherBaseButton = (props) => {
+  return <button {...props}>AnotherBaseButton</button>;
+};
+
+export default AnotherBaseButton;
+```
+
+這邊可以看到和前一個的些微不同之處，這在後面會提到，接著我們撰寫一個 HOC
+
+```jsx=
+// withDynamicButtonBgAndColor
+
+import React from "react";
+import "./index.css";
+
+const withDynamicButtonBgAndColor = (WrapComponent, type) => {
+  return (props) => <WrapComponent className={type} {...props} />;
+};
+
+export default withDynamicButtonBgAndColor;
+```
+
+最後則是在 App.js 中使用，為了方便呈現，僅保留動態傳入值的程式碼，測試範例則包含兩者。
+
+```jsx=
+// App.js
+import React from "react";
+import "./styles.css";
+
+import withDynamicButtonBgAndColor from "./HOC/withDynamicButtonBgAndColor";
+import AnotherBaseButton from "./components/AnotherBaseButton";
+
+
+// 透過 props 不同的值來取得被包裝後的元件
+const YellowBgAndBlackColor = withDynamicButtonBgAndColor(
+  AnotherBaseButton,
+  "yellow-bg-and-black-color"
+);
+
+const RedBgAndWhiteColor = withDynamicButtonBgAndColor(
+  AnotherBaseButton,
+  "red-bg-and-white-color"
+);
+
+export default function App() {
+  return (
+    <div className="App">
+      <h2>HOC - 傳入不同的值動態修改 Button 的樣式</h2>
+      <RedBgAndWhiteColor />
+      <YellowBgAndBlackColor />
+    </div>
+  );
+}
+```
+
+我們在 HOC 中設定了兩組樣式 `yellow-bg-and-black-color`, `red-bg-and-white-color`，接著我們透過傳入的方式在 HOC 中可以將其作為元件的 class name 使用，這裡有幾個細節需要注意:
+
+1. 在 `AnotherBaseButton` 元件中的 `{ ...props }` 是為了讓元件可以獲得由 HOC 那層傳入的 `props`，否則會無法取得 `props` 進來的參數
+2. 在 `withDynamicButtonBgAndColor` 函式中的 `{ ...props }`是為了將由外層傳入的 `props` 的參數傳遞給 `AnotherBaseButton` 元件而寫，否則 `AnotherBaseButton` 元件會無法取得 props 進來的參數
+3. `{ ...props } `代表的是我們這次用不到的 `props` 的參數，如果需要用到的部分，可以透過 `className={type}` 的方式額外撰寫。
+
+以上就是 HOC 的基礎學習，明天繼續下一個部分～
+
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Higher-Order Components](https://zh-hant.reactjs.org/docs/higher-order-components.html)

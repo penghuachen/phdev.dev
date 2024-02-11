@@ -1,0 +1,114 @@
+---
+title: 認識 React Hooks 之三
+date: "2020-10-14 07:58:35"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+今天是探索 Hooks 基礎觀念的最後一天，要學習的是 `useImperativeHandle`、`useLayoutEffect` 、如何打造自己的 Hook 與使用 Hook 時需要注意的幾個規則。
+
+
+而打造自己的 Hook 的部分只會了解觀念，運用的部分則不在今天的範圍之內。
+
+學習 React Hooks 基礎觀念的探索之旅也在今天的篇幅會暫時告一段落，接著就要靠著實務經驗來挖掘更多深層的觀念。
+
+那事不宜遲，趕緊今天的學習吧！
+
+## `useImperativeHandle`
+
+在前幾天的篇幅有介紹到如果需要像是 focus 在 input 元素之類的需求，我們可以透過 `useRef` 的方式達成。
+
+但如果今天這個 **input 元素是額外再封裝成一個 component 的話**，而父 component 也想要對於這個被額外封裝成 component 的 input 元素可以執行像是 focus 的需求的話，那這時候就還需要用到 `useImperativeHandle` 這個 Hook
+
+這裡讓我們看看這個測試範例:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/romantic-ritchie-jvkdu?file=/src/components/BaseInput/index.jsx)。
+
+首先我們先如同之前使用 `useRef` 的方式一樣設定
+
+```jsx=
+import React, { useRef } from "react";
+import "./styles.css";
+import BaseInput from "./components/BaseInput";
+
+export default function App() {
+  const inputRef = useRef(null);
+  const foucsBaseInput = () => {
+    inputRef.current.focus();
+  };
+  return (
+    <div className="App">
+      <h1 onClick={foucsBaseInput}>useImperativeHandel Demo: 請點擊這段文字</h1>
+      <BaseInput ref={inputRef} />
+    </div>
+  );
+}
+```
+
+`BaseInput` 元件封裝的是一個簡單的 `input` 元素，當點擊 `h1` 的文字內容時，會 focus 在這個 `BaseInput` 元件上。
+
+接著我們看看 `BaseInput` 元件的設定:
+
+
+```jsx=
+import React, { useRef, useImperativeHandle, forwardRef } from "react";
+
+const BaseInput = (props, ref) => {
+  const inputRef = useRef();
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current.focus();
+    }
+  }));
+  return (
+    <input
+      type="text"
+      placeholder="type text here..."
+      ref={inputRef}
+      {...props}
+    />
+  );
+};
+
+export default forwardRef(BaseInput);
+```
+
+`forwardRef` **用來建立一個新的 React component 並將 ref 屬性轉交到底下的另外一個 component。**
+
+而這裡我們透過 `export default forwardRef(BaseInput)` 將 ref 屬性轉交給 input 元素。
+
+接著透過 `useImperativeHandle` hook 在**使用 ref 屬性時可以向父 component 暴露自定義的 instance 的值。**
+
+而這裡則是暴露了 focus 這個方法。
+
+## useLayoutEffect
+
+使用方式與 `useEffect` 一樣，只是差別在觸發的時間點是在**所有 DOM 改變之後才會同步調用。**
+
+但這個方式會阻礙瀏覽器的更新，所以在使用上應該先以 `useEffect` 為主，如果有問題才使用 `useLayoutEffect`。
+
+
+## 打造自己的 Hook
+
+除了 React 提供的 Hooks 之外，我們也可以打造自訂的 Hooks，乍聽之下可能覺得很抽象，但其實本質就像我們在撰寫 Javascript function 一樣，**當我們有多個 function 中有共同邏輯時，這時候我們會將共同邏輯的部分抽成一個新的 function。**
+
+而打造自己的 Hook 也是基於這個概念下撰寫，只是如果是自定義的 Hook 會是以 **use 為開頭命名的 function，並且在這個 function 中可以呼叫其他的 Hooks**。
+
+雖然有了基本的概念，但這部分的運用則留在於實務開發時再來體會了。
+
+
+## 使用 Hook 時需要注意的幾個規則
+
+最後要看的是在使用 Hook 時需要知道的一些規則：
+
+1. **不要在迴圈、條件式或是巢狀的 function 內呼叫 Hook，確保在 component render 時 Hook 都可以是照著正確的順序呼叫。**
+1. **只在 React Function 中呼叫 Hook，例如像是 React function component 或者自定義的 Hook**
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [useImperativeHandle](https://zh-hant.reactjs.org/docs/hooks-reference.html#useimperativehandle)
+- [useLayoutEffect](https://zh-hant.reactjs.org/docs/hooks-reference.html#uselayouteffect)

@@ -1,0 +1,223 @@
+---
+title: 在 vue cli3 中使用 vue2-google-maps 把玩 google map
+date: "2020-06-13 13:10:59"
+tags: ['vue2', 'map']
+draft: false
+summary: ''
+---
+
+
+此篇幅聚焦於如何快速透過 vue2-google-maps 來製作一個客製化需求的 google map。
+
+
+如果之前有玩過 google 提供的 [範例](https://developers.google.com/maps/documentation/javascript/tutorial)，那就能很快理解 vue2-google-maps 該怎麼使用。
+
+至於透過原生寫法製作一個客製化需求 google map，則另外找時間再寫一篇了。
+
+## 安裝 & 注意事項
+
+- 安裝 vue2-google-maps:
+
+透過 [npm](https://www.npmjs.com/package/vue2-google-maps) 或者 [github](https://github.com/xkjyeah/vue-google-maps) 其實就可以很清楚知道該怎麼使用，寫的挺清楚的。
+
+如果是透過 npm 方式安裝:
+
+```bash=
+npm install vue2-google-maps
+```
+
+順帶一提，如果透過 yarn 方式安裝則是:
+
+```bash=
+yarn add vue2-google-maps
+```
+
+此外，作者也有提供將整份 [dist/vue-google-maps.js](https://github.com/xkjyeah/vue-google-maps/blob/vue2/dist/vue-google-maps.js) 引入到 HTML 中的方式來使用，也提到了因為 HTML 採用 kebab case 的方式，所以要這麼寫:
+
+```html
+<!-- 採用將整份 dist/vue-google-maps.js 引入到 HTML 中的方式 -->
+<gmap-map>
+<!-- 不可使用 -->
+<GmapMap>
+```
+
+但筆者此次專案需求並沒有使用到，所以就留給有需要的讀者玩看看囉。
+
+- In main.js:
+
+設定 google map 需要的一些基本設定，例如像是金鑰等。
+
+詳細的設定可以透過上述提供的連結查看，這裡筆者只單純設定了 key 和 libraries，並額外建立一支新的檔案管理。
+
+
+
+```javascript
+// @/plugins/vue2GoogleMaps/index.js
+import Vue from 'vue';
+import * as VueGoogleMaps from 'vue2-google-maps';
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: '你的 Google map API key',
+    libraries: ['geometry']
+  }
+});
+```
+
+```javascript
+// main.js
+import './plugins/vue2GoogleMaps'; 
+```
+
+## 開始使用，以 Vue file components 為例
+
+- 引入 component
+
+作者提到如果透過 Webpack 或者 Vue file components ，可以直接使用官方提供的 code：
+
+```html
+<GmapMap
+  :center="{ lat:10, lng:10 }"
+  :zoom="7"
+  map-type-id="terrain"
+  style="width: 500px; height: 300px"
+>
+  <GmapMarker
+    :key="index"
+    v-for="(m, index) in markers"
+    :position="m.position"
+    :clickable="true"
+    :draggable="true"
+    @click="center=m.position"
+  />
+</GmapMap>
+```
+
+筆者目前習慣將額外透過 vue `computed` 將設定統一管理，所以額外會寫成：
+
+```html
+<GmapMap
+  :center="{ lat:10, lng:10 }"
+  :options="mapOptions"
+  :style="mapStyle"
+>
+  <GmapMarker
+    :key="index"
+    v-for="(m, index) in markers"
+    :position="m.position"
+    :clickable="true"
+    :draggable="true"
+    @click="center=m.position"
+  />
+</GmapMap>
+```
+
+```javascript
+//... 略
+computed: {
+  mapOptions() {
+    return {
+      zoom: 7,
+      mapTypeId: "terrain"
+    }
+  },
+  mapStyle() {
+    return {
+      width: 500 + "px",
+      height: 300 + "px"
+    }
+  }
+}
+```
+
+這邊需要注意的是: 在官方 source code 中可以看出其把 `props` 的 `center` 的設定成 ==`required: true`==，所以 `:center` 是必須被保留在 `template` 上的。 [source code 連結](https://github.com/xkjyeah/vue-google-maps/blob/vue2/src/components-implementation/map.js)
+
+- 把資料透過 markers 標記在地圖上
+
+把 componet 引入後，接著要來把**資料標記在地圖上**了
+
+如果曾寫過 [原生](https://developers.google.com/maps/documentation/javascript/marker-clustering) 的話對於這一個部分就不會太難理解
+
+那如果是第一次使用則是可以先知道只要把 **一個具有經緯度資料的陣列，當作 markers 的值傳入給 `GmapMarker` 即可。**
+
+大致程式碼如下:
+
+```html
+<GmapMap
+  :center="{ lat:10, lng:10 }"
+  :options="mapOptions"
+>
+  <GmapMarker
+    :key="index"
+    v-for="(m, index) in markers"
+    :position="m.position"
+    :clickable="true"
+    :draggable="true"
+    @click="center=m.position"
+  />
+</GmapMap>
+```
+
+```javascript
+//... 略
+data() {
+  return {
+    markers: [
+      { 
+        position: { lat:20, lng:20 } 
+      },
+      { 
+        position: { lat:30, lng:30 } 
+      },
+    ]
+  }
+}
+```
+
+- 調用 Map 實例
+
+有時候我會需要調用一些方法，如同筆者在專案中需要用到計算兩點的直線距離為例，需要使用到的 google map api 中的 geometry 中的方法: `computeDistanceBetween`。
+
+而官方也有開接口讓我們可以存取 Map instance:
+
+```html
+<template>
+  <GmapMap ref="mapRef" ...></GmapMap>
+</template>
+```
+
+```javascript
+export default {
+  mounted () {
+    this.$refs.mapRef.$mapPromise.then((map) => {
+      map.panTo({lat: 1.38, lng: 103.80})
+    })
+  }
+}
+```
+
+文件中也提到當 vue component 在 mounted 時，此時 map 還沒有被初始化，所以要透過 `then` 的方式等確定初始化後才可以使用那些方法。
+
+不過筆者自己在測試時因為需要用到的方法在上述無法更快取得，於是搜尋了一下並改用下列方式取得要用的方法：
+
+```javascript
+mounted() {
+  this.$refs.mapRef.$gmapApiPromiseLazy().then(map => {
+    const { LatLng, geometry } = map.maps;
+    const result = geometry.spherical.computeDistanceBetween(
+      new LatLng({ lat:20, lng:20 }),
+      new LatLng({ lat:30, lng:30 }),
+    );
+    this.distance = (result / 1000).toFixed(1);
+  });
+}
+```
+
+- 調用 google 物件
+
+官方額外有提供存取 google 物件的方式讓我們使用，但筆者在測試時卻是一直得到 null 的值，並不能正常的存取到。
+
+所以如果有讀者成功取得的話，在麻煩底下留言給我，小弟不勝感激～
+
+以上就是這次在 vue cli3 中使用 vue2-google-maps 的開發記錄，相關測試程式碼可以到我的 Github 找到：
+
+[點擊前往 Github](https://github.com/penghuachen/vue2-google-maps-demo/blob/master/src/App.vue)

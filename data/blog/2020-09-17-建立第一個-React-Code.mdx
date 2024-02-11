@@ -1,0 +1,221 @@
+---
+title: 建立第一個 React Code
+date: "2020-09-17 09:14:53"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+
+---
+
+# 建立第一個 React Code 
+
+學習新技術的第一天總是精神奕奕，趕緊跟 React 好朋友學習吧！
+
+
+今天 React 好朋友跟我說，學習一門技術最快的方式就是把手弄髒(get hands dirty)，所以它打算透過舉一個簡單的範例來讓我了解 React 是如何建立一個元件(component) 並將資料傳入到元件中(component)的。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/affectionate-leftpad-pi2eu?file=/src/App.js)。
+
+## 初探 React，建立第一個元件
+
+### React 環境建置: 使用 create-react-app
+
+往下理解 React 如何建立元件(component)之前，需要先建立環境。
+
+而這裡則透過使用 **create-react-app 的方式建立環境**
+
+至於建立的方式則是可以參考官方提供的方式： [Quick Overview](https://github.com/facebook/create-react-app#quick-overview)。
+
+```bash=
+npx create-react-app my-app
+cd my-app
+npm start 
+```
+
+完成環境建置後，接著我們要開始建立第一個元件囉
+
+### 建立第一個元件(component)
+
+首先先來看看一個我們在 HTML 常見的撰寫:
+
+```html
+<div class="person">
+  <h1>Bill</h1>
+  <p>Your Age: 26</p>
+</div>
+```
+
+```html
+<style>
+  .person {
+    display: inline-block;
+    margin: 10px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 2px #ccc;
+    width: 200px;
+    padding: 20px;
+  }
+</style>
+```
+
+接下來，我們要透過在 **React 中建立元件，並且 DOM 架構會與上面的程式碼相同**。
+
+#### 建立第一個 Function Component
+
+最基本的方式之一是**使用 function 建立的元件，也稱為 Function Component**。
+
+並且我們會使用到一種叫做 **JSX 的語法**幫助我們在建立元件(component)時可以更加容易。
+
+JSX 語法在此時的出現也許會造成一些疑問，不過這於接下來的文章中會深入了解，所以這邊我們先理解怎麼使用即可。
+
+接著，我們在專案中建立 PersonOne 元件
+
+```jsx=
+// ./src/components/PersonOne
+
+function PersonOne() {
+  return (
+    <div className="person">
+      <h1>Bill</h1>
+      <p>Your Age: 26</p>
+    </div>
+  );
+}
+
+export default personOne;
+```
+
+在 App.js 中引入這個元件：
+
+```jsx=
+import React from "react";
+import "./styles.css";
+
+import PersonOne from "./components/PersonOne";
+
+export default function App() {
+  return (
+    <div className="App">
+      <h2>建立第一個 Function Component</h2>
+      <PersonOne />
+    </div>
+  );
+}
+```
+
+
+這邊需要注意的重點是:
+- **因為 `class` 在 JS 是保留字，所以另外寫成 `className`。** 這個部分的說明可以在文件中查到，[前往文件](https://zh-hant.reactjs.org/docs/introducing-jsx.html#specifying-attributes-with-jsx)。
+- 將 `PersonOne` Component export ，在 App.js 中使用。
+
+
+如果沒意外的話，應該可以成功看到我們透過 React 建立的元件已經顯示在畫面上了。
+
+但是上面的元件存在一個問題: **無法有效的複用**，因為值是固定的(hard code)。
+
+因此這邊我們需要建立一個可以**傳遞自定義參數**的函式，這樣我們才可以**依據不同的值，渲染出不同的資料**。
+
+所以這邊我們需要改寫一下剛剛程式碼，讓它更有彈性一些。
+
+為了保留比較，這邊建立 `PersonTwo` Component:
+
+```jsx=
+function PersonTwo(props) {
+  const { name, age } = props;
+  return (
+    <div className="person">
+      <h1>{ name }</h1>
+      <p>Your Age: { age }</p>
+    </div>
+  );
+}
+```
+
+在 App.js 中引入這個元件，並且傳遞自定義的參數:
+
+```jsx=
+import React from "react";
+import "./styles.css";
+
+import PersonOne from "./components/PersonOne";
+import PersonTwo from "./components/PersonTwo";
+
+export default function App() {
+  return (
+    <div className="App">
+      <h2>建立第一個 Function Component</h2>
+      <PersonOne />
+      <PersonTwo name="Mark" age="27"/>
+    </div>
+  );
+}
+```
+
+
+這邊需要注意的重點是：
+- 在 React 元件中透過在**大括號 `{}` 中寫入變數**，可以取得動態傳入的值。
+- 在 React component 中，**允許我們透過 `props` 這個物件，將自定義的參數傳到 function 中使用**。
+
+
+
+上述的篇幅學習了如何建立一個 Function Component，接著讓我們來看看如何建立一個 Class-based Component 吧！
+
+#### 建立一個 Class-based Component
+
+這裡我們將 PersonTwo 的程式碼從原本的 **Function Component 改寫成 Class-based Component，PersonThree。**
+
+使用 ES6 Class 語法達成： 
+
+```jsx=
+import React, { Component } from "react";
+
+class PersonThree extends Component {
+  render() {
+    const { name, age } = this.props;
+
+    return (
+      <div className="person">
+        <h1>{name}</h1>
+        <p>Your Age: {age}</p>
+      </div>
+    );
+  }
+}
+
+export default PersonThree;
+```
+
+引入到 App.js 後的使用方式相同。
+
+```jsx=
+// ... 略
+import PersonThree from "./components/PersonThree";
+
+export default function App() {
+  return (
+    <div className="App">
+     // ...略
+      <h2>建立一個可傳入自定義參數的 Class-based Component</h2>
+      <PersonThree name="Terry" age="17"/>
+    </div>
+  );
+}
+```
+
+透過 ES6 Class 建立的元件有幾個地方需要注意:
+1. **Class-based Component 使用 props 的方式需要透過 `this` 來取得。**
+2. 透過 `render()` 方法將內容渲染在網頁上。
+
+以上就是 React 好朋友在今天想要讓我先了解的部分~
+
+它告訴我雖然一下子就提供了看似很難的例子，但這邊可以先記住使用的方式，並且在往後的天數裡會慢慢帶領我學習今天使用的種種技巧的細節。
+
+程式碼同步發佈於:
+1. [Github](https://github.com/penghuachen/React_30)
+
+就這樣囉，明天見~
+
+## 資源
+
+- [在 JSX 中指定屬性](https://zh-hant.reactjs.org/docs/introducing-jsx.html#specifying-attributes-with-jsx)
+- [Quick Overview](https://github.com/facebook/create-react-app#quick-overview)

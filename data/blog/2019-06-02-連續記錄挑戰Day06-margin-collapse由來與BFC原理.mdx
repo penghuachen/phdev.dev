@@ -1,0 +1,70 @@
+---
+title: 連續記錄挑戰Day06- margin collapse由來與BFC原理
+date: "2019-06-02 18:51:02"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 這次要記錄的是為什麼會有margin collpase的情況，和BFC又有什麼關係。
+
+ 
+記錄的順序依序為:
+1. 什麼情況會遇到margin collpase？
+2. 為什麼BFC會和margin collapse有關？
+3. 如何避免這樣的狀況？
+
+對於自己來說，**先是遇到了什麼問題，然後查了相關的原理，最後得到了處理該問題的方法**這樣子的順序會比較好記憶。
+
+
+## 什麼情況會遇到margin collpase？
+
+情境題： 
+
+小明今天在撰寫HTML時，寫了一個 h1 tag 以及一個 p tag，如圖所示：
+
+![](https://i.imgur.com/oFqfrig.png)
+
+而且小明想要讓**h1 tag 以及 p tag 的margin-top、margin-bottom都各自設定20px，心想這樣的話，h1 tag 以及 p tag 之間的距離就會是20px+20px = 40px了吧！但沒想到卻發現實際的結果竟然還是20px**如下圖所示(為方便呈現重疊情形，有後製圖片)。
+
+![](https://i.imgur.com/cZGtXNj.png)
+
+
+
+這裡小明就是遇到了margin collpase的情況，**margin collpase會導致元素之間的margin-top、margin-bottom重疊**。
+
+## 什麼是BFC(Block Formattimg Context，和 margin collpase 有什麼關係?
+
+1. BFC定義：
+    - 大概意思是在**BFC中元素的排列方式是一個接著一個垂直的排列下去，且元素之間的距離是由margin特性決定。而相鄰的兩元素會有collpase的情形。** (這也是為什麼會有margin collapse的情形發生)
+
+> ![](https://i.imgur.com/XHFdeoa.png)
+
+2. 以下幾種狀況可以建立新的BFC：
+    - float
+    - position absolute / fixed
+    - overflow (except visiable attribute)
+    - inline-block
+    - table-cells
+    - table-captions 
+
+> ![](https://i.imgur.com/YiwQc1j.png)
+
+
+## 如何避免這樣的狀況？
+
+規範文件中有提到下列情況會發生margin collpase，所以反過來思考與設定就可以避免此問題。
+最常見的方式就是**使用padding-top取代margin-top推移元素之間的距離**（圖片中第二行有提到）。
+而這只是其中一種方式，其他的方式可以參考文件並反思即可。
+
+> ![](https://i.imgur.com/u3J7w9A.png)
+
+ 
+
+原來 margin collaspe是因為這麼深層的原理而造成的，真的是收穫良多啊！！
+
+以前只知道會有這種情形，所以改用padding-top處理就好，但為什麼會有這種情況卻一直沒有深入探究，幸好這次有研究了一番，覺得值得！！
+
+今天就到這裡為止～ 明天繼續，keep moving！！
+
+  

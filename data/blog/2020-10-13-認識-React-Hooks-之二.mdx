@@ -1,0 +1,126 @@
+---
+title: 認識 React Hooks 之二
+date: "2020-10-13 09:55:19"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+# 認識 React Hooks 之二
+
+今天是延續昨天的 Hooks 探索，要學習的是 `useReducer` 、`useCallback`、`useMemo` 與 `useRef` 。
+
+就讓我們來看看這些 Hooks 可以帶給我們怎麼樣更簡便的使用方式吧!
+
+
+## `useReducer`
+
+在前面的天數我們學習到了 Redux 的使用，如果能夠理解的話，相信 `useReducer` 使用起來就不會那麼陌生。
+
+因為 `useReducer` 會回傳一個 `state` 與 `dipatch` 的方法，然後就跟 Redux 一樣透過 `dispatch` 一個 action 來更新 `state` 中的狀態。
+
+這裡我們來看看官方提供的範例程式碼:
+
+```jsx=
+const initialState = {count: 0};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+      <button onClick={() => dispatch({type: 'increment'})}>+</button>
+    </>
+  );
+}
+```
+
+上方的程式碼是一個簡單的加減計數器，可以執行加一、減一的操作。
+
+而基本上設定 `state`， `dipatch` 一個 action 到 `reducer` 更新 `state` 的狀態，根本和使用 Redux 沒什麼差異。
+
+不過有一個小細節需要注意的部分是， `initialState` 原本在 Redux 中會作為 `reducer` 的預設值，而使用 `useReducer` 的話，則是將 `initialState` 當作**第二個參數傳入**。
+
+## `useCallback`
+
+**`useCallback` 會回傳傳入的 callback function 的 memoized 版本，讓這個 callback 只會在依賴改變時才會更新。**
+
+而這麼做的原因在於要避免**不必要的 render**，優化效能。
+
+這裡來看看官方提供的一個示意程式碼:
+
+```jsx=
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+);
+```
+
+callback function 傳入一個 `doSomething` 方法，而這個方法**會在當 `a`, `b` 發生改變時才會執行。**
+
+
+## `useMemo`
+
+`useMemo` 使用方式與 `useCallback` 類似，都是為了優化效能，但是其 `memoized` 的是一個值，而且需要注意的是 `useMemo` 的 function **是在 render 期間執行**，所以避免在 render 期間處理 side effect。
+
+## `useRef` 
+
+今天的最後要學習的是 `useRef`，如果還記得第十四天的[createRef 學起來，focus 元素不麻煩](https://ithelp.ithome.com.tw/articles/10246160)，那這個部分也不會太難理解，因為 `useRef` 可以讓我們在 function component 中更簡單的 focus 元素。
+
+直接來看看底下這個例子:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/zealous-sea-6mq3w?file=/src/App.js:0-400)。
+
+```jsx=
+import React, { useRef } from "react";
+import "./styles.css";
+
+export default function App() {
+  const myRef = useRef(null);
+
+  const focusInputByUseRef = () => {
+    myRef.current.focus();
+  };
+
+  return (
+    <div className="App">
+      <h2 onClick={focusInputByUseRef}>
+        functional Componet: useRef - 點擊本段文字
+      </h2>
+      <input ref={myRef} />
+    </div>
+  );
+}
+```
+
+在 `useRef` 中傳初始值傳入 `null` 是告訴 React 目前在一開始時還沒有任何 ref 依附在 React element 中，而之後當我們在元素中設定 `ref` 時，此時就會拿到這個元素了。
+
+
+今天學習了 React Hooks 中的 `useReducer`、`useCallback`、`useMemo` 以及 `useRef` 的基礎概念。
+
+明天再繼續探索其他的 Hooks吧！
+
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [useReducer](https://zh-hant.reactjs.org/docs/hooks-reference.html#usereducer)
+- [useCallback](https://zh-hant.reactjs.org/docs/hooks-reference.html#usecallback)
+- [useMemo](https://zh-hant.reactjs.org/docs/hooks-reference.html#usememo)
+- [useRef](https://zh-hant.reactjs.org/docs/hooks-reference.html#useref)
+

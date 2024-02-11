@@ -1,0 +1,61 @@
+---
+title: 整理 Vue2 中在元件裡達到雙向綁定的幾種方式
+date: "2021-04-27 14:05:23"
+tags: ['Vue2']
+draft: false
+summary: ''
+---
+
+快速記錄一下幾個==在 Vue2 中達成雙向綁定的方式==：
+
+- `props` / `emit`
+- `sync` / `update`
+- 在元件上預設使用 `v-model` 的方式
+- 在元件上客製化使用 `v-model` 的方式
+
+文章篇幅僅擷取重點程式碼部分，完整程式碼請移步至 [測試範例](https://codesandbox.io/s/vue-custom-event-2klo8?file=/src/App.vue) 查看。
+
+
+## 使用 `props` / `emit` 的方式
+
+在父層的設計：
+
+![](https://i.imgur.com/u7XdEpn.png)
+
+在子層(CustomComponent)的設計：
+
+![](https://i.imgur.com/k3bpc0z.png)
+
+## 使用 `sync` / `update` 的方式
+
+在父層的設計：
+
+![](https://i.imgur.com/IYnSEFL.png)
+
+在子層(CustomComponent)的設計：
+
+![](https://i.imgur.com/y3Xwxxd.png)
+
+## 在元件上預設使用 `v-model` 的方式
+
+==預設 binding attribute： value / event: input==
+
+在父層的設計：
+
+![](https://i.imgur.com/GiGzGRg.png)
+
+在子層(CustomComponent)的設計：
+
+![](https://i.imgur.com/Qdq1nA7.png)
+
+## 在元件上客製化使用 `v-model` 的方式
+
+==客製化 binding attribute： value3 /event: use-v-model==
+
+在父層的設計：
+
+![](https://i.imgur.com/UGTtRHf.png)
+
+在子層(CustomComponent)的設計：
+
+![](https://i.imgur.com/yX4wNwP.png)

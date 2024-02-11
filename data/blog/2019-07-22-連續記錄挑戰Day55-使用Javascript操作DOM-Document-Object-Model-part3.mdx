@@ -1,0 +1,124 @@
+---
+title: 連續記錄挑戰Day55-使用Javascript操作DOM(Document Object Model) part3
+date: "2019-07-22 21:21:57"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+# 使用Javascript操作DOM(Document Object Model) part3
+
+## scrollBy / pageXOffSet / pageYOffSet / scrollX / scrollY
+
+scrollBy的用途是：「在窗口中依照指定的偏移量滾動文檔。」
+
+scrollBy語法是window物件中才有的方法，使用時需要注意透過**window**.scrollBy()控制。
+
+
+而pageXOffSet其實就是scrollX以及pageYOffSet是scrollY，使用上是相等的。
+
+當透過scrollBy獲得值時，可以發現其中的x偏移量=scrollX、y偏移量=scrollY
+
+寫法一：
+```javascript
+window.scrollBy(x偏移量,y偏移量)
+```
+寫法二：
+```javascript
+window.scrollBy({
+    top:100, //＝y偏移量
+    left:100, //＝x偏移量
+    behavior: //instant(瞬移，預設值)/ smooth()滑順，兩種滾軸移動時的效果
+})
+```
+
+Ex:[scrollBy練習](https://codepen.io/kids5346/pen/JgYjKo)
+
+
+## getBoundingClientRect
+
+可以獲得元素的大小以及相對於窗口的位置。
+
+會得到DOMRect物件並包含一組資訊：x/y/top/left/bottom/right/weight/height的值，這組資訊其實就是與該元素相關的css邊框資訊的集合。
+
+關於元素的位置，在[MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect)中有示意圖：
+
+![](https://i.imgur.com/qBJrAFe.png)
+
+
+Ex:取得box的css邊框資訊
+
+```html
+<style>
+    .box {
+      width: 100px;
+      height: 100px;
+      background: #aaaadd;
+    }
+</style>
+
+<div class="box"></div>
+```
+```javascript
+let box = document.querySelector('.box');
+let getBoxinfo = box.getBoundingClientRect();
+console.log(getBoxinfo);
+```
+## elementFromPoint
+
+getBoundingClientRect可以取得元素的邊框資訊，而有時候我們會想要反過來透過座標點獲得該座標上的元素是什麼，這個時候就可以使用 elementFromPoint()。
+
+這組方法會回傳位於指定坐標上的元素為何。
+
+Ex: 取得座標位置(50,50)上的元素值
+```html
+<style>
+    .box {
+      width: 100px;
+      height: 100px;
+      background: #aaaadd;
+    }
+</style>
+
+<div class="box"></div>
+```
+```javascript
+let box = document.querySelector('.box');
+let getBoxinfo = box.getBoundingClientRect();
+console.log(getBoxinfo);
+```
+## scrollTop
+
+> 屬性可以設置和獲取元素被向上捲動的高度(pixels). 元素的 scrollTop 是元素頂端和能被看見的最頂端之間的距離
+
+Ex:獲得滾動時元素的水平、垂直和最頂端的距離
+
+```html
+<style>
+    .container {
+      width: 200px;
+      height: 200px;
+      overflow: auto;
+    }
+
+    .box {
+      width: 3000px;
+      height: 3000px;
+      background: #aaaadd;
+    }
+</style>
+
+<div class="container">
+    <div class="box"></div>
+</div>
+```
+```javascript
+let container = document.querySelector('.container');
+
+container.addEventListener('scroll', scrollEl);
+
+function scrollEl(e) {
+    document.querySelector('.showText').innerHTML = "Horizontally: " + e.target.scrollLeft + "px Vertically: " + e.target.scrollTop + "px";
+}
+```

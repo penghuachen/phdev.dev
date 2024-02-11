@@ -1,0 +1,67 @@
+---
+title: 連續記錄挑戰Day20-float和清除浮動的方法
+date: "2019-06-16 17:53:24"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 為什麽會出現浮動和什麽時候需要清除浮動？清除浮動的方式?
+
+## 起源：
+
+原本是因應**文繞圖**的需求被創造出來，但在還沒有flex/grid時，被發現用於排版上相較table的方式好，所以被拿來運用在排版上，但必須要知道這是誤用，每個語法都有自己被開發出來的意義。
+
+
+![](https://i.imgur.com/fsP9aJf.png)
+
+## 特性：
+
+當元素設定為float時，元素會脫離normal flow而浮動起來，此時的容器會因此而高度變成0
+
+示意圖如下：
+
+![](https://i.imgur.com/BtHuOOm.png)
+
+上述狀況會造成的影響：
+
+- 容器沒有高度
+- 在排版時導致跑版，元素無法放置在需求位置。
+
+## 清除浮動所造成的影響
+
+- 給容器一個高度：但固定高度不是一個好作法，當文字等內容過多時，會造成內容溢出。
+- 給一個div，並對於這個div設定clear語法，藉此達到清除浮動的效果。
+  - 缺點：必須額外設定div清除浮動，有些多餘。
+  - tips: 需設定在浮動元素之後
+
+```html
+    <div class="clearfix"></div>
+```
+
+```html
+    .clearfix{
+        clear:both;
+    }
+```
+- 借助:after 偽元素：在容器上設定class="clearfix"，並透過偽元素:after將清除浮動的語法設定在此，藉此達到清除浮動的效果。
+  - tips:
+      - 偽元素是行內元素，所以需要設定display:block，讓其變為區塊元素。
+      - 一定要有content:''語法，偽元素才會有作用
+      
+```html
+    <div class="wrap clearfix"></div>
+```
+
+```html
+    .clearfix:after{
+        content:'';
+        display:block;
+        clear:both;
+    }
+```
+
+- overflow:hidden : 原理：透過overflow來閉合浮動，會建立一個新的BFC，且計算高度時會考慮該BFC包含的所有元素，所以會連同被設定為float元素的高度也一併得到，進而達到清除float的效果
+    - 閉合浮動和清除浮動的概念不一樣。
+
+  

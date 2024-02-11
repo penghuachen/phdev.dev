@@ -1,0 +1,181 @@
+---
+title: 把玩 vue-chartjs
+date: "2021-05-01 11:29:39"
+tags: ['Vue2', 'Chart']
+draft: false
+summary: ''
+---
+
+
+![](https://i.imgur.com/3RiBUvM.png)
+
+## 前言
+
+vue-chartjs 是基於 chart.js 服務封裝成 vue component 的圖表服務，基本上常見的圖表需求都可以透過這個服務達到目的。
+
+
+由於筆者這陣子在專案中有使用圖表的需求，但要實作的功能只是簡單的將 API 回來的資料渲染到圖表上而已，並沒有辦法運用到這個服務的全部功能，所以筆者決定採用逐次更新的方式完善這個服務的學習。
+
+所以如果有興趣的讀者可以持續關注此篇幅，內容會不定期更新！
+
+那麼就趕緊進入主題吧！
+
+## 安裝 vue-chartjs 、 chart.js
+
+使用 vue-chartjs 時要同時安裝 chart.js 才可以，畢竟是基於 chart.js 封裝而來的服務。
+
+```bash=
+yarn add vue-chartjs chart.js 
+
+npm install vue-chartjs chart.js --save
+```
+
+### 安裝後遇到版本更新後導致的錯誤
+
+如果是大約 2021 年4月 之後使用這個服務的讀者可能會遇到以下的報錯：
+
+![](https://i.imgur.com/2BkyErz.png)
+
+**報錯原因在於 chart.js 服務 v3 後的版本在 vue cli 中使用會有問題導致**
+
+然而將版本調降至 v2 的版本後就可以正常使用了
+
+這邊提供在 github 中這個 issue 的討論，有興趣的讀者可以持續關注這個問題是否已經被修正： [Chart.js 3.0 support #695](https://github.com/apertureless/vue-chartjs/issues/695)。
+
+不過尚未修正前，讀者們可能只能先暫時透過 v2 版本使用這個服務了。
+
+順帶一提，chat.js v2 與 v3 版本的文件可是不同的哦，附上連結：
+- [前往 v2.9.4 文件(v2 最新版本)](https://www.chartjs.org/docs/2.9.4/)
+- [前往 v3.2.0 文件(v3 最新版本)](https://www.chartjs.org/docs/latest/)
+
+解決安裝時的小插曲後，接著來建立第一個圖表吧！
+
+## 建立第一個 vue-chart.js 圖表
+
+如果讀者有前往 [vue-chart.js 文件](https://vue-chartjs.org/zh-cn/guide/#vue-%E5%8D%95%E6%96%87%E4%BB%B6%E7%BB%84%E4%BB%B6) 閱讀的話第一次看會有幾點需要注意的部分：
+
+- **圖表使用的元件不能使用 `<template>` 標籤**
+- **更新圖表的幾種方式**
+
+至於不能使用 `<template>` 標籤的原因在文件中也有描述：
+
+> 不要使用Template標籤
+不要在你的.vue文件中引入`<template>`標籤. Vue無法合併模板.如果你添加了一個空的`<template>`標籤, Vue將會從你的主鍵裡獲取模板,而不會從你extend中獲取,這將導致頁面為空並報錯.
+
+接著讓我們先從建立一個 Line Chart 開始：
+
+### 建立一個 Line Chart
+
+根據 [vue-chart.js 文件](https://vue-chartjs.org/zh-cn/guide/#vue-%E5%8D%95%E6%96%87%E4%BB%B6%E7%BB%84%E4%BB%B6) 可以梳理出一些步驟，假設今天要建立一個形式為 Line 的 chart ：
+1. **建立一個 component 將 vue-chartjs 封裝的 Line component 引入，**
+2. **extend vue-chartjs 封裝的 Line component**
+3. **建立 local data 或者取得由父層傳入的 props data**
+4. **透過 `renderChart()` 建立圖表**
+
+所以這邊我們建立一個 LineChart 元件，而資料與額外圖表的設定(`options`) 則由父層 props 進來：
+![](https://i.imgur.com/koVRF9Z.png)
+
+一個基本的 Line 圖表我們已經建立好了，接著我們從父層 props data 到這個元件中:
+
+![](https://i.imgur.com/nQVDmdF.png)
+
+data 的格式參考 [chart.js](https://www.chartjs.org/docs/2.9.4/#creating-a-chart) 服務中設定 data 的格式，這裡介紹一下這個 data 中的每個參數：
+
+- 第一層 `labels`: 類別軸定義，用於 x 軸(參考 [Category Cartesian Axis](https://www.chartjs.org/docs/2.9.4/axes/cartesian/category.html))
+- `datasets`: 用來設定資料、樣式等等，依據圖表類型不同可設定的參數不一定相同(參考 [Charts](https://www.chartjs.org/docs/2.9.4/charts/))
+- 第二層 `labels`: 顯示在圖表中對應的資料控制顯示，如下圖中的 「My First Dataset」
+  - ![](https://i.imgur.com/VQwvQA7.png)
+- `borderColor`, `pointBackgroundColor` 等：用於樣式設定
+- `options`: 該圖表的 config，如果有額外設定則需要寫在這裡
+- `resonsive`: 用於設定該圖表是否需要響應式(Responsive)(參考 [Responsive Charts](https://www.chartjs.org/docs/2.9.4/general/responsive.html))
+- `maintainAspectRatio`: 用於設定縮放時是否維持 canvas 的大小(圖表是透過 canvas 渲染的)(參考 [Responsive Charts](https://www.chartjs.org/docs/2.9.4/general/responsive.html))
+- `title`: 用於設定該圖表的標題(參考 [Title](https://www.chartjs.org/docs/2.9.4/configuration/title.html))
+
+
+### 新增 Line Chart 中的數據
+
+如果還沒有查看文件中關於新增圖表數據相關說明的讀者，可能在新增資料時會很直接地認為是不是只要把新的 data push 到 `datasets` 中就好了。
+
+但很可惜並不是，在 [更新Charts](https://vue-chartjs.org/zh-cn/guide/#%E6%9B%B4%E6%96%B0-charts) 提到：
+
+> 如果你修改了數據集, Chart.js是不會提供實時更新的
+
+不過 vue-chart.js 提供了兩種方便我們更新數據的方式：
+- `reactiveProp`
+- `reactiveData`
+
+而這兩種方式的差別只在於**資料是 local data 還是 props data 而已**
+
+**不過在使用 `reactiveProp` 或者 `reactiveData` 需要注意的一點是關於 data 參數的限定，只能是 `chartData`，否則就會有 props 的錯誤。**
+
+> ...
+> 這兩個mixins其實實現的是相同的功能.大多數時間你將會使用 reactiveProp 它擴展了圖表組件的邏輯,並自動創建名為 chartData 的 prop s參數
+> ...
+
+由於我們在前面建立的測試範例資料是 props 的，所以這裡我們要使用 `reactiveProp` ，並依據 vue-chart.js 要求的寫法設定：
+
+![](https://i.imgur.com/eKi8eis.png)
+
+然後我們在父層設定一個用來新增一筆資料的 `updata` method:
+
+![](https://i.imgur.com/lFuP0y2.png)
+
+當點擊按鈕 2 秒後就可以看到一筆新的數據被新增到圖表中了，是不是非常簡單呢？
+
+
+但也許會有讀者在想，有沒有辦法不要用 `chartData` 這個參數也一樣能更新圖表呢？
+
+答案是：有的！
+
+從文件中可以看到一段更新數據的描述：
+
+> ...
+> 並為這個參數添加vue watch.當數據改變,如果數據在數據集中改變,它將調用 update();如果添加了新的數據集,它將調用 renderChart()
+> ...
+
+從描述可以知道
+- 如果要新增資料，可以調用 `renderChart()`
+- 如果要更新資料，可以調用 `update()`
+
+這邊我們梳理出一些步驟來測試：
+1. 將 `chartData` 命名變更為 `customChartData`
+2. watch Line component 中 props 的 `customChartData`
+3. 如果資料有新增，調用 `renderChart()`
+4. 如果資料有更新，調用 `update()`
+
+首先先看新增資料的時候，此時 Line component 的程式碼設計如圖：
+
+![](https://i.imgur.com/1gBkvyI.png)
+
+父層為：
+
+![](https://i.imgur.com/TXyKUAa.png)
+
+以上設定就可以不受命名的限制但依然可以新增資料到圖表囉！
+
+除了 `renderChart()` 之外，我們再來測試更新數據時要用到的 `update()`
+
+而更新時則要透過這樣的方式使用 chart.js 中定義好的 `update()`:
+
+```javascript
+// delegate update method in __prtot__
+this.$data._chart.update()
+```
+
+此時 Line component 的程式碼設計如圖：
+
+![](https://i.imgur.com/eqSkp43.png)
+
+
+
+父層為：
+
+![](https://i.imgur.com/oXJIP70.png)
+
+
+以上完成了一個基本 Line 圖表的呈現設定與更新數據，相關的測試範例，[點擊前往](https://codesandbox.io/s/vue-chartjs-demo-9jtmk)。
+
+## 參考
+
+- [ vue-chartjs](https://vue-chartjs.org/zh-cn/)
+- [Chart.js](https://www.chartjs.org/)

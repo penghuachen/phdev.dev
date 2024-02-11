@@ -1,0 +1,352 @@
+---
+title: 把玩 HTML Drag and Drop API
+date: "2021-01-31 15:54:52"
+tags: ['Javascript', 'Drag API']
+draft: false
+summary: ''
+---
+
+距離上一次的發文好像又隔了好一段時間(遠目)
+
+
+但 2021 年都已經又快過完一個月了，怎麼還能不開張呢!!
+
+所以思來想去，最近剛好對於 HTML Drag and Drop API 的操作挺有興趣
+
+所以決定 2021 年的首發就從把玩 Drag and Drop API 開始吧！！
+
+## 梳理文章架構
+
+今天的篇幅會大致會拆分為如下幾個區塊:
+
+1. 了解 Drag and Drop API 的用途
+2. 了解如何設定可拖曳的元素與可以放置拖曳元素的區塊
+3. 了解使用 Drag and Drop API 時可以觸發的事件(情境)
+4. 其他語法的細節學習
+5. 兩個測試 Demo
+
+接著，就讓我們趕緊來把玩這個 API 吧！！
+
+## 了解 Drag and Drop API 的用途
+
+想運用這些 API 之前，一定要先知道這些 API 的用途，了解這些 API 可以讓我們運用在哪些使用情境上。
+
+而 Drag and Drop API 透過單字的理解不難知道，這就是一個支援我們能夠在==瀏覽器上拖曳元素及放置元素的 API==
+
+而這一個 [MDN Example](https://developer.mozilla.org/en-US/docs/Web/API/Document/drag_event#examples) 可以讓讀者更快了解如何使用，以及呈現的方式。
+
+![](https://i.imgur.com/BrWK7Zo.gif)
+
+接著，讓我們來看看怎麼**設定一個可拖曳的元素與一個可以放置拖曳元素的區塊**吧！！
+
+## 了解如何設定可拖曳的元素與可以放置拖曳元素的區塊
+
+在寫程式時，為了可以更有效率的解決問題，所以我們**在動手之前一定要先思考它的使用者流程會是怎麼運作。**
+
+以今天把玩的 Drag and Drop API 為例，我們會知道一個基本的拖曳與放置的流程會經過以下的流程:
+
+==1. 使用者選取到一個可以被拖曳(draggle)的元素
+2. 將可被拖曳的元素拖曳到可以放置拖曳元素(dropple)的區塊
+3. 將元素放置(drop)到該區塊==
+
+而上述的一個簡單的拖曳和放置的流程，我們可以搭配 [MDN](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#the_basics) 的部分來看看會用到哪些語法
+
+### **首先，由「使用者選取到一個可以被拖曳(draggle)的元素」可以思考到，我們必須設定一個可以被拖曳(draggle)的元素**，才能讓瀏覽器分辨哪些是可以被拖曳而哪些不行。
+
+而設定上也很簡單，只是加上 `draggable="true"` 即可。
+
+這邊附上最後要呈現的其中一個小測試 Demo 的程式碼：
+
+```html
+<p id="drag-text" draggable="true">This is a draggable text</p>
+```
+
+然後為了知道這個可拖曳(draggle)的元素什麼時候會被拖曳(drag)，我們需要**替它註冊一個 dragstart 事件，在元素被拖曳時觸發。**
+
+```javascript
+const dragText = document.querySelector("#drag-text");
+dragText.addEventListener("dragstart", dragStart);
+
+function dragStart(e) {
+  console.log('drag start!');
+  e.dataTransfer.setData("text/plain", e.target.id)
+}
+```
+
+你也許會困惑 `e.dataTransfer.setData("text/plain", e.target.id)` 這一行程式碼的用途，這邊可以先簡單理解，**瀏覽器會需要將正在拖曳的元素相關的數據儲存起來做後續的應用**，所以當元素觸發 `dragstart` 事件時，必須執行上述該行的程式碼。
+
+這邊我們先看看有沒有成功註冊了 `dragstart` 事件：
+
+![](https://i.imgur.com/cSGb7dh.gif)
+
+### 接著，「將可被拖曳的元素拖曳到可以放置拖曳元素(dropple)的區塊」可以知道我們需要配置一塊可以放置拖曳元素的區域，然後將元素放置(drop)到該區塊
+
+在 HTML 中我們配置一個簡單的區塊如下：
+
+```htmlembedded=
+ <div class="box"></div>
+```
+
+```css=
+.box {
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+  background: #ebeaea;
+}
+```
+
+然後我們需要替這個區塊註冊兩個事件： `dragover` 與 `drop`
+
+- `dragover` 事件**會以每幾百毫秒的時間間隔來偵測拖曳元素是不是位於可以放置拖曳元素的區塊**，
+-  `drop` 事件則是**當被拖曳中元素於可以放置拖曳元素的區塊被使用者放開時會觸發**
+
+接著讓我們看看這兩個事件的設計:
+
+```javascript
+const box = document.querySelector(".box");
+box.addEventListener("drop", drop)
+
+box.addEventListener("dragover", dragOver);
+box.addEventListener("drop", drop);
+
+function dragOver(e) {
+  e.preventDefault();
+  console.log('drag over!');
+}
+
+function drop(e) {
+  e.preventDefault();
+  console.log('drop');  
+  const data = e.dataTransfer.getData("text/plain");
+  console.log(data);
+  e.target.appendChild(document.getElementById(data));
+  e.dataTransfer.clearData();
+}
+```
+
+這邊會困惑的點可能會有兩點：
+
+1. 為什麼需要使用 `e.preventDefault()`？
+2. `e.dataTransfer.getData("text/plain");` 與 `e.dataTransfer.clearData();` 在此時的用途是？
+
+首先先解答第一點，為什麼需要使用 `e.preventDefault()`？原因是因為瀏覽器中可以被觸發的事件其實非常多，並且==時常在觸發某個事件時也同時觸發了另一個事件==，最常見之一莫過於**同時觸發了 `click` 與 `blur` 事件造成的一些小困擾**。
+
+而拖曳事件同樣也會有這個問題，所以透過 `e.preventDefault()` 來==阻止這個事件觸發時，也有額外的事件觸發==
+
+接著是第二點，還是記得剛剛前面簡單瞭解的 `e.dataTransfer.setData("text/plain", e.target.id)` 嗎？ 我們把拖曳相關的狀態記錄起來，並在 `drop` 事件被觸發時可以透過 `e.dataTransfer.getData("text/plain");` 的方式==取得這個我們儲存的拖曳元素==，然後透過 `appendChild` 等等的方式將元素放置(drop)到該區塊。
+
+而 `e.dataTransfer.clearData();` 則是用來清除這個我們儲存的拖曳元素的狀態
+
+來看看實際執行的成果吧！！
+
+![](https://i.imgur.com/sJuaxJH.gif)
+
+
+以上就完成一個簡單的拖放元素的操作囉!!蠻有趣而且 API 使用上也不會很難～
+
+## 了解使用 Drag and Drop API 時可以觸發的事件(情境)
+
+在前面我們完成了一個簡單的測試範例，接著要來看看除了上面提到的事件之外，我們還可以運用哪些事件。
+
+這裡不賣關子，直接上測試範例的程式碼和執行結果：
+
+```javascript
+const dragText = document.querySelector("#drag-text");
+dragText.addEventListener("dragstart", drag);
+
+const box = document.querySelector(".box");
+box.addEventListener("dragover", dragOver);
+box.addEventListener("drop", drop);
+box.addEventListener("dragenter", dragEnter);
+box.addEventListener("dragleave", dragLeave);
+box.addEventListener("dragend", dragEnd);
+
+function drag(e) {
+  console.log('drag start!');
+  e.dataTransfer.setData("text/plain", e.target.id)
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  console.log('drag over!');
+}
+
+function drop(e) {
+  e.preventDefault();
+  console.log('drop');  
+  const data = e.dataTransfer.getData("text/plain");
+  e.target.appendChild(document.getElementById(data));
+  e.dataTransfer.clearData();
+}
+
+function dragEnter(e) {
+  console.log('drag enter!');
+}
+
+function dragLeave(e) {
+  e.preventDefault();
+  console.log('drag leave!');
+}
+
+
+function dragEnd(e) {
+  console.log('drag end!');
+}
+```
+![](https://i.imgur.com/T4VlHeX.gif)
+
+- `dragstart`: 可拖曳元素**開始被拖曳時**觸發
+- `dragover`: 可拖曳元素**進入**到可放置拖曳元素的區塊時觸發
+- `dragEnter`: 可拖曳元素**進入**到可放置拖曳元素的區塊時觸發
+- `dragLeave`: 可拖曳元素**離開**到可放置拖曳元素的區塊時觸發
+- `dragEnd`:  **一個拖曳操作完成時**觸發
+- `drop`: 可拖曳元素**放置**在可放置拖曳元素的區塊時觸發
+
+
+而這些事件可以讓我們在拖曳過程中額外做很多事情，如同上面提到的 [MDN Example](https://developer.mozilla.org/en-US/docs/Web/API/Document/drag_event#examples) ，在拖曳過程中的背景顏色等等的改變都是可以在這些事件中額外設定。
+
+![](https://i.imgur.com/BrWK7Zo.gif)
+
+## 其他語法的細節學習
+
+這個部分要來看的是 `DataTransfer` 物件中提供的一些方法和特性：
+
+1. `dropEffect` 
+2. `effectAllowed`
+3. `files`
+4. `setData()`
+5. `getData()`
+6. `clearData()`
+
+### `DataTransfer` 物件
+
+這個物件是瀏覽器用來**保存拖放操作期間要拖動的數據而建立的物件**。
+
+
+#### `DataTransfer` 物件中的 `dropEffect` 與 `effectAllowed`
+
+而這個物件提供了 `dropEffect` 與 `effectAllowed` 兩個特性來判定拖曳過程時 ==鼠標的樣式呈現與是否是一個符合當前拖曳操作類型的行為==，可以透過這兩個特性來規定。
+
+首先先看看 `dropEffect` 的效果，有四種值可設定： 
+
+- `none`
+- `copy`
+- `link`
+- `move`
+
+這裡擷取設定 `dropEffect` 的程式碼方便讀者閱讀:
+
+```javascript
+function dragOver(e) {
+  e.preventDefault();
+  console.log('drag over!');
+  e.dataTransfer.dropEffect = "copy"; // control how cursor displays
+}
+```
+
+當我們將 `dropEffect` 效果設定為 `copy` 時：
+
+![](https://i.imgur.com/aPbMg1R.gif)
+
+可以清楚看見鼠標樣式與前面的測試範例長得非常不同，適用於 `copy` 時鼠標的呈現。
+
+接著是 `effectAllowed` 用來判定當前的拖曳操作是否為符合的操作，有九種值可設定：
+
+- `none`
+- `copy`
+- `link`
+- `move`
+- `copyLink`
+- `copyMove`
+- `linkMove`
+- `all`
+- `uninitialized`
+
+為了更便於理解，這邊設定一個測試情境：
+
+**`dropEffect` 設定為 `copy` 的情境，但是 `effectAllowed` 卻是 `move`**
+
+```javascript
+function dragStart(e) {
+  console.log('drag start!');
+  // console.log(e);
+  e.dataTransfer.setData("text/plain", e.target.id)
+  event.dataTransfer.effectAllowed = "move"; // limit what drag effect is allowed
+}
+```
+
+```javascript
+function dragOver(e) {
+  e.preventDefault();
+  console.log('drag over!');
+  e.dataTransfer.dropEffect = "copy"; // control how cursor displays
+}
+```
+
+同樣的來看看效果：
+
+![](https://i.imgur.com/v5OiunQ.gif)
+
+會發現因為允許的拖曳操作為 `move`，但當前的拖曳操作行為為 `copy` ，因此無法成功放置拖曳元素。
+
+#### `DataTransfer` 物件中的 `files`
+
+==當使用情境是從本地拖曳一個文件類型的資料到可以放置拖曳元素的區域時，`files` 中會記錄這個資料相關的資訊==
+
+這裡我們透過從本地拖曳一張圖片來觀察 `files` 的變化：
+
+```javascript
+function drop(e) {
+  e.preventDefault();
+  console.log('drop'); 
+  console.log(e.dataTransfer.files[0]);  
+}
+```
+
+![](https://i.imgur.com/mY01dSD.gif)
+
+這個方式讓我們可以做出好比說像是**拖曳本地圖片到瀏覽器中特地位置然後預覽**的的效果，很是方便呢！！
+
+#### `DataTransfer` 物件中的 `setData()`, `getData()`, `clearData()`
+
+`setData()` 允許我們將拖曳操作的資料**設定為指定的數據和類型**
+
+```javascript
+void dataTransfer.setData(format, data);
+```
+
+這裡的 `format` 指的是 [MIME TYPE](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Basics_of_HTTP/MIME_types) 規範的規則，有興趣的讀者可以前往閱讀。
+
+而 `data` 則是我們指定要拖曳的元素所儲存的資料。
+
+然後透過 `getData()` 取出符合類型的拖曳資料，我們就可以執行後續的想要的操作
+
+```javascript
+dataTransfer.getData(format);
+```
+
+而 `clearData()` 則是用來刪除剛剛給定類型的資料
+
+```javascript
+dataTransfer.clearData([format]);
+```
+
+## 測試 Demo
+
+文章的最後不免俗的要將今天學習的部分做個測試範例，當作本篇幅的最後總結
+
+這邊提供筆者在測試時所做的範例提供給有興趣的讀者測試看看囉!!
+
+- 相關測試範例： [點擊前往](https://codesandbox.io/s/vigorous-star-2vzg6?file=/index.html)。
+- 筆者的 [Github](https://github.com/penghuachen)
+
+## 參考來源
+
+- [HTML Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#the_basics)
+- [DataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer)
+- [DataTransfer.getData()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/getData)
+- [DataTransfer.clearData()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/clearData)
+- [DataTransfer.setData（）](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData)
+- [Drag Operations](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#draggableattribute)
+- [MIME 類別 (IANA 媒體類別)](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Basics_of_HTTP/MIME_types)

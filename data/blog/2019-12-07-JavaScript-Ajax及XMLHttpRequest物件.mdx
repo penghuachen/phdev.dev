@@ -1,0 +1,242 @@
+---
+title: JavaScript Ajax及XMLHttpRequest物件
+date: "2019-12-07 13:02:39"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+## Ajax(Asynchronous JavaScript and XML) 非同步 JavaScript 及 XML
+
+在 MDN 是這麼解釋著：
+
+
+> AJAX 代表 Asynchronous JavaScript And XML，即非同步 JavaScript 及 XML。簡單地說，AJAX 使用 XMLHttpRequest(XHR) 物件來與伺服器進行通訊。它可以傳送並接收多種格式的資訊，包括 JSON、XML、HTML、以及文字檔案。AJAX 最吸引人的特點是「非同步」的本質，這代表它可以與伺服溝通、交換資料、以及更新頁面，且無須重整網頁。
+> [什麼是AJAX?](https://developer.mozilla.org/zh-TW/docs/Web/Guide/AJAX/Getting_Started#AJAX_%E6%98%AF%E4%BB%80%E9%BA%BC%EF%BC%9F)
+
+而上述提到了關於Ajax兩個很重要的觀念：
+1. AJAX 使用 XMLHttpRequest 物件來與伺服器進行溝通、交換資料、以及更新頁面，且無須重整網頁(此為AJAX的非同步特性)
+
+2. XMLHttpRequest 物件可以傳送並接收多種格式的資訊，包括 JSON、XML、HTML、以及文字檔案
+
+
+## XMLHttpRequest 物件(XHR物件)
+
+既然 Ajax 是使用 XMLHttpRequest 物件作為與伺服器溝通的橋樑，那就必須了解一下關於這個XHR物件的屬性、方法。
+
+由於XHR物件有許多的屬性與方法，在此不一一敘述，僅提到測試例子有使用到的語法。
+
+(註：XMLHttpRequest物件以下簡稱為XHR物件)
+
+首先，要使用XHR物件的話，需要先實體化XHR物件
+
+```javascript
+var xhr = new XMLHttpRequest();
+console.log(xhr);
+```
+此時應該可以看到下圖的資訊
+
+![Day24-1](https://i.imgur.com/9ADZwvY.png)
+再來我們繼續往下看看它的屬性與方法
+
+剛建立的XHR物件，因為還沒有要和伺服器發出請求，所以可以看到readyState的狀態為0，**代表是XHR物件已經被建立，但open()方法還沒有被呼叫**
+
+```javascript
+var xhr = new XMLHttpRequest();
+console.log(xhr.readyState);
+```
+關於readyState的狀態變化，可以參考mdn的這個表格
+
+![Day24-2](https://i.imgur.com/Ir6N6Pw.png)
+
+>[XMLHttpRequest readyState](https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/readyState)
+
+當成功請求到資料時，會回傳一個DOMString，可以透過responseText屬性查看回應的內容，
+
+```javascript
+var xhr = new XMLHttpRequest();
+//還沒發出請求，會是空值
+console.log(xhr.responseText);
+```
+
+需要注意的是這邊拿到的會是字串型別的資料，我們還需要透過**JSON.parse()的語法將資料轉成物件**，如此一來才可以使用物件的操作技巧。
+
+```javascript
+const a = JSON.parse(xhr.responseText);
+//如果有成功拿到資料，經過JSON.parse()轉換後會得到物件型別的資料
+console.log(a);
+```
+
+
+然後除了可以透過XHR物件查看對於伺服器發出的請求狀態之外，我們也可以透過 status屬性查看伺服器如何回應我們這次的請求。
+
+而statusText則是會回傳如"200"、"OK"這類的文字訊息。
+
+```javascript
+var xhr = new XMLHttpRequest();
+//還沒發出請求，會是空值
+console.log(xhr.status);
+console.log(xhr.statusText);
+```
+
+大致提完了關於XHR物件的屬性，接下來要講到XHR物件的方法
+
+透過這些方法我們才能成功的向伺服器發出請求
+
+xhr.open()，設定請求
+
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.open(method,url,async,user,password);
+```
+- method: 可以使用"GET"，"POST"，"PUT"，"DELETE"等方式做出請求
+- url: 要提出請求的URL
+- async: 是否執行非同步操作，預設值為true
+- user: 用於身份驗證的使用者名稱，預設值為null
+- password: 用於身份驗證的使用者密碼，預設值為null
+
+> [XMLHttpRequest.open()
+](https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/open)
+
+初始化請求之後，再來是要發送請求
+
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.open(method,url,async,user,password);
+xhr.send(body);
+```
+
+這裡的send()操作會因為GET、POST的使用不同而有所不同。
+
+單純請求資料(GET)，則xhr.send()可以是空值 -> `xhr.send(null)`
+
+若是需要將資料傳遞至伺服器，則還要補充相關訊息
+
+以傳遞純文字資料為例:
+
+```javascript
+var xhr = new XMLHttpRequest();
+//需要告知要傳遞的資料格式
+xhr.open("POST","/log.php");
+xhr.setRequestHeader("Content-type","text/plain;charset=UTF-8");
+xhr.send('1234');
+```
+
+重點在於 `xhr.setRequestHeader("Content-type","text/plain;charset=UTF-8");`
+
+上面這行程式碼表明請求主體為純文字，而這就是我們如果需要將資料往伺服器端傳送時需要補充的訊息。
+
+
+> [XMLHttpRequest.send()
+](https://developer.mozilla.org/zh-TW/docs/Web/API/XMLHttpRequest/send)
+
+最後要提到的部分是關於對XHR物件的監聽
+
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.addEventListener('load',getRequest);
+request.open('GET', endpoint,true);
+request.send(null); 
+function getRequest(){
+    console.log(xhr.responseText);
+}
+```
+
+因為發出請求時不一定可以即時拿到資料，所以必須監聽當請求得到回覆後，才往下執行程式碼
+
+如果沒有這麼做的話會拿到空值。
+
+觸發事件的類型有很多，這邊則使用load事件，**當目標資源加載完之後才觸發事件**
+
+
+
+## 實作：透過XHR物件介接高雄市政府資料開放平台的Open Data
+
+這個例子會透過XHR物件的GET方法取得高雄市政府資料開放平台的Open Data
+
+可以將程式碼貼到自己的編輯器嘗試運作看看
+
+> [電動機車充電站名稱及充電站地址](https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json)
+
+1. 撰寫HTML、CSS部分
+```html
+<!-- css part -->
+<style>
+  body {
+    background: #f0d0d0;
+  }
+  h1 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 48px;
+  }
+  .charge-list {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+  .charge-list li {
+    box-sizing: border-box;
+    flex: 0 1 24%;
+    padding: 10px;
+    margin: 0 1% 2% 0;
+    border-radius: 10px;
+    transition: all .4s;
+  }
+  .charge-list li:hover {
+    margin-top: -1%;
+  }
+  .charge-list li:nth-child(n) {
+    background: #aaaadd;
+  }
+  .charge-list li:nth-child(2n) {
+    background: #ddddaa;
+  }
+  .charge-list li:nth-child(3n) {
+    background: #dad;
+  }
+  .charge-list li:nth-child(3n+1) {
+    background: #aaf;
+  }
+</style>
+```
+```html
+<!-- html -->
+<ul class="charge-list"></ul>
+```
+
+2. 透過xhr物件向高雄市政府Open Data請求資料
+```javascript
+const endpoint = 'https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json'; 
+const request = new XMLHttpRequest();
+request.open('GET', endpoint,true);
+request.send(null); 
+request.addEventListener('load', getRequest); 
+function getRequest() {
+  // 可以將註解拿掉查看
+  //console.log(request);
+  const charge = [];
+  charge.push(...JSON.parse(request.responseText));
+  
+  createDomElement(charge);
+}
+```
+
+3. 將指定的資料內容(位置、地址)渲染到HTML頁面中
+
+```javascript
+function createDomElement(charge) {
+  const domElements = charge.map(place => {
+    return `
+    <li>
+      <p class="location">位置： ${ place.Location }</p>
+      <p class="address">地址：${ place.Address }</p>
+    </li>
+  `;
+  }).join("");
+  
+  const chargeList = document.querySelector('.charge-list');
+  chargeList.innerHTML = domElements;
+}
+```

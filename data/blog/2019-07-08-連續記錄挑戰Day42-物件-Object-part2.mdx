@@ -1,0 +1,249 @@
+---
+title: '連續記錄挑戰Day42-物件-Object-part2'
+date: "2019-07-08 19:08:27"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# Object 方法
+
+這個部分要來學習的是關於 Object 的一些方法，那就開始吧！
+
+
+
+## 建立原型物件 
+
+> MDN: `Object.create()`: 指定其原型物件與屬性，創建一個新物件。
+
+意思是==我們可以透過這個語法 assign(指定) 一個新物件的原型物件，然後建立新物件。==
+
+而透過 `Object.create` 將原型物件 assign(指定) 給一個新的物件，也稱為 ==原型繼承==
+
+以下面這個例子來說：
+
+```javascript
+var obj = {
+  name:'Bill',
+  sayHi: function (){
+    console.log('Hello!');
+  }
+}
+
+var newObj = Object.create(obj);
+console.log(newObj);
+```
+
+![](https://i.imgur.com/66xh9hc.png)
+
+透過上面這個圖可以知道，==obj已經被當作newObj這個物件的原型物件，而且newObj也被建立==。
+
+但對於比較舊的瀏覽器而言， `Object.create` 也許是無法使用的，所以就必須透過其他方式解決。
+
+而這個==透過某段程式因應瀏覽器不支援的情況稱為`polyfill`==
+
+在 Understanding the weird parts 中對於因應這樣子的情況有著下列這段程式碼:
+
+```javascript
+if (!Object.create) {
+  Object.create = function (o) {
+    if (arguments.length > 1) {
+      throw new Error('Object.create implementation only accepts the first parameter');
+    }
+
+    function F() {};
+    F.prototype = o;
+    return new F();
+  };
+}
+
+```
+
+當瀏覽器不支援Object.create時，會符合條件判斷句並執行內容，而上述程式碼中的這段:
+
+```javascript
+function F() {};
+F.prototype = o;
+```
+==就是透過建構式建立物件，達到跟Object.create一樣的用途==
+
+## 定義物件的特性
+
+==Object.defineProperty()==
+
+用在定義某個物件的特性和值，而且可以決定是否 **可寫入(writable)**、**可配置(configurable)**及**可列舉(enumerable)**。
+
+關於 **可寫入(writable)、可配置(configurable)及可列舉(enumerable)** 則需要說明一下:
+
+1. 可寫入(writable): 決定是否能變更一個特性的值
+2. 可配置(configurable): 決定該特性能不能被刪除或修改，但有些情形需要注意:
+  - 可配置但不可寫入:可以更改特性的值
+  - 不可配置不可寫入: 無法更改特性的值
+  - 設定不可配置:不能將 `writable` 從 `false` 改成 `true` ，但可以從 `true`改為 `false`
+3. 可列舉(enumerable):決定特性是否能夠透過物件方法(如 `for...in` )被取出
+4. 特性的值(value): 設定這個被定義特性的值
+
+來看看測試的例子:
+
+一、 將 `writable` 改為 `false`:
+
+```javascript
+var obj = {};
+Object.defineProperty(obj,'name',{
+  value: 'Bill',
+  enumerable:true,
+  configurable:true,
+  writable:false,
+})
+
+obj.name = "Jack";
+console.log(obj);
+```
+
+可以看到 `Jack` 這個值無法被寫入 `obj`物件
+![](https://i.imgur.com/aidZKLg.png)
+
+二、 將 `configurable` 改為 `false`:
+
+```javascript
+var obj = {};
+Object.defineProperty(obj,'name',{
+  value: 'Bill',
+  enumerable:true,
+  configurable:false,
+  writable:true,
+})
+
+// delete: 刪除特性
+delete obj.name;
+console.log(obj);
+```
+
+可以看到 `name` 這個特性並沒有被刪除
+![](https://i.imgur.com/aidZKLg.png)
+
+三、 將 `enumerable` 改為 `false`:
+
+```javascript
+var obj = {};
+obj.habbit = "Read books";
+Object.defineProperty(obj,'name',{
+  value: 'Bill',
+  enumerable:false,
+  configurable:true,
+  writable:true,
+})
+
+var prop = Object.keys(obj);
+console.log(prop);
+```
+可以看到 `name` 這個特性並沒有被取出來(因為不可列舉)
+![](https://i.imgur.com/ZEFuTK2.png)
+
+那又該怎麼同時定義多組特性呢? 其實也很簡單，透過 `Object.defineProperties()`。
+
+直接來看測試的例子:
+
+```javascript
+var obj = {};
+obj.habbit = "Read books";
+Object.defineProperties(obj,{
+  'name':{
+    value: 'Bill',
+    writable:true
+  },
+  'habbit':{
+    value: 'Read books',
+    writable:true
+  }
+});
+console.log(obj);
+```
+可以看到透過 `Object.defineProperties()` 就可以設定成功囉!
+![](https://i.imgur.com/hJLAHD3.png)
+
+
+## 測試特性的方法
+
+==`hasOwnProperty()`==:
+
+ - 如果**沒有該特性**則會回傳 `false`。
+ - `hasOwnProperty()` ==不會檢查原型物件中是否有該特性==，所以會回傳 `false`。
+ - 這個方法可以測試物件本身是否有該特性，==無論能否[列舉](#enumerable列舉-是什麼)==，只要有就會回傳 `true`
+
+來做些測試驗證看看:
+
+```javascript
+var obj = {
+  sayHi: () => console.log('Hello!')
+}
+
+var obj2 = Object.create(obj);
+obj2.habbit = 'Read books';
+
+console.log(obj2);
+console.log('驗證 obj2 有沒有該特性: ' + obj2.hasOwnProperty('habbit'));
+console.log('驗證 obj2 有沒有該特性: ' + obj2.hasOwnProperty('sayHi'));
+console.log('驗證 obj2 有沒有該特性: ' + obj2.hasOwnProperty('playball'));
+```
+
+可以得到值如下圖:
+
+![](https://i.imgur.com/cKX9Buc.png)
+
+
+所以可以做個小結論:
+
+1. `console.log(obj2.hasOwnProperty('habbit'));` 因為 `obj2` 中本來就有 `habbit` 這個特性，所以回傳 `true`
+
+2. `console.log(obj2.hasOwnProperty('sayHi'));` 因為 `sayHi` 這個特性是存在於原型物件中，並非 `obj2` 本身自有的，所以回傳 `false`
+
+3. `console.log(obj2.hasOwnProperty('playball'));` 因為 `obj2` 中沒有 `playball` 這個特性，所以回傳 `false`
+
+再來測試關於不可列舉的特性，看看能否正常取出特性:
+
+```javascript
+var obj = {};
+
+//透過 `Object.defineProperty()` 設定一個不可列舉的特性
+Object.defineProperty(obj,'name',{
+  value: 'Bill',
+  enumerable:false
+})
+
+console.log('驗證 obj 能否取得不可列舉的特性: ' + obj.hasOwnProperty('name'));
+```
+
+![](https://i.imgur.com/RcsyfgJ.png)
+
+
+## 測試可列舉特性
+
+==propertyIsEnumerable()==
+
+- 只會將物件中可列舉的特性回傳(這和 `hasOwnProperty()` 有些差別)。
+
+來看一下測試的例子:
+
+```javascript
+var obj = {
+  name: 'Bill',
+  habbit: 'Read books'
+}
+
+Object.defineProperty(obj,'weight',{
+  value: '65kg',
+  enumerable:false
+})
+
+console.log('obj物件的 name 是否為可列舉特性: ' + obj.propertyIsEnumerable('name'));
+console.log('obj物件的 habbit 是否為可列舉特性: ' + obj.propertyIsEnumerable('habbit'));
+console.log('obj物件的 weight 是否為可列舉特性: ' + obj.propertyIsEnumerable('weight'));
+
+```
+
+![](https://i.imgur.com/N7KZKsB.png)
+
+
+透過 `Object.defineProperty()` 設定一個不可列舉的特性 :`weight`，可以發現
+`propertyIsEnumerable()` 回傳 `false` ，代表為不可列舉的特性

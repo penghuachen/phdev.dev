@@ -1,0 +1,84 @@
+---
+title: 連續記錄挑戰Day28-如何使用 jQuery ui ? - 以range slider為例
+date: "2019-06-24 20:14:13"
+tags: ['jQuery']
+draft: false
+summary: ''
+---
+
+
+# 如何使用 jQuery ui ? - 以slider為例
+
+## jQuery 來源
+
+使用方式有兩種: 
+
+
+<span style="color:#f00;">引入順序需要先引入**jQuery的js檔案**後才引入**jQuery-ui的js檔案**，否則會報錯</span>
+
+- 透過cdn引入 :
+  ```js 
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+  ```
+  ```js 
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  ```
+  ```html 
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  ```
+  
+- 透過將jQuery source code下載後儲存，並在專案中引入使用
+
+## 使用 jQuery的 range slider
+
+將 range slider 程式碼複製一份到專案需求位置，就可以看到雛形結構。之後再依照需求調整css樣式
+
+```html
+<!-- jQuery官網提供之程式碼-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Slider - Range slider</title>
+  
+<!--   引入jQuery source code and css  -->
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  
+<!--  slider設定相關數值的程式部分  -->
+  <script>
+  $( function() {
+    $( "#slider-range" ).slider({
+      range: true,
+      min: 0,
+      max: 500,
+      values: [ 75, 300 ],
+      slide: function( event, ui ) {
+        $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+      }
+    });
+    $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
+      " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+  } );
+  </script>
+</head>
+<body>
+ 
+<p>
+  <label for="amount">Price range:</label>
+  <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+</p>
+ 
+<div id="slider-range"></div>
+ 
+ 
+</body>
+</html>
+
+```
+
+> [jQuery UI slider](https://jqueryui.com/slider/#range)

@@ -1,0 +1,187 @@
+---
+title: 連續記錄挑戰Day54-陣列方法的 filter / map / reduce 深入理解與運用
+date: "2019-07-20 20:33:36"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 陣列方法的 filter / map / reduce 深入理解與運用
+
+## Array.prototype.filter()
+
+filter的中文翻譯是「過濾」，可想而知就是可以用來作為資料篩選時使用
+
+
+而 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) 上是這麼解釋關於filter的用途:
+
+> filter() 方法會建立一個經**指定之函式運算**後，由**原陣列中通過該函式檢驗之元素所構成的新陣列**。
+
+意思是**filter()會讓陣列中的元素一個個傳入我們自定義的函式裡，並回傳經過判斷後為true的值到新的陣列中**，而這個過程**不會修改到原陣列**。
+
+而其語法為: 
+```javascript
+var newArray = arr.filter(callback(element[, index[, array]])[, thisArg])
+```
+- callback:用在測試陣列中的每個元素，回傳為true時將當前元素保留至新陣列
+- element:原陣列中的每個元素
+- index:原陣列中每個元素的索引值
+- array:原陣列
+- thisArg:callback函式的this值
+
+Ex: 過濾10~20之間的質數出來(箭頭函式版本的寫法)
+```javascript
+//質數：指在大於1的自然數中，除了1和該數自身外，無法被其他自然數整除的數
+let numbers = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+let prime = numbers.filter((value, index) => {
+  for (let i = 2; i < value; i++) {
+    if (value % i === 0) { return; }
+  }
+  return value > 1;
+});
+console.log(prime);
+
+```
+
+Ex1: 過濾10~20之間的質數出來(一般函式版本的寫法)
+```javascript
+//質數：指在大於1的自然數中，除了1和該數自身外，無法被其他自然數整除的數
+let numbers = [10,11,12,13,14,15,16,17,18,19,20];
+
+function isPrime(value, index) {
+  for (let i = 2; i < value; i++) {
+    if (value % i === 0) { return; }
+  }
+  return value > 1;
+}
+
+let prime = numbers.filter(isPrime);
+
+console.log(prime);
+```
+
+## Array.prototype.map()
+
+map的意思是映射，維基百科中對於映射的定義是:「設 A,B 是兩個非空集合，**若對 A 中的任一元素 x , 依照某種規律（或法則）f , 恆有 B 中的唯一確定的元素 y 與之對應**，則稱對應規律 f 為**一個從 A 到 B 的映射**」
+
+要簡單一點的解釋可以想成當**輸入一個數字x值時，會有一個對應的y值輸出**。
+
+而[MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Array/map) 上是這麼解釋關於map的用途:
+
+> map() 方法會**建立一個新的陣列**，其內容為**原陣列的每一個元素經由回呼函式運算後所回傳的結果之集合**
+
+和維基百科的解釋對應，就不難理解map method的用途。
+
+而其語法為: 
+```javascript
+var new_array = arr.map(function callback(currentValue[, index[, array]]) {
+    // Return element for new_array
+}[, thisArg])
+```
+
+
+Ex: 印出數字5~10在100中的所有倍數(箭頭函式+遞迴函式版本的寫法)
+```javascript
+//質數：指在大於1的自然數中，除了1和該數自身外，無法被其他自然數整除的數
+let numbers = [5,6,7,8,9,10];
+
+let multiple = numbers.map((value,index)=>{
+  let eachMultiple = [];
+  let count = 1;
+  function caculate(value) {
+    if (value * count >= 100) {
+      return eachMultiple;
+    }
+    if (value) {
+      eachMultiple.push(value * count);
+      count++;
+      return caculate(value, count);
+    }
+  }
+  caculate(value);
+  return eachMultiple;
+
+```
+
+## Array.prototype.reduce()
+
+reduce是一個比較難理解的觀念，因為在使用上不像map/filter直觀，但reduce的功能其實很強大，甚至可以透過reduce實現和map/filter一樣的結果
+
+而[MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) 上是這麼解釋關於reduce的用途:
+
+> reduce() 方法將一個累加器及陣列中每項元素（由左至右）傳入回呼函式，將陣列化為單一值。
+
+但其實透過撰寫手法，我們也可以獲得不只是單一值的值(例如陣列等)
+
+而其語法為: 
+```javascript
+var new_array = arr.reduce(callback[accumulator, currentValue, currentIndex, array], initialValue)
+```
+- accumulator:用來累積回呼函式回傳值的累加器（accumulator）或 initialValue（若有提供的話，詳如下敘）。累加器是上一次呼叫後，所回傳的累加數值。
+- currentValue:原陣列中的元素。
+- currentIndex:原陣列目前所迭代處理中的元素之索引。若有傳入 initialValue，則由索引 0 之元素開始，若無則自索引 1 之元素開始。
+- array:呼叫 reduce() 方法的陣列。
+
+
+Ex: 取得a陣列[2, 3, 1, 7, 9]的加總值
+```javascript
+//透過reduce實現
+let totalSum = [2, 3, 1, 7, 9].reduce((acc, value, index) => {
+  //acc 的初始值 = [8, 7, 9, 3, 1]這個陣列
+  //取出初始值的元素值與value相加後修改掉初始值陣列的元素值
+  acc = acc + value;
+  return acc;
+}, 0);
+
+console.log(totalSum);
+```
+
+Ex1: 取得a陣列[2, 3, 1, 7, 9]和B陣列[8, 7, 9, 3, 1]相對應元素的加總值[10, 10, 10, 10, 10]
+```javascript
+let totalSum = [2, 3, 1, 7, 9].reduce((acc, value, index) => {
+  //acc 的初始值 = [8, 7, 9, 3, 1]這個陣列
+  //取出初始值的元素值與value相加後修改掉初始值的元素值
+  //注意是拿初始值的元素值出來做運算，而不是這個初始值的整個陣列
+  acc[index] = acc[index] + value;
+  return acc;
+}, [8, 7, 9, 3, 1]);
+
+console.log(totalSum);
+```
+
+Ex2: 透過 reduce實現map方法取得[ 1, 2, 3, 4, 5]的平方根值
+```javascript
+//map method
+let square = [1, 2, 3, 4, 5].map((value, index) => value * value);
+
+console.log(square);
+
+```
+
+```javascript
+//reduce method 
+let square = [1, 2, 3, 4, 5].reduce((acc, value, index) => {
+  acc.push(value * value);
+  return acc;
+}, []);
+console.log(square);
+```
+
+Ex3: 透過 reduce實現filter方法取得[ 1, 2, 3, 4, 5]的奇數值
+```javascript
+//filter method
+let odd = [1, 2, 3, 4, 5].filter((value, index) => index % 2 === 0);
+
+console.log(odd);
+```
+
+```javascript
+//reduce method 
+let totalSum = [1, 2, 3, 4, 5].reduce((acc, value, index) => {
+  if (index % 2 === 0) 
+    acc.push(value);
+  return acc;
+}, []);
+console.log(totalSum);
+```

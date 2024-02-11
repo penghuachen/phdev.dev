@@ -1,0 +1,116 @@
+---
+title: '連續記錄挑戰Day39-Javascript-述句-part3'
+date: "2019-07-05 20:44:20"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+### try/catch/finally
+
+用來處理Javascript的例外機制
+
+
+Ex:
+```javascript
+  /*
+    正常情況下，這個區塊的程式碼會依序執行，但當有丟出(throw)例外狀況時，就會將例外狀況丟入catch區塊處理。
+  */
+  try {
+    // node js 於終端機輸入參數的方式
+    let numInput = process.argv[2];
+    if (numInput == 1) {
+      console.log('符合條件：輸入為1');
+      return;
+    }
+    else {
+      throw numInput;
+    }
+  }
+  /*
+    catch區塊透過 e 這個區域變數承接try區塊中所丟出的例外情況的訊息，而且除了值以外，也可以承接Error物件的內容。 
+    而這裡的e為try區塊 throw的 numInput
+  */
+  catch (e) {
+    console.log('不符合條件，你輸入的值為' + e);
+  }
+
+  /*
+    finally區塊所包含的述句永遠會被執行。
+    當try區塊以下列方式終止時，也會執行。
+    1. 抵達區塊結尾正常結束
+    2. 因為break / continue / return  
+    3. catch有接到錯誤訊息
+  */
+
+  /*
+    狀況題：當使用try/catch/finally時，全域有撰寫一程式碼為 console.log('test')，試看執行時的情況。
+    
+    1. 抵達區塊結尾正常結束 : try > finally ，外部 console.log不執行
+    2. 因為break / continue / return  :
+      - 正常情況結束 ： try > finally ，外部 console.log不執行
+      - 有例外情況時：  try > catch > finally ，外部 console.log會執行。若是沒有自己的catch子句處理例外情況的話，則會先執行finally區塊，然後跳至最接近的catch子句
+    3. catch有接到錯誤訊息:try > catch > finally ，外部 console.log會執行
+  */
+  finally {
+    numInput = 0;
+    console.log(numInput);
+  }
+
+  console.log('test');
+
+```
+
+
+## 其他述句
+
+### with 
+
+可以更容易讀取深層巢狀的物件階層。
+
+- 語法：
+    with(object){
+        statement
+    }
+- 在strict模式中被禁用，而在非strict中也應該盡可能不要用到。因為使用with的程式碼很難優化。
+
+Ex:
+
+```javascript
+let WangFamily = {
+  father: {
+    name: 'Bill',
+    age: 27
+  }
+}
+
+//雖然使用with子句可以更容易讀取WangFamily這個物件的深層特性(name、age)，但還是少用為妙。
+with (WangFamily) {
+  console.log(father.name);
+  console.log(father.age);
+}
+
+```
+
+### debugger
+
+透過在需要除錯的程式碼區塊設定debugger，就可以透過瀏覽器查看相關除錯訊息、執行順序
+
+```javascript
+let WangFamily = {
+  father: {
+    name: 'Bill',
+    age: 27
+  }
+}
+
+// 使用with子句可以更容易讀取WangFamily這個物件的深層特性(name、age)。
+with (WangFamily) {
+  console.log(father.name);
+  console.log(father.age);
+  
+  //設定中斷點
+  debugger;
+}
+
+```

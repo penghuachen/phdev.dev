@@ -1,0 +1,212 @@
+---
+title: 事件處理的使用與了解
+date: "2020-09-21 08:52:25"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+
+# 事件處理的使用與了解
+
+昨天的 [在 class-based Component 中的 State 與事件處理](https://hackmd.io/39D2cl2wTc-rep0l7Zhpow) 中我們對於事件處理的部分有稍微提了一些，而今天的篇幅是針對於在使用事件時的一些細節學習。
+
+
+而今天的內容會依據官方文件提供的例子，再搭配一些簡單的測試範例來學習。
+
+## 將參數傳給 Event Handler
+
+我們可以透過如下兩種方式將額外的參數傳給 Event Handler:
+- `Function.prototype.bind()`
+- `arrow function`
+
+如同文件提供的例子:
+
+```jsx=
+<button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>
+<button onClick={this.deleteRow.bind(this, id)}>Delete Row</button>
+```
+
+接著讓我們分析一下這兩種寫法的細節:
+
+### 使用箭頭函式(arrow function)的方式
+
+在文件中提及的部分在於，**如果使用箭頭函式(arrow function)的話，我們必須明確將 `e` 傳遞到 handler 中**，讓我們透過傳統函式的寫法來改寫使用箭頭函式的寫法，如下方這個小範例:
+
+PS. 由於這邊的部分屬於原生 JS 的行為，並不是 React 特有的，所以這邊我們可以透過原生 JS 的方式來呈現。
+
+```html
+<div class="box">Click</div>
+```
+
+```javascript
+const box = document.querySelector('.box');
+
+function deleteRow(id, e) {
+  console.log(e);
+  console.log(id);
+}
+
+box.onclick = function(e) {
+  deleteRow(0, e);
+}
+```
+
+而 `onclick` 等號右邊的這一段程式碼:
+
+```javascript
+box.onclick = function(e) {
+  deleteRow(0, e);
+}
+```
+
+透過 ES6 箭頭函式簡化，其實就等同於:  `(e) => deleteRow(id, e)`。
+
+所以才有文件上 `<button onClick={(e) => this.deleteRow(id, e)}>Delete Row</button>` 這樣的結果(`this` 則由於是因為文件在這裡是以 class-based Component 來探討)。
+
+
+### 使用 Function.prototype.bind() 的方式
+
+另一種文件中提及可以達到相同目的的方式就是透過**使用 bind 綁定的方式**。
+
+所以我們先看看 bind 怎麼使用:
+
+```javascript
+fun.bind(thisArg[, arg1[, arg2[, ...]]])
+```
+
+- `thisArg`: 我們指定的 this 的值
+- `arg1, arg2....argN`: 我們額外傳入的參數
+
+bind 會建立一個新的函式，而這個函式的 `this` 可以透過 `this` 可以透過我們自定義的值綁定。
+
+而額外傳入的參數則可以在這個新建立的函式中使用。
+
+如下方這個小範例:
+
+
+```javascript
+'use strict';
+
+function foo(p1, p2) {
+  console.log(this);
+  console.log(p1);
+  console.log(p2);
+}
+
+foo('foo test', 'foo test2');
+
+const newFoo = foo.bind('bind this text', 'newFoo test', 'newFoo test2');
+newFoo();
+```
+
+- 執行 `foo` 時，由於使用嚴格模式(`'use strict'`)，所以可以得到 `this` 的值是 `undefined`。
+- 執行 `newFoo` 時，由於透過 `bind` 的方式綁定了 `this` ，所以可以得到 `this` 的值是 `bind this text`。
+
+了解了 bind 的使用方式後，我們接著將剛剛使用箭頭函式(arrow function)的方式透過 `bind` 方式改寫：
+
+```javascript
+const box = document.querySelector('.box');
+
+function deleteRow(id, e) {
+  console.log(id);
+  console.log(e);
+}
+
+box.onclick = deleteRow.bind(box, 0);
+```
+
+這裡的 `this` 我們將其綁定在 box 這個元素上，並額外帶入作為 `id` 使用的參數，並且可以發現我們**不用額外傳入 `e` 就可以在 handler 中使用，而 `e` 都會是作為最後一個參數被使用**。
+
+如同上方的程式碼，我們額外傳入 `id` ，所以在 `deleteRow` 中參數的順序依序為 `id` 、 `e`。
+
+## 傳遞方法到子元件與實現 input 雙向綁定(Two way binding)
+
+最後要學習的部分是在 React 中**傳遞父層的方法到子元件中，以及透過 修改 input 的輸入值，進而改變文字的內容，實現簡單的雙向綁定。**
+
+這邊我們先以在 class component 中如何達成來理解。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/great-meadow-ohd0j?file=/src/App.js)。
+
+所以這邊我們先假設一個情境，如圖：
+
+![](https://i.imgur.com/fOFlcdh.png)
+
+我們先看看父層的元件結構:
+
+```jsx=
+import "./styles.css";
+import Person from "./Person.js";
+
+class App extends Component {
+  state = {
+    person: [{ name: "init value" }]
+  };
+
+  changeNameHandler = (e, name, idx) => {
+    this.setState(state => {
+      const { person } = state;
+      person[idx].name = name;
+      return state;
+    });
+  };
+
+
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="App">
+        <h1>雙向綁定(Two way binding)</h1>
+        <Person
+          name={person[0].name}
+          changeNameHandler={this.changeNameHandler}
+        />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+然後是子層的元件結構：
+
+```jsx=
+import React from "react";
+import "./index.scss";
+
+const Person = props => {
+  const { name, changeNameHandler } = props;
+  return (
+    <div className="person">
+      <h1>{name}</h1>
+      <input
+        type="text"
+        onChange={e => {
+          changeNameHandler(e, e.target.value, 0);
+        }}
+        placeholder="type name here..."
+      />
+    </div>
+  );
+};
+
+export default Person;
+```
+
+對於上述的程式碼進行說明：
+
+1. 父層的 `<Person>` 中的 `name` 是透過 `state` 的值作為 `props` 傳入。
+2.  父層的 `<Person>` 中的 `changeNameHandler` 是為了將這個方法傳入(pass)到子元件中，才能在子元件中使用。
+3. 在子元件中的 `input` 透過 `onChange` 事件作為觸發的事件類型，並在觸發時，調用從父層傳遞進來的 `changeNameHandler`，而 `0` 代表的是 `index` ，這邊先透過 hard code 的方式提供。
+4. `input` 輸入時，觸發了父層 `changeNameHandler` 的方法，此時透過 `setState` 的方式更新 `state` 中的資料，並藉此更新畫面(UI)
+
+
+今天的部分是為了補充對於事件的使用方式，明天讓我們繼續下一個部分進行學習吧。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [事件處理](https://zh-hant.reactjs.org/docs/handling-events.html)

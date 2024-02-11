@@ -1,0 +1,232 @@
+---
+title: '透過 JavaScript 動態修改CSS 樣式、屬性 '
+date: "2019-12-05 23:34:29"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+透過JS動態修改CSS樣式、屬性是很常有的事情，所以這個篇幅就來看些關於修改的方式吧! 
+
+## 動態修改CSS樣式
+
+在修改CSS樣式的起手式不外乎常用的應該就是下列兩種方式: 
+
+
+```javascript
+document.getElementById(id).style.property = new style;
+document.querySelector(classname/id/...).style.property = new style;
+... 
+```
+
+而上面的寫法與下面的寫法相同:
+
+```javascript
+document.getElementById(id).style = property:new style;
+document.querySelector(classname/id/...).style = property:new style;
+...
+```
+
+接下來就來運用看看吧!
+
+### 修改背景顏色 
+
+- HTML程式碼: 
+```html
+<style>
+  .box {
+    width: 100px;
+    height: 100px;
+    background: yellow;
+  }
+</style>
+
+<div class="box"></div>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  var box = document.querySelector('.box');
+  box.style.backgroundColor = "black";
+</script>
+```
+
+上下兩種寫法都可以正常執行
+
+```javascript
+<script>
+  var box = document.querySelector('.box');
+  box.style = "background-color:black";
+</script>
+```
+
+原本的css設定 `box` 元素背景色為黃色，但被動態修改背景色為黑色了。
+
+
+
+### 修改文字顏色 
+
+- HTML程式碼: 
+```html
+<style>
+  .box {
+    width: 100px;
+    height: 100px;
+    background: yellow;
+  }
+  .box p{
+    color: blue;
+  }
+</style>
+
+<div class="box">
+  <p>This is test text.</p>
+</div>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  var paragraph = document.querySelector('.box p');
+  paragraph.style.color = "red";
+</script>
+```
+
+透過 `element.style.color` 將 `<p>` 的文字顏色從藍色修改為紅色了
+
+### 修改邊框(border)
+
+- HTML程式碼: 
+```html
+<style>
+  .box {
+    width: 100px;
+    height: 100px;
+    background: yellow;
+    border: 1px solid #ccc;
+    outline : 1px solid #f00;
+  }
+  .box p{
+    color: blue;
+  }
+</style>
+
+<div class="box">
+  <p>This is test text.</p>
+</div>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  var box = document.querySelector('.box');
+  box.style.border = "5px solid red";
+  box.style.outline = "3px solid blue";
+</script>
+```
+
+原本的 css設定， `box` 的 `border` 為灰色、寬度為 `1px`， `outline` 為紅色、寬度為 `1px`
+
+動態修改 `box` 的 `border` 變為紅色、寬度為 `5px`、`outline` 為藍色、寬度為 `3px`
+
+### 修改 margin 、 padding
+
+- HTML程式碼: 
+```html
+<style>
+.box {
+  width: 100px;
+  height: 100px;
+  background: yellow;
+  border: 1px solid #ccc;
+  outline : 1px solid #f00;
+}
+.box p{
+  color: blue;
+  padding: 10px;
+  margin:15px;
+}
+</style>
+
+<div class="box">
+  <p>This is test text.</p>
+</div>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  var paragraph = document.querySelector('.box p');
+  paragraph.style.padding = "5px";
+  paragraph.style.margin = "5px";
+</script>
+```
+
+透過瀏覽器開發工具，可以查看 `<p>` 的 `margin` 從原本的 `15px` 動態已經修改為 `5px`; `padding` 從原本的 `10px` 動態被修改為 `5px` 。
+
+## 隱藏溢出內容(overflow)
+
+- HTML程式碼: 
+```html
+<style>
+.box {
+  width: 100px;
+  height: 100px;
+  background: yellow;
+}
+.box p{
+  color: blue;
+}
+</style>
+
+<div class="box">
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Obcaecati reiciendis impedit sequi adipisci dolores
+    libero quidem quod accusamus, possimus doloremque corrupti nostrum id dolorem autem quo architecto eos quasi ut?
+  </p>
+</div>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  var paragraph = document.querySelector('.box p');
+  paragraph.style.overflow = "scroll";
+</script>
+```
+
+原本文字內容多餘 `box` 高度導致內容溢出，所以動態設定 `box` 的 `overflow` 特性，使多出來的元素內容可以以滾軸方式呈現。
+
+
+### 修改屬性的值
+
+- HTML程式碼: 
+```html
+<a href="#">This is a link</a>
+```
+
+- JS程式碼:
+
+```javascript
+<script>
+  const link = document.querySelector("a");
+  link.setAttribute('href', 'http://www.google.com');
+  link.setAttribute('class', 'link');
+  console.log(link.getAttribute('href'));
+</script>
+```
+
+`setAttribute('attribute','value')`，透過這個語法可以動態==修改 HTML 標籤中的屬性及新增屬性。==
+
+如同測試例子中 `<a>` 的 `href` 屬性的值從原本的 `#` 被修改為 `http://www.google.com`;也同時新增了 `class="link"` 給 `<a>` 標籤。
+
+而 `getAttribute(propety)` ，則是==可以從 HTML 標籤取得屬性(Attribute)的值。==
+
+關於學習一些常用的 avaScript 動態修改CSS 樣式、屬性的方式就先到這裡囉
+
+明天見~

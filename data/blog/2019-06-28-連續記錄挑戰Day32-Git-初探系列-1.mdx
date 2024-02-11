@@ -1,0 +1,136 @@
+---
+title: '連續記錄挑戰Day32-Git 初探系列 #1'
+date: "2019-06-28 19:58:56"
+tags: ['Git']
+draft: false
+summary: ''
+---
+
+# Git 初探系列 #1
+
+關於Git，雖然不是前端的技術之一，但卻是和他人協作中不可或缺的重要工具之一。協作專案時會遇到的困難點很多都可以透過Git作為溝通的橋樑，也可以記錄每一次修改的記錄(如果你願意的話)。
+
+
+當然，最重要的一點：可以保護自己(誤)。
+
+好工具，不學嗎？
+
+Outline:
+
+- Git 是什麼？
+- 使用Git的前置作業
+    - 第一次接觸Git應該要有的基本了解-Https與SSH優點及缺點
+    - 設定SSH金鑰方式
+    - 設定使用者名稱與帳號
+- Git在本地端與遠端的運作關係圖(個人認為的基礎關係圖)
+    - Git在本地端與遠端的基本運作關係(上傳)
+    - Git在本地端與遠端的基本運作關係(下載)
+
+## Git 是什麼？
+淺談幾種版本控制的方式：
+- 關於version control(版本控制)
+    可以記錄檔案在某一段時間裡的變化，例如新增、刪除、修改等。亦可以從中找回先前的某一個版本的記錄。
+
+- Local Version Control Systems(本地端版本控制)
+    透過複製檔案到其他目錄的方式執行版本控制但這個方法很容易出錯，也不易查詢。
+    ![](https://i.imgur.com/vxRLRqp.png)
+    
+- Centralized Version Control System(CVCSs 集中化版本控制系統)
+    將檔案全部集中於單一伺服器進行控管。   
+    但當伺服器產生問題時，就會造成很大的問題。
+
+    
+![](https://i.imgur.com/nTkCaO8.png)
+ 
+- Distributed Version Control Systems(DVCS  分散式版本控制)
+    檔案不只是在遠端才有，每個用戶端都可以有獨立的一份檔案可以各自運作，且當遠端伺服器產生問題時，可以透過任一個用戶端的檔案還原。
+    - **Git、Mercurial、Bazaar 和 Darcs）屬於此類**
+     ![](https://i.imgur.com/adS7w4j.png)
+
+
+## 使用Git的前置作業
+
+### 1. 創建帳號及安裝
+- Git官網[安裝Git](https://git-scm.com/)
+- 創建一個[Github](https://github.com/)/[Gitlab](https://about.gitlab.com/)的帳號
+
+### 2. 設定使用者名稱與帳號
+
+-  **git config --global user.name  '你的名字'**
+
+-  **git config --global user.email '你的信箱'**
+
+### 3. 第一次接觸Git應該要有的基本了解-HTTPS與SSH
+
+與遠端讀/取檔案的方法主要有底下這兩種方式：
+
+- HTTPS -> 在每次上傳時都需要輸入帳號密碼，除非已經將帳號密碼儲存在電腦中
+
+- SSH -> 在電腦與遠端伺服器中各設定了一組相互對應的金鑰序號，並透過此金鑰達成。
+
+目前得到的小結論: SSH安全性高於HTTPS
+
+
+### 4. 設定SSH金鑰方式
+
+以Mac為例
+
+- 檢查自己的電腦是否已經有設定
+    - **cd ~/.ssh**
+    - **ls**
+- 產生金鑰
+    - **ssh-keygen** : 會產出一個是id_rsa和id_rsa.pub兩個檔案
+    此時再執行檢查一次應該就會看到底下這個畫面。
+    ![](https://i.imgur.com/BcbvDoE.png)    
+
+- 獲得公共金鑰中的資訊：
+    - cat ~/.ssh/id_rsa.pub**
+- 將公鑰放到遠端的github / gitlab中，流程如下：
+    1. 從github中的右上角的使用者找到setting
+    2. 點擊 SSH and GPG keys中的 New SSH key，將公鑰中的資訊貼入並儲存即可
+    ![](https://i.imgur.com/OgpsqSi.png)
+
+
+
+## 對於Git在本地端與遠端的基本運作關係圖(個人認為的基礎關係圖)
+
+先有個概念：
+
+在學習後整理了一張關於上傳及下載檔案的簡單流程圖，方便自己記憶。
+
+![自製流程圖](https://i.imgur.com/hJM8UuK.png)
+
+### Git在本地端與遠端的基本運作關係(上傳)
+1. 初始化.git 資料夾
+    - **git init**
+2. 將檔案加入到git資料夾中進行追蹤
+    - **git add .** -> 將所有檔案都加入
+    - **git add '檔案名稱'** -> 將指定的檔案名稱加入
+3. 將檔案存入版本儲存區，建立版本編號
+    - **git commit** -> 需要較長的註解時使用
+        - 搭配vim的指令使用(註解編輯完後離開)： 
+            - w: write
+            - q: quit
+    - **git commit**  -m '短註解' -> 用於註解較短時
+4. 將檔案上傳至遠端儲存庫
+    - 在github / gitlab點擊New Repository創建一個專案，此時可以看到底下畫面
+    ![](https://i.imgur.com/vpnaixm.png)
+    - **git remote add origin git@github.com:penghuachen/test.git **-> 將等等要放到github中test的位置加入
+    - **git push origin master** ->將檔案推到github
+        - origin 儲存庫默認的名字，這裡指的是test 
+        - master 指的是遠端test的其中一支分支叫做master
+        
+### Git在本地端與遠端的基本運作關係(下載)
+
+1. 完整下載github上的專案：
+    - 在github中找到圖中字樣 ```Clone or download```
+    ![](https://i.imgur.com/lU9SknP.png)
+
+    - 選擇HTTPS or SSH Keys的方式，並複製提供的連結
+    ![](https://i.imgur.com/4WYTRwJ.png)
+
+    - **git clone 剛剛複製的連結** ，即可將檔案下載下來
+
+
+  
+

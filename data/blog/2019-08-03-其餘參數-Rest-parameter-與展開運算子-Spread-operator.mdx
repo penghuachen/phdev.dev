@@ -1,0 +1,148 @@
+---
+title: 其餘參數(Rest parameter)與展開運算子(Spread operator)
+date: "2019-08-03 14:33:57"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 其餘參數(rest parameter)與展開運算子(Spread operator)
+
+**其餘參數(rest parameter)與展開運算子(Spread operator)** 為 ES6 的新特性，然而這兩者雖然使用的方式都是 `...` ，但是用途的不同決定我們當下使用的是其餘參數（rest parameter）還是展開運算子(Spread operator)，如下方表格:
+
+
+|語法|用途|
+|-|-|
+|其餘參數 `...`|將一個不確定數量的參數集合在一個陣列中|
+|展開運算子 `...`|將陣列中的值展開為個別值|
+
+## 其餘參數(Rest parameter)的使用與比較
+
+### 怎麼使用其餘參數:
+
+來看看幾個測試例子:
+
+```javascript
+function result(...numbers){
+    //會獲得一組陣列:[1,2,3,4,5]
+    console.log(numbers);
+}
+
+result(1,2,3,4,5);
+```
+
+從上面這個例子可以獲得以下的資訊:
+
+1. 這邊最後獲得的值為一組陣列 `[1,2,3,4,5]`，表示這邊使用的 `...` 是作為 ==其餘參數== 使用。
+2. 在函式參數位置的 `numbers` ，則是參數集合在一個陣列之後，我們可以運用的變數。
+3. 透過 `console.log(numbers);` ，獲得陣列型式的值。
+
+
+再往下看看這個例子:
+
+```javascript
+function result(a,b,...numbers){
+    console.log('a的值為: ' + a);
+    console.log('b的值為: ' + b);
+    console.log(numbers);
+}
+
+result(1,2,3,4,5);
+```
+
+如同一開始所提: ==其餘參數用於將一個不確定數量的參數集合在一個陣列中==，而在其餘參數 `...` 之前有`a` 與`b` 兩個參數，因此==其餘參數只會將扣除`a` 與`b` 後剩餘下的參數集合在陣列中。==
+
+所以會得到結果如下圖:
+
+![Day19-1](https://lh3.google.com/u/0/d/1v_NlRYtwQle2xFsPV-sKFXzp0ozzMgfV=w1444-h1498-iv1)
+
+
+
+### 其餘參數與 arguments 物件的比較:
+
+再來要談談其餘參數與`arguments`物件的關係
+
+==其餘參數之所以被創造就是要用來取代ES5的`arguments`物件==
+
+而`arguments`物件，是類陣列(array-like)，**因此不能使用陣列的多數方法**:
+
+
+來看看這個測試的例子:
+
+```javascript
+function result(){
+    console.log(arguments);
+}
+
+result(1,2,3,4,5);
+```
+
+![Day19-2](https://lh3.google.com/u/0/d/1KtRqM1JAOyejMqG0Fdu6njBVXP4g3ONP=w1444-h1498-iv1)
+
+如果想要將`arguments`物件轉為陣列，可以透過下面測試例子中的方法轉換。
+
+```javascript
+function result(){
+    let arg = Array.prototype.slice.call(arguments)
+    console.log(arg);
+}
+
+result(1,2,3,4,5);
+```
+
+在ES6之前只有`arguments`物件可以使用時，可能還需要透過一些手法處理後才能使用陣列的方法，但ES6之後有了其餘參數一切都變得省事許多！
+
+![Day19-3](https://lh3.google.com/u/0/d/138_DQrA-7dgEOrITM7HF9kSROnJWYaZ2=w1444-h1498-iv2)
+
+## 展開運算子(Spread operator)的使用
+
+### 怎麼使用展開運算子:
+1. **展開運算子的 `...` 後面必定是接一個陣列或物件**
+2. 可以將一個陣列的元素值展開成個別值(簡化展開陣列的過程)
+3. 可以將一個物件的可列舉特性拷貝到新的物件中
+
+
+看看這個測試例子幫助理解:
+
+```javascript
+let numbers = [1,2,3];
+console.log(...numbers);
+```
+可以獲得陣列值被展開的結果
+
+接下來讓我們將展開運算子運用在函式上:
+
+```javascript
+const numbers = [1,2,3];
+
+function sum(a,b,c){
+  return a + b + c;
+}
+const totalSum = sum(...numbers);
+console.log(totalSum);
+```
+
+這裡的 `...` 為展開運算子，所以會將 `numbers` 的值展開給 `sum `函式的 `a,b,c`參數，於是會得到總和值為 `6` 。
+
+
+最後來看看將展開運算子用在物件上的使用:
+
+```javascript
+const obj = {
+  name:"Bill"
+};
+
+Object.defineProperty(obj,'habbit',{
+  value:"Read books",
+  enumerable: false
+})
+
+const obj2 = {...obj};
+console.log(obj2);
+```
+
+由程式碼可以知道，透過展開運算子可以更快速地將物件的**可列舉特性**拷貝給另一個物件。
+
+而且因為 `habbit` 特性被設定為不可列舉，所以即使使用展開運算子也無法將這個無法列舉的特性拷貝到 `obj2` 物件上。
+
+可以嘗試看看將 `enumerable: false` 改為 `enumerable: true`看看差別~

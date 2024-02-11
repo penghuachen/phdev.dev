@@ -1,0 +1,186 @@
+---
+title: Redux 觀念初探
+date: "2020-10-07 10:48:46"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# Redux 觀念初探
+
+今天要學習的部分是**管理應用程式中所有 State 的神器， Redux。** 如果沒有它，當我們開發的應得程式越來越複雜的時候，亦或者是 containers 之間彼此需要相同資料的時候，就會顯得舉步維艱。
+
+
+而今天是和 Redux 交朋友的第一天，所以我們先從認識 Redux 一些相關的詞彙與概念來慢慢增進與 redux 的關係吧!
+
+相關的知識可以從[官方文件](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#redux-essentials-part-1-redux-overview-and-concepts)中查看。
+
+## 想認識 redux 嗎? 先認識我常用的詞彙與用途吧!
+
+### Redux 好朋友幫助我的兩三事
+
+Redux 好朋友可以幫助我在開發 React 應用程式的時候可以**更有效地[管理/更新]全域 state 的狀態。**
+
+至於如何更新 state 的狀態呢?
+
+我們在 React Component 中透過觸發事件(event) 來更新 state，**在 Redux 也是相同的**，我們在 Redux 中使用**稱為 actions 的事件來更新 state**。
+
+而要讓 Redux 中的 state / actions 可以在 React component 中使用，還需要借助一位朋友的幫忙。
+
+那就是 React-Redux。
+
+如果沒有 React-Redux， Redux 和 React 應用程式的友誼橋樑就會無法建立。
+
+**這表示要讓 Redux 中的 state/actions 得以在 React 應用程式使用，需要透過 React-Redux 才可以。**
+
+此外， Redux 好朋友還跟我提及了一個很重要的觀念，關於 **「不可變(Immutability)」。**
+因為 Javascript 中的**物件與陣列都是可變的(mutable)**，但是在 **redux 中它希望在更新 state 中狀態的時候，是在不修改到原本 state 狀態下進行更新的(不變地更新值)。**
+
+所以為了避免這個問題，我們需要**透過複製一份當前 state 的狀態，然後再將要更新的資料(陣列或者物件型別)放進去。**
+
+這邊舉個簡單的小例子:
+
+```javascript
+const arr = ['a', 'b'];
+const arr2 = arr; // 指向同一個記憶體位置
+arr2.push('c') // arr, arr2 同時都被修改了
+```
+
+```javascript
+const arr = ['a', 'b'];
+const arr2 = [...arr]; // 淺層複製，修改第一層或新增資料時並不修改到 arr
+arr2.push('c')
+```
+
+介紹至此，Redux 好朋友說暫時先介紹到這裡，再往下介紹之前，必須先瞭解一些在 Redux 中的術語。
+
+接著它就自顧自的開始介紹一些術語與運作方式呢。
+
+## 更加貼近 Redux - 了解術語
+
+### Store
+
+在 Redux 中**用來儲存 state 狀態的物件，稱為 store**。
+
+並且藉由 redux 中的 createStore 方法，用來將 Reducer 傳入。
+
+```javascript
+import { createStore } from 'redux';
+import rootReducer from './store/rootReducer';
+const store = createStore(rootReducer);
+```
+
+### Reducers
+
+**是一個函式，用來接收當前的 state 與 action，並在需要的時候可以更新 state 的狀態。**
+
+此外，還有一些使用的規則需要注意:
+
+1. 新的 state 狀態只能是透過 **當前的 state 與 action 物件來取得。**
+2. 不可以修改當前的 state，需要透過額外複製一份當前 state 的狀態，並從那份狀態來進行更新。
+3. **不可以在此設計非同步邏輯、隨機值或者其他會造成 side effect 的行為。**
+
+這裡提供一個片段的小例子來幫助理解：
+
+```javascript
+const initialState = { value: 0 }
+
+function counterReducer(state = initialState, action) {
+  // Check to see if the reducer cares about this action
+  if (action.type === 'counter/increment') {
+    // If so, make a copy of `state`
+    return {
+      ...state,
+      // and update the copy with the new value
+      value: state.value + 1
+    }
+  }
+  // otherwise return the existing state unchanged
+  return state
+}
+```
+
+1. 定義了 initialState，當 counterReducer 被執行的時候，**initialState 作為 state 的預設值**。
+2. 藉由 action 中描述的事件，當在 React 應用程式中觸發了描述這個事件的 action 時(此為 counter/increment)， counterReducer 會**回傳一個 value 值 + 1 的物件，更新 state 狀態。**
+3. 更新 state 狀態時，記得要複製一份當前的 state 狀態，可以透過物件解構的方式達成。
+
+### Dispatch
+
+**唯一一種用來將 action 物件傳入，並且更新 store 中  state 狀態的方式。**
+
+store.dispatch 可以視為是**觸發一個事件，透過這個方式讓 store 知道我們想要觸發哪一個事件(藉由傳入 action 物件得知)。**
+
+而當執行 store.dispatch 時， store 其實是執行 ruducer 函式並更新 state 的狀態，以下方這個小例子為例:
+
+```javascript
+store.dispatch({ type: 'counter/increment' })
+```
+
+我們將 `{ type: 'counter/increment' }` 這個 action 物件傳入，讓 store 中的 reducer 方法知道我們現在要執行的是 `counter/increment`，然後執行對應更新 state 狀態的流程。
+
+### Actions
+
+可以將 actions 視為是一個**在 React 應用程式中用來描述某件事件可以被執行的事件。**
+
+Actions 具有 type 與 payload 欄位，其中:
+
+- type 欄位用來描述這個可以被執行的事件
+- payload 欄位用來提供額外的資訊可以被操作
+
+```javascript
+const addTodoAction = {
+  type: 'todos/todoAdded',
+  payload: 'Buy milk'
+}
+```
+
+### Action Creators
+
+**是一個函式，可以用來回傳一個 action 物件，並且可以額外提供參數傳入。**
+
+```javascript
+const addTodo = text => {
+  return {
+    type: 'todos/todoAdded',
+    payload: text
+  }
+}
+```
+
+介紹到這裡， Redux 好朋友認為我應該是都懂了...。
+
+於是又接著介紹運作的模式...
+
+## Redux 運作模式理解
+
+為了讓我可以更快理解運作模式，這邊它區分為兩個部分來講解:
+
+1. 初始設置
+2. 更新 state 狀態
+
+首先是初始設定:
+
+1. 建立 Redux Store 與 reducer 函式。
+2. Store 呼叫一次 reducer，並將取得的 state 狀態作為初始狀態。
+3. 當 React 元件第一次渲染時，透過 react-redux 的幫助，可以取得 Redux Store 物件的 state 狀態，並將值運用在 React 元件中。
+
+再來是更新時:
+
+1. 觸發像是點擊事件時，從 React 元件中 disptach 一個 action ，告訴 Store 中的 reducer，我現在要對於符合條件的進行對應的 state 更新流程。
+2. Store 中 state 被更新， React 元件中得知後就會重新渲染，並將更新後的 state 的狀態運用在 React 元件中。
+
+Redux 好朋友怕我看不懂文字的描述，還特地從 [官方文件](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#redux-application-data-flow) 中找來這張圖:
+
+![](https://redux.js.org/img/tutorials/essentials/ReduxDataFlowDiagram.gif)
+
+關於 Redux 的整體觀念大致就介紹到這裡， redux 好朋友說明天要透過範例讓我們了解如何處理同步資料流的部分。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+明天見~
+
+
+## 資源 
+
+- [Redux Essentials, Part 1: Redux Overview and Concepts](https://redux.js.org/tutorials/essentials/part-1-overview-concepts#redux-essentials-part-1-redux-overview-and-concepts)

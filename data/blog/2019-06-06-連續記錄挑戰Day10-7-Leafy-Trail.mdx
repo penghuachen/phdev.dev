@@ -1,0 +1,42 @@
+---
+title: 連續記錄挑戰Day10-7-Leafy Trail
+date: "2019-06-06 20:02:11"
+tags: ['把玩CSS', 'CSSBattle']
+draft: false
+summary: ''
+---
+
+
+# Target #7- Leafy Trail
+
+![CSSBattle](https://i.imgur.com/A4n4r1s.png)
+
+## 撰寫思維
+
+- 水平及垂直置中方式一樣採用flex的語法達成。
+
+- 圖形組合的思考則是將三個正方形的 **左上及右下**做border-radius圓角的設定，並透過 **margin設定負值**讓元素可以置於需求位置。
+
+
+
+## 最後結果
+
+![Leafy Trail](https://i.imgur.com/SOKxiKK.png)
+
+附上 codepen(CSSBattle 目前無法透過附上連結看到別人所寫的程式碼，所以我另外寫在 codepen 方便點擊。可直接複製貼上即可查看結果)
+
+[#7 Leafy Trail](https://codepen.io/kids5346/pen/MddRao)
+
+這一關有使用到margin設定負值達成需求，而margin其實是可以設定負值的，但是**padding、border不行。**這一個部分在規範文件中有提到：
+
+![](https://i.imgur.com/4H4EDvP.png)
+![](https://i.imgur.com/YTDHdjv.png)
+
+> [8.4 Padding properties](https://www.w3.org/TR/CSS2/box.html)
+
+> [8.5 Border properties](https://www.w3.org/TR/CSS2/box.html)
+
+關於margin設定負值的測試會另篇記錄，之後在將連結補上。
+
+
+  

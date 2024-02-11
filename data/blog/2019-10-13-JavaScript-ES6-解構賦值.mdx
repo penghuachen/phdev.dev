@@ -1,0 +1,232 @@
+---
+title: JavaScript ES6 解構賦值
+date: "2019-10-13 14:11:58"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# JavaScript ES6 解構賦值
+
+> MDN : 可以將陣列或物件中的資料取出成獨立變數。
+
+解構賦值是ES6的新特性，可以快速的將值從陣列或物件中取出。
+
+
+如果能好好熟悉運用的話，不僅快速、更可以提高程式碼的可讀性。
+
+趕緊往下看吧!
+
+## 陣列解構
+
+有一個很重要的觀念需要記住: ==等號的左側要用來儲存右側解開後的值==
+
+把握住這個觀念，在使用解構賦值的技巧就會容易許多
+
+關於陣列如何解構，讓我們透過底下幾個測試例子來看看吧
+
+一、 基本變數
+
+```javascript
+var names = ['Bill','Jack','Alice'];
+
+var [nameA,nameB,nameC] = names;
+console.log('透過解構獲得nameA的值為: ' + nameA);
+console.log('透過解構獲得nameB的值為: ' + nameB);
+console.log('透過解構獲得nameC的值為: ' + nameC);
+```
+
+等號的左側是要用來儲存右側解開後的值，從這個觀點延伸可以知道:
+
+1. 等號右側的值會依序解開為: `Bill`、`Jack`、`Alice`
+2. 等號左側的變數 `nameA`、`nameB`、`nameC` 則會依序將`Bill`、`Jack`、`Alice` 的值存入。
+
+因此就可以得到圖中的結果:
+
+![Day18-1](https://lh3.google.com/u/0/d/1F07HBoDlDsXf5f8TZ2kXNdys17SmOf9k=w1444-h1498-iv1)
+
+除了上方的寫法之外，也可以寫成如下程式碼:
+
+```javascript
+var nameA,nameB,nameC;
+var names = ['Bill','Jack','Alice'];
+
+[nameA,nameB,nameC] = names;
+console.log('透過解構獲得nameA的值為: ' + nameA);
+console.log('透過解構獲得nameB的值為: ' + nameB);
+console.log('透過解構獲得nameC的值為: ' + nameC);
+```
+
+同樣也可以獲得一樣的結果
+
+### 基本變數(設定預設值)
+
+有時候為了避免沒有輸入值，會事先設定一個預設值來解決。
+
+而解構的技巧同樣也可以運用這個概念。
+
+來看看測試例子:
+
+```javascript
+var nameA,nameB,nameC;
+var names = [,,'Alice'];
+
+[nameA = "John",nameB = "Henry",nameC = "David"] = names;
+console.log('透過解構獲得nameA的值為: ' + nameA);
+console.log('透過解構獲得nameB的值為: ' + nameB);
+console.log('透過解構獲得nameC的值為: ' + nameC);
+```
+
+這裡的程式碼替變數 `nameA`、`nameB`、`nameC` 都設定了預設值，分別為 `John`、`Henry`、`David`，如此一來當如果等號左側要被解開的任一個值為 `undefined` 時，就會以預設值來取代 `undefined` 。
+
+所以可以從圖中得到，`John`、`Henry`的值取代了 `names` 陣列中值為`undefined` 的部分。
+
+![Day18-2](https://lh3.google.com/u/0/d/16h7XGuZXY5tuw64QZiwybauktMgz27AV=w1444-h1498-iv1)
+
+### 變數交換
+
+透過解構技巧，可以輕易的變換變數的值
+
+```javascript
+var nameA = "Bill";
+var nameB = "Jen";
+
+[nameB,nameA] = [nameA,nameB];
+
+console.log('nameB的值為: ' + nameB);
+console.log('nameA的值為: ' + nameA);
+```
+
+![Day18-3](https://lh3.google.com/u/0/d/1qj1scsfcjnxZesIyL6e6v_jpysFOlH2G=w1444-h1498-iv1)
+
+
+可以發現 `nameB` 與 `nameA` 的值已經對調了。
+
+接下來寫一個陣列方法搭配與解構技巧搭配的測試例子:
+
+
+```javascript
+const numberArray = [1,2,3,4,5];
+const [number,number2,...numbers] = numberArray.map(value => value * value);
+
+console.log(number);
+console.log(number2);
+console.log([...numbers]);
+```
+
+![Day18-4](https://lh3.google.com/u/0/d/1Hmd3mTTBO5Dr-xCpaqod-wRwhnWUXqfN=w1444-h1498-iv1)
+
+上面的程式碼透過 `map()` 方法取得每一個元素的平方值，而且透過解構賦值的技巧取得 `number`、`number2` 的值，而剩餘的元素則透過展開運算符一併取出。
+
+關於陣列解構的部分就先到這裡，接下來往下看看物件解構的部分
+
+## 物件解構
+
+關於物件解構的技巧，這邊就直接寫些測試例子來看看
+
+```javascript
+var person ={
+  age: '20歲',
+  habbit: '閱讀書籍'
+}
+
+var {age,habbit} = person;
+
+console.log('這個人的年紀為:' + age);
+console.log('這個人的興趣是:' + habbit);
+```
+
+物件解構技巧與陣列解構技巧相似，但是差別在於物件解構是將物件的==特性值取出來==，而陣列解構則是取出陣列元素的值
+
+![Day18-5](https://lh3.google.com/u/0/d/1Qzl_zuvbRZENUXOg9J_dp_x9UlFXEWTa=w1444-h1498-iv1)
+
+但是也可以直接將==用來解構物件而設定的物件特性值設定為變數==，然後透過這個變數將值取出
+
+有點饒舌，所以直接來看看測試例子:
+
+```javascript
+var person = {
+  age: '20歲',
+  habbit: '閱讀書籍'
+}
+
+var {age :hisAge,habbit:hisHabbit} = person;
+
+console.log('這個人的年紀為:' + hisAge);
+console.log('這個人的興趣是:' + hisHabbit);
+```
+
+![Day18-6](https://lh3.google.com/u/0/d/1rrk_JuMcHbaL67u5ywcdIBZHVg1fz1Bi=w1444-h1498-iv1)
+
+和前一個程式碼的差別在於: 等號左邊用來解構物件的設定中，另外設定了兩個變數，分別為 `hisAge` 、 `hisHabbit`，並透過這兩個變數將 `person` 物件的值取出。
+
+
+為了避免沒有值的情況，所以在物件解構上也有和陣列解構一樣的技巧:設定預設值。
+
+來看看下列的測試:
+
+```javascript
+var person = {
+  age: '20歲',
+}
+
+var {age = '15歲',habbit = '閱讀書籍'} = person;
+
+console.log('這個人的年紀為:' + age);
+console.log('這個人的興趣是:' + habbit);
+```
+
+![Day18-7](https://lh3.google.com/u/0/d/1wSf4CYcld1br5oZtEgzVZYuBpeFkCpkL=w1444-h1498-iv1)
+
+將 `age`、`habbit` 都設定了預設值，當要被解構的物件中沒有這個特性值，就可以透過預設值去填補。
+
+
+上述而外對於特性值設定變數與設定預設值的方式還可以搭配運用，如此一來就可以做到當==被解構物件有值時，就透過該變數取出，否則就使用預設值填補==的目的
+
+來看看測試例子:
+
+```javascript
+var person = {
+  age: '20歲',
+}
+
+var {age :hisAge = '15歲',habbit : hisHabbit = '閱讀書籍'} = person;
+
+console.log('這個人的年紀為:' + hisAge);
+console.log('這個人的興趣是:' + hisHabbit);
+```
+
+![Day18-8](https://lh3.google.com/u/0/d/18oh9Nz4tFTDlAm6_NMkVEq9q9dimImBn=w1444-h1498-iv1)
+
+
+## 巢狀物件解構
+
+最後要討論的部分是關於當物件有多層結構時，要如何快速解構該物件
+
+直接透過測試例子來看看吧!
+
+```javascript
+var person = {
+  name: "Bill",
+  details:{
+    age: '20歲',
+    habbit: '閱讀書籍'
+  }
+}
+
+var {name,details:{age,habbit}} = person;
+console.log('這個人的年紀為:' + age);
+console.log('這個人的興趣是:' + habbit);
+```
+
+![Day18-9](https://lh3.google.com/u/0/d/10rdxD9V04TiTAR4oSnrN9gtjKTPYvuwM=w1444-h1498-iv1)
+
+其實很簡單，透過對於巢狀結構的物件，可以再設定一層==`:{...}`==
+
+就可以將巢狀結構中的特性值取出來囉！
+
+> [解構賦值](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+
+
+
+

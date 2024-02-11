@@ -1,0 +1,44 @@
+---
+title: 連續記錄挑戰Day56-查找特定li節點的索引值
+date: "2019-07-23 22:13:30"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+# 查找特定li節點的索引值
+
+當我們可能有需要點擊到某個節點後刪除那個節點時，就需要取得節點的位置。
+
+
+例如一個ul li 的清單，我們想要刪除特定的li時，就需要前面提到的方法，其中有些方法需要知道
+
+1. list.children 代表要找的是ul裡面的所有子節點，會回傳一組HTMLCollection(4) [li, li, li, li]的資料。 而children與childNodes不同的地方在於children只會回傳節點不為空值的子節點，而childNodes則都會回傳
+2. parentNode則是可以得到指定節點的父節點
+3. 因為透過querySelectorAll會得到為nodeList的類陣列物件，所以可以以Array.prototype.indexOf.call()的方式取得該節點的索引值
+
+Ex: 點擊a連結時，取得li的索引值
+```html
+  <ul class="list">
+    <li>1234 <a href="#">點擊</a></li>
+    <li>1234 <a href="#">點擊</a></li>
+    <li>1234 <a href="#">點擊</a></li>
+    <li>1234 <a href="#">點擊</a></li>
+  </ul>
+```
+
+```javascript
+let list = document.querySelector('.list');
+let listLi = document.querySelectorAll('.list li');
+list.addEventListener('click', getLiIndex);
+
+// 取得ul的所有子節點
+console.log(list.children);
+function getLiIndex(e) {
+  if (e.target.nodeName !== 'A') return;
+  //將ul的所有子節點作為this值傳入，並取得點擊到的li的索引值
+  let index = Array.prototype.indexOf.call(list.children, e.target.parentNode);
+  console.log(index);
+}
+```

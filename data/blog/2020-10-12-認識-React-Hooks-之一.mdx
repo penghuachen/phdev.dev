@@ -1,0 +1,327 @@
+---
+title: 認識 React Hooks 之一
+date: "2020-10-12 09:10:02"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 認識 React Hooks 之一
+
+今天要學習的是 React 的新功能 **Hook**，而 Hook 是 React 在 16.8 版本中新加入的功能，以往只要是需要管理到 state 的話，都一定要使用 class-based component 的方式才可以，而 Hook 的出現可以讓我們也可以在 function component 中管理 state 以及使用 React 的功能。
+
+
+而今天與明天的篇幅會學習關於使用 Hook 替代原本 class-based component 的寫法。
+
+接著就趕緊今天的學習吧！
+
+## 使用 State Hook
+
+第一個要介紹的是 `useState`，**這是一個能讓我們將 `state` 加到 function component 中的 Hook。**
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/epic-dan-83f7n?file=/src/App.js)。
+
+在測試範例中提供了兩種 component 的使用方式，這裡則擷取出使用 `useState` 的程式碼:
+
+```jsx=
+export default function App() {
+  const [text, setText] = useState("Text from function component's state");
+
+  const changeTextHandler = () => {
+    setText("Text changed from function component's useState method");
+  };
+
+  return (
+    <div className="App">
+      <h2>function component 範例: 使用 useState</h2>
+      <p>{text}</p>
+      <button onClick={changeTextHandler}>變更文字</button>
+    </div>
+  );
+}
+```
+
+當我們使用 `useState` 時，我們需要提供一個**初始的值作為參數傳入**，而這也是 state 的初始值。
+
+值得注意的是，比較 class-based component一定得傳入一個物件， `useState` 接受像是 String 或者 Number 這類的值作為初始值。
+
+而 `useState` 提供的部分，我們可以取得這個**初始值以及用來更新這個值的方法**
+
+而命名上這裡的 `text` 與 `setText` 是自定義的名稱，只要記得順序第一個值，而第二個則是用來更新的方法即可。
+
+此外還需要注意的部分是 `useState` 與 `this.setState` 更新時的差異
+
+使用 `this.setState` 的時候，如果你只需要更新某一個值的時候，也許你會這麼寫:
+
+```jsx=
+class App extends Components {
+  state = {
+    num: 0,
+    text: 'Text'
+  };
+  
+  componentDidMount() {
+    this.setState({
+      num: 666,
+    });
+  };
+}
+```
+
+如果只需要更新 `num` 的時候，只需要把**需要更新的寫入**即可，React 會自己 merge 到 class-based component 中的 `state`。
+
+但如果今天是透過 `useState` 的方式，那就需要這麼寫：
+
+```jsx=
+const App = () => {
+  const [num, setNum] = useState({
+     num: 0,
+    text: 'Text'
+  })
+  
+  componentDidMount() {
+    setNum({
+      ...state,
+      num: 666,
+    });
+  };
+}
+```
+
+由於 `useState` 在更新時並不會 merge 需要更新的部分到原本的 `state`，而是**整個 `state` 替換**，所以如果沒有將不需要更新的其他狀態一併寫入的話，就會造成**狀態的遺失**，這點需要注意。
+
+## 使用 Effect Hook
+
+接著要學習的是 `useEffect`，至於為什麼會用 Effect 這個詞呢？
+
+原因在於**像是 fetch 資料、訂閱事件與改變 DOM，這些被稱為是「side effect」的行為會影響其他 component 且在 render 期間無法完成的。**
+
+而 `useEffect` 基本上就是整合了 class-based component 的 **`componentDidMount`、`componentDidUpdate` 與 `componentWillUnmount` 這三個生命週期，讓這個 API 也可以達到同樣的目的。**
+
+這裡我們改寫一下上一個測試範例，這次不透過點擊切換 `text` 的值，而是在等同 class-based component 的生命週期 `componentDidMount` 的階段，我們將 `text` 更新。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/relaxed-nightingale-9m072?file=/src/App.js)。
+
+這裡一樣擷取出關於 `useEffect` 相關的測試程式碼:
+
+```jsx=
+export default function App() {
+  const [text, setText] = useState("Text from function component's state");
+
+  useEffect(() => {
+    setText("Text changed from function component's useState method");
+  });
+
+  return (
+    <div className="App">
+      <h2>
+        function component 範例: 使用 useEffect 在相似於 componentDidMount
+        的階段更新 state
+      </h2>
+      <p>{text}</p>
+    </div>
+  );
+}
+```
+
+當我們使用 `useEffect` 的時候，這代表我們告訴 React 在 component render 之後需要做一些事情，**而 React 會在 render 之後執行我們傳入的 function。**
+
+而將 `useEffect` 寫在 component 的內部是因為這樣可以透過閉包(closure)的觀念取得 `state` 或者是 `props` 的狀態。
+
+這裡需要注意的是目前的設定方式，預設會在**每次 render 之後都一定會執行。**
+
+那要怎麼樣才能在 **`text`** 的值有變化的時候才做執行就好呢？
+
+這個時候我們就**需要透過 `useEffect` 的第二個參數來達成**。
+
+這裡我們將上面的程式碼改寫一下:
+
+```jsx=
+export default function App() {
+  const [text, setText] = useState("Text from function component's state");
+
+  useEffect(() => {
+    setText("Text changed from function component's useState method");
+  }, [text]);
+
+  return (
+    <div className="App">
+      <h2>
+        function component 範例: 使用 useEffect 在相似於 componentDidMount
+        的階段更新 state
+      </h2>
+      <p>{text}</p>
+    </div>
+  );
+}
+```
+
+**每次 render 後就清除或執行 effect 可能會造成效能的問題**，所以透過傳入 `useEffect` 的第二個參數 `[text]`， **此時當重新 render 時， React 會比對該次的值是否與前一次的值，如果有不同才會執行 effect，否則就跳過這一次的更新**。
+
+那如果是**只想要在 componet mount 的階段觸發一次就好呢**? 
+
+這時候也很簡單，**只要傳入一個空陣列 `[]`** 這樣就好囉！
+
+所以上方的程式碼我們再改寫一下：
+
+```jsx=
+export default function App() {
+  const [text, setText] = useState("Text from function component's state");
+
+  useEffect(() => {
+    setText("Text changed from function component's useState method");
+  }, []);
+
+  return (
+    <div className="App">
+      <h2>
+        function component 範例: 使用 useEffect 在相似於 componentDidMount
+        的階段更新 state
+      </h2>
+      <p>{text}</p>
+    </div>
+  );
+}
+```
+
+而當有時候我們**可能會在 component 中訂閱一個事件，並且在這個元件被 unmount 的時候取消訂閱這個事件**，這時候應該怎麼做才好呢?
+
+這個時候我們可以透過 **`return` 一個 function 的方式達成這個目的**。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/determined-breeze-x48oj?file=/src/App.js)。
+
+```jsx=
+export default function App() {
+  const [text, setText] = useState("初始文字");
+
+  const test = () => {
+    setText("有發現我不一樣了嗎?");
+  };
+
+  useEffect(() => {
+    document.querySelector("h2").addEventListener("mouseenter", test);
+    return () => {
+      document.querySelector("h2").removeEventListener("mouseenter", test);
+    };
+  }, [text]);
+
+  return (
+    <div className="App">
+      <h2>function component 範例: 請將滑鼠移到這個標題上，觀察變化</h2>
+      <p>{text}</p>
+    </div>
+  );
+}
+```
+
+透過 **`return` 一個 function 的方式**可以讓我們像是在 class-based component 中於生命週期 `componentWillUnmount` 的階段時，取消對於事件的訂閱。
+
+而最後要提的部分是關於**瀏覽器更新螢幕的部分**，這邊來看看文件是怎麼寫的：
+
+> 提示
+與 componentDidMount 或 componentDidUpdate 不同，使用 useEffect 安排的 effect 不會阻止瀏覽器更新螢幕。這使你的應用程式感覺起來響應更快。大多數 effect 不需要同步發生。在少見的需要同步發生的情況下（例如測量 layout），有另外一個 useLayoutEffect Hook，它的 API 與 useEffect 相同。
+
+## `useContext`
+
+在第十五天的時候，我們學習了關於 [Context API](https://ithelp.ithome.com.tw/articles/10246793)的使用方式，而在 component 中如果我們想要使用我們透過 `Provider` 傳入的 `Context` 物件的時候，我們可以透過 `Consumer` 或 `static contextType = Context` 的方式來取得。
+
+而 React Hooks 對此也提供了更簡便的方式讓我們存取這個 `Context` 物件: 透過 `useContext`
+
+這裡我們改寫第十五天的測試範例來看看怎麼使用 `useContext` 吧!
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/relaxed-voice-gwvy4?file=/src/App.js)。
+
+首先，我們一樣需要建立一個 `Context` 物件：
+
+```jsx=
+// Context.js
+import React from "react";
+
+const Context = React.createContext({
+  text: "",
+  changeTextByContextAPI: () => {},
+  changeTextByContextAPIInFuncComponent: () => {},
+  changeTextByUseContextInFuncComponent: () => {}
+});
+
+export default Context;
+```
+
+接著，我們一樣要透過 `Provider` 將 `Context` 物件提供給需要的 component:
+
+```jsx=
+// App.js
+import React, { useState } from "react";
+import "./styles.css";
+import Card2 from "./components/Card2";
+import Context from "./components/Context";
+const App = () => {
+  const [state, setTextState] = useState({
+    contextText: "Initial value"
+  });
+
+  const changeTextByContextAPI = () => {
+    setTextState({
+      ...state,
+      contextText: "change text by Context Provider/Consumer"
+    });
+  };
+
+  return (
+    <div className="App">
+      <h2>透過 Context.Provider 提供 Coontext 物件的值到 card 元件中</h2>
+      <p>此為 Class-based component</p>
+      <Context.Provider
+        value={{
+          ...state,
+          changeTextByContextAPI
+        }}
+      >
+        <Card2 />
+      </Context.Provider>
+    </div>
+  );
+};
+
+export default App;
+```
+
+最後我們需要透過 `useContext` 來取得這個 `Context` 物件：
+
+```jsx=
+// Card4.js
+
+import React, { useContext } from "react";
+import "./index.css";
+import Context from "../Context";
+
+const Card4 = () => {
+  const context = useContext(Context);
+  return (
+    <div
+      className="card"
+      onClick={context.changeTextByUseContextInFuncComponent}
+    >
+      {context.contextTextInFuncComponentByUseContext}
+    </div>
+  );
+};
+
+export default Card4
+```
+
+沒意外的話，應該成功取得，並執行目前測試範例上提供的操作囉!
+
+今天學習了 React Hooks 中的 `useState`、`useEffect` 以及 `useContext`
+
+明天繼續探索其他的 Hooks
+
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [介紹 Hook](https://zh-hant.reactjs.org/docs/hooks-intro.html)
+- [使用 Effect Hook](https://zh-hant.reactjs.org/docs/hooks-effect.html)
+

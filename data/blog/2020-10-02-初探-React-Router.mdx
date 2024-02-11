@@ -1,0 +1,197 @@
+---
+title: 初探 React Router
+date: "2020-10-02 00:09:55"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 初探 React Router
+
+在網頁中最常使用的操作肯定要有**透過導航列切換頁面**這一個功能，而在 React 中我們可以透過 React router 的方式達成**切換元件，渲染對應元件的內容來達成就像是跳轉到該頁面的目的。**
+
+
+意思是在 React 中，透過 router 切換的 url 並非是真正的跳轉至具有該 url 的頁面，透過這個 path 用來切換的是我們寫在 React 中的元件。
+
+後續幾天的篇幅會搭配著文件提供的部分範例來學習在不是使用 hook 與使用 hook 下的不同寫法。
+
+接著讓我們來學習關於 router 常用的一些方式吧!
+
+## 使用 react-router-dom 套件
+
+這是一套並非由 Facebook 團隊開發的套件，但是在 React 中卻廣為被應用於配置路由的套件。
+
+首先，我們先進行安裝:
+
+```bash=
+npm i --save react-router-dom
+```
+
+接著再往下設定基礎的 router 之前，我們要先了解組成 React router 最重要的三個部分:
+
+根據這個套件的[文件](https://reactrouter.com/web/guides/primary-components)描述:
+
+>- routers, like `<BrowserRouter>` and `<HashRouter>`
+>- route matchers, like `<Route>` and `<Switch>`
+>- and navigation, like `<Link>`, `<NavLink>`, and `<Redirect>`
+
+接著我們先看看這幾個重要的組成的用途
+
+### routers
+
+首先是 routers，區分為 `<BrowserRouter>` 以及 `<HashRouter>`，差異如下:
+
+- `<BrowserRouter>`: http://example.com/your/page
+- `<HashRouter>`: http://example.com/#/your/page
+
+透過 `<BrowserRouter>` 方式呈現的 URL 更貼近於我們平常在使用的 URL，但這個部分需要注意和後端的設定做配置，否則可能容易導致 404 的情形發生。
+
+而 `<HashRouter>` 方式則是多了一個 `/#/`，雖然不貼近於我們使用的 URL，但是並不需要注意後端的配置是否會影響。
+
+### route matchers
+
+接著是 route matchers，`<Route>` 以及 `<Switch>`，透過 `<Switch>` 可以用來包住 `<Route>` ，將 `<Route>` 作為它的 children。並且 `<Switch>` 只會渲染第一個符合匹配的路徑(即使還有另外一個符合的路徑。)
+
+而 `<Route>` 則是用來將符合匹配路徑的元件內容渲染出來。
+
+此外，文件中提到在使用 `<Route path>` 需要注意的部分: **path 從 URL 的開頭進行匹配，而非是整個 path。**
+
+舉個例子： 我們可能會有如下這個 router設置:
+
+```jsx=
+<Route path="/">
+<Route path="/page">
+```
+
+在上述的設定中， **path 永遠只匹配 `/` 這個路徑，因此為了避免這個部分，有幾種做法:**
+1. **將 `<Route path="/">` 移動到所有 router 配置的最後方**
+2. **透過 exact 明確表示要匹配完整 path**
+
+所以會變成如下兩種方式:
+
+```jsx=
+<Route path="/page">
+<Route path="/">
+```
+
+或者
+
+```jsx=
+<Route exact path="/">
+<Route path="/page">
+```
+
+另外要提的部分是，如果有查閱[文件](https://reactrouter.com/web/api/Route)的話，會發現有三種方式可以 render component:
+
+- `<Route component>`
+- `<Route render>`
+- `<Route children> function`
+
+至於為什麼有這幾種不同的方式，可以從這篇 [Difference between passing component to Route as prop and wrapping component in render function](https://stackoverflow.com/questions/59256109/difference-between-passing-component-to-route-as-prop-and-wrapping-component-in) stackoverflow 中的回答可以有比較多的了解。
+
+基本上在 react-router v5 之前只有 `<Route component>`、`<Route render>` 這兩種方式，而在 v5 之後提供了`<Route children> function`，而這幾個方式的實作上有著什麼差異呢?
+
+首先是透過 `<Route component>` 的方式，這個方式是使用 `React.createElement` 的方式每次都產生一個**新的 react element**，當如果是透過內聯函式的方式設定，比如這個寫法:
+
+```jsx=
+<Route component={() => (<Bar id={this.state.id}/>)}/>
+```
+
+則會造成元件不斷的在 mount 與 unmount 導致效率很低。
+
+然後是 `<Route render>`，這個方式則不會有 `<Route component>` 的問題，並不會導致元件不斷的在 mount 與 unmount。但需要注意的是如果同時使用 `<Route component>` 與 `<Route render>` 的話，前者優先權比後者高。
+
+接著是 `<Route children> function`，用法與 `<Route render>` 基本上沒有差異，差別只在當 route 沒有 match 到 URL 時， 此時 match 的值會是 null ，並且可以動態調整 UI 等。
+
+可以參考官方的這個 [範例](https://reactrouter.com/web/api/Route/children-func)。
+
+### navigation
+
+最後是 `<Link>`, `<NavLink>`, 以及 `<Redirect>`，用途如下:
+
+- `<Link>`: 用來導航至你要渲染出來的元件，在 HTML 中會是以 `<a>` 的方式呈現
+- `<NavLink>`: 也是一種 `<Link>`，但差別在於**可以自訂點擊該連結時的效果，透過搭配 activeClassName 來使用**，並且當路徑中有 `"/"` 設定時，需搭配 `exact` 明確指出需要完整匹配路徑才可以觸發 active style
+- `<Redirect>`: 用於頁面重整等等時，作為重導向到指定路徑使用
+
+接著我們透過上述的理解與文件中 [Quick Start](https://reactrouter.com/web/guides/quick-start) 的範例，改寫一個比較簡單的例子來學習:
+
+這裡只提供關於 router 配置的部分，相關測試範例，[點擊前往](https://codesandbox.io/s/quiet-mountain-glw7z?file=/src/App.js)。
+
+```jsx=
+  import React from "react";
+  import "./styles.css";
+  import PageA from "./containers/PageA";
+  import PageB from "./containers/PageB";
+
+  import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Link,
+    NavLink,
+    Redirect
+  } from "react-router-dom";
+
+  export default function App(props) {
+    return (
+      <div className="App">
+        <Router>
+          <h2>使用 Link</h2>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/PageA">PageA</Link>
+              </li>
+              <li>
+                <Link to="/PageB">PageB</Link>
+                <Redirect to="/" />
+              </li>
+            </ul>
+          </nav>
+          <h2>使用 NavLink</h2>
+          <nav>
+            <ul>
+              <li>
+                <NavLink to="/PageA" activeClassName="active">
+                  PageA
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/PageB" activeClassName="active">
+                  PageB
+                </NavLink>
+                <Redirect to="/PageA" />
+              </li>
+            </ul>
+          </nav>
+          <Switch>
+            <Route path="/PageA">
+              <PageA />
+            </Route>
+            <Route path="/PageB">
+              <PageB />
+            </Route>
+          </Switch>
+        </Router>
+      </div>
+    );
+  }
+```
+
+上述範例展示如何透過 router 切換路由，分為幾個部分:
+
+- `<Link>`、`<NavLink>` 與 `<Route>` 都要寫在 `<Router>` 中(這裡的 `<Router>` 指的是 `<BrowserRouter>` 或者 `<HashRouter>`)
+- 在 `<Route>` 中指定路徑，渲染對應的元件
+- 在 `<Link>`、`<NavLink>` 中指定要前往的路徑，若符合匹配，則會切換並渲染該元件的內容。
+- `<Link>`、`<NavLink>` 差別只在於點擊時是否有被點擊(active)的效果。
+- 可以修改 `<Switch>` 中的 `<Route path="/pageA">` 為 `<Route path="/pageB">`，理解 `<Switch>` 的用意：**只會渲染第一個符合匹配的路徑(即使還有另外一個符合的路徑。)**
+
+了解了基本的配置方式之後，明天我們接著學習幾個常用的 router 配置方式。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [React Router](https://reactrouter.com/)
+

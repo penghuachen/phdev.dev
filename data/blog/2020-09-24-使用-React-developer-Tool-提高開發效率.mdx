@@ -1,0 +1,86 @@
+---
+title: 使用 React developer Tool 提高開發效率
+date: "2020-09-24 10:16:58"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+今天的篇幅比較簡單，但是在透過框架開發時卻是一個會影響開發時間、效率很重要的關鍵工具之一，那就是 React 的 developer tools。
+
+
+![](https://i.imgur.com/2UxaNk5.png)
+
+在開發過程時，我們肯定需要常常觀察元件(Component)中像是 state 的變化等等，這個時候就是 React developer tools 派上用場的時候囉!!
+
+而目前的學習階段由於還沒有學習到 Redux，所以 Redux 的 developer tools 的使用就留待後面學習到的時候再說囉XD
+
+接著讓我們來學習如何使用吧
+
+## 透過瀏覽器安裝 React developer tools。
+
+這邊介紹在 Google Chrome 與 Firefox 中安裝的部分。
+
+在 Google Chrome 可以透過 chrome 線上應用程式商店中安裝，[點擊連結前往](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?utm_source=chrome-ntp-icon)。
+
+![](https://i.imgur.com/KQ49OrA.png)
+
+而在 Firefox 中則是可以透過在 ADD-ONS 中安裝，[點擊連結前往](https://addons.mozilla.org/zh-TW/firefox/addon/react-devtools/)。
+
+![](https://i.imgur.com/WPWG6wS.png)
+
+接著就透過 Google 的 React developer tools 來看看怎麼使用吧!
+
+## 透過簡單例子使用 React developer tools
+
+這邊為了可以更聚焦如何使用 React developer tools，所以提供一個非常簡單的測試例子。
+
+情境： 當點擊 Card 元件時，會替換掉名字、年齡與嗜好。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/boring-zhukovsky-ngyem?file=/src/App.js)。
+
+而這裡為了節省一些時間，透過 codesandbox 這個服務來觀察，這個服務已經將 React developer tools 也都準備好了，沒意外的話應該可以看到如下的畫面:
+
+![](https://i.imgur.com/9BiM4zj.png)
+
+但這邊想要分享一個小小的技巧，通常我們將專案運行起來時會透過F12 打開 chrome 的 dev tools
+
+而如果有安裝 React developer tools 的話，預期右邊的工具列中會有兩個選項，分別是「Components」、「Profiler」(這兩個就是透過剛剛安裝後才能看到的，一般來說不會有哦!)
+
+但如果是透過筆電或者小螢幕開發時，如果要開啟 React developer tools ，我們**總是需要點擊下拉選單才可以選取到**，多少會造成一些不便。
+
+所以這邊有個自己覺得比較順手的開發習慣，**就是將 「Components」移至最前方**，這對於螢幕視窗不大卻要開發時，可以不會因為開發者工具視窗比較小而總是一直點擊下拉選單選取，增加了一些方便性呢！
+
+![](https://i.imgur.com/RQnCEqh.png)
+
+拉回來主題，可以先點擊卡片區塊觀察是否有 state 中的資料替換掉，接著再看看 React developer tools state 的變化。
+
+預期會從這樣子的結果:
+
+![](https://i.imgur.com/Zk3E6pZ.png)
+
+變成這樣子的結果:
+
+![](https://i.imgur.com/Z6BlCyI.png)
+
+但除了可以觀察改變之外，我們也可以透過直接在這裡修改 `name` 的值來觀察變化，可以自行嘗試看看。
+
+而左方的部分，則是顯示了元件(Components) 的架構，如圖:
+
+![](https://i.imgur.com/KK7i3fn.png)
+
+至於「props」，若是在元件中如果有使用到 props ，就會在這裡可以清楚看見。
+
+如 Card 元件，因為是透過 props 的值來顯示內容，所以可以看到如下資訊:
+
+![](https://i.imgur.com/DBmGDM5.png)
+
+其他如「rendered by」及「source」則是用來讓開發者知道用的是哪個版本的 React-dom 與來源。
+
+開發者工具一定要了解怎麼使用，因為這會大幅提升開發的效率!!
+
+今天的學習就這樣囉，明天見~
+
+鐵人賽文章與程式碼同步發佈於:
+1. [個人部落格](https://penghuachen.github.io/)
+2. [Github](https://github.com/penghuachen/React_30)

@@ -1,0 +1,120 @@
+---
+title: 連續記錄挑戰Day50-關於瀏覽器的window物件
+date: "2019-07-16 21:05:57"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+# window物件
+
+透過瀏覽器的開發者工具，打上window指令時可以看到很多特性，而這些特性都是我們可以用來實現需求的方法。
+
+所以透過這篇記錄，會慢慢的將有使用上的方法都新增到這裡。
+
+
+## setTimeout() / setInterval()
+
+- 預設的時間單位: 毫秒(ms)
+- setTimeout():當符合指定時間時，會執行函式一次
+- setInterval():依照指定的時間作為每次執行的間隔，並不斷的執行函式
+
+Ex: setTimeout()
+```javascript
+/*
+ 1.當2秒時，會執行sayHello這個函式，並回傳Hello World。
+ 2.而setTimeout()的this指向window
+ */
+function sayHello(){
+    console.log(this);
+    console.log("Hello World!");
+}
+setTimeout(sayHello,2000);
+```
+
+
+Ex1: setInterval()
+```javascript
+/*
+ 1.每2秒時就會執行sayHello這個函式，並回傳Hello World。
+ 2.setInterval()的this指向window
+ */
+function sayHello(){
+    console.log(this);
+    console.log("Hello World!");
+}
+setInterval(sayHello,2000);
+```
+
+## location 物件
+
+- window的location指向一個location物件，代表當前視窗文件的URL
+- Document物件也有一個location物件，兩者指向的是同一個location物件
+- location物件中：
+    - assign:可以指定要跳轉頁面的URL，**跳轉後，若點擊上一頁則可以回到前一個歷程記錄**
+    - replace:類似assign，可以指定要跳轉頁面的URL，**但是若點擊上一頁，則不會回到前一個歷程記錄，因為replace在跳轉至新頁面時，會將歷程紀錄都刪除。**
+Ex:location(以google網頁為例)
+
+```javascript
+//http://www.google.com
+//取出location物件中的search特性的字串，並以&作為分隔將字串存入陣列。
+let ary = [];
+let searchUrl = window.location.search;
+let searchUrlAry = searchUrl.split('&').slice(1);
+console.log(searchUrlAry);
+```
+
+Ex2:比較location物件中的assign/replace特性(以google跳轉yahoo為例)
+
+```javascript
+//先連結至google頁面，並將下面程式碼貼上瀏覽器的開發者工具查看
+//assgin點擊上一頁會跳回google頁面
+window.location.assign("http://www.yahoo.com.tw");
+
+//replace點擊上一頁不會跳回google頁面
+window.location.replace("http://www.yahoo.com.tw");
+```
+
+## history 物件
+
+- window的history特性指向一個history物件
+- 可用於操作瀏覽歷程，如上一頁、下一頁或者跳至特定數目的頁面等這類功能
+    - back()
+    - forward()
+    - go():以當前頁面為基準，正數會往下跳至指定的頁面;負數會往回到至指定的頁面
+
+- 安全性考量，所以無法透過指令存取這些歷程記錄的URL
+
+Ex: 測試back()/forward/go()
+
+```javascript
+//先連結至google頁面，並將下面程式碼貼上瀏覽器的開發者工具查看(執行完一行後在執行下一行)
+window.history.back();
+window.history.forward();
+window.history.go(-1);
+```
+
+## navigator物件
+
+- 可以該特性取得瀏覽器的資訊等，**用於要處理特定瀏覽器的特定版本時會很有幫助**
+
+Ex:透過navigator特性取得一些資訊
+
+```javascript
+console.log(window.navigator.appName);// web瀏覽器完整名稱
+console.log(window.navigator.appVersion);//瀏覽器供應商與版本號碼資訊
+console.log(window.navigator.userAgent);//包含了許多資訊，通常也會包含appVersion的所有資訊
+console.log(window.navigator.platform);//辨別運作於哪種系統
+console.log(window.navigator.online);//辨別瀏覽器是不是正連接至網路
+```
+
+## screen 物件
+
+- 可以提供使用者顯示器寬高，或者實際可供顯示的寬高等資訊
+
+```javascript
+window.scree.width;//取得使用者顯示器寬度
+window.scree.availHeight;//取得使用者顯示器可用於顯示瀏覽器畫面的寬度(已經扣除工作列等高度)
+
+```

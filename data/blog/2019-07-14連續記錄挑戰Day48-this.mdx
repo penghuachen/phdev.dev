@@ -1,0 +1,458 @@
+---
+title: 連續記錄挑戰Day48-this
+date: "2019-07-14 19:17:53"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# JavaScript 的 this 怎能不知道 
+
+思來想去，還是決定先將我理解的 `this` 用兩句話做個結論，再由此延伸後續的詳細差別。
+
+1. 在 ES6 之前，==決定this的方式取決於函式如何被呼叫==，除非直接指定 `this`  (例如: `bind` 、 `call` 、 `apply` 方法)。
+2. 在 ES6 之後，==箭頭函式對於this的綁定則有了重新的定義。==
+
+
+## ES6之前的 `this`
+
+如前面所提，==決定this的方式取決於函式如何被呼叫==。
+
+所以再來要對於函式呼叫時 `this` 的綁定依序了解。
+
+### 什麼是全域
+
+在後面的篇幅中會很常提及「全域」，所以決定稍微解釋一下方便後續的理解。
+
+在 克服JS的奇怪部分 中的第2節有提及對於全域的解釋:
+
+> ==在任何地方都可以取用它==，這就是全域的意思。
+
+寫個測試的例子:
+
+```javascript
+var habbit = "Read books";
+
+function getHabbit(){
+  var habbit = "Read comics";
+}
+console.log(habbit);
+```
+
+當我們在全域查詢 `habbit` 的值時， 可以得到 `habbit` 的值為 `Read books` 而不是 `Read comic` ，就是因為 `habbit` 的值 ==位於全域==。
+
+關於對於全域的解釋就先到這裡，後續趕緊切入本章的主題~
+
+### 直接使用 `this` 
+
+來看看這個測試例子:
+
+```javascript
+console.log(this);
+```
+
+如果我們直接調用 `this` 並查看，會發現 ==`this` 指向全域==
+
+![Day14-1](https://lh3.google.com/u/0/d/1Inm0L-x72-2Hglvkb3NQCQy-6Cth0GNO=w1298-h1498-iv1)
+
+所以當全域中有變數時:
+
+```javascript
+var name = "Bill";
+console.log(this.name);
+```
+
+因為 `this` 指向全域， 所以才可以取得同樣位於全域的 `name` 變數的值 `Bill`。
+
+![Day14-2](https://lh3.google.com/u/0/d/1zPeo6oBRWEZ5U7Sx5Yw4hKJQweoTlGWY=w1298-h1498-iv1)
+
+### 直接呼叫函式
+
+當我們 ==直接呼叫函式== 的時候，此時的 ==`this` 指向全域==
+
+來看看測試例子驗證一下:
+
+```javascript
+var name = "Bill";
+function getName(){
+  console.log(this.name);
+}
+getName();
+```
+
+![Day14-3](https://lh3.google.com/u/0/d/1dHO6FJ_734pxVckfxEmCgXn5b6vCriYz=w1298-h1498-iv1)
+
+因此可以得到全域的 `name` 的值 `Bill` 
+
+### 嚴格模式下的 `this`
+
+> MDN: 嚴格模式下，如果 `this` 沒有定義到執行環境( Execution Context)內，其預設值就會是  `undefined` 。
+
+
+寫些測試例子驗證一下:
+
+```javascript
+'use strict'
+function test(){
+  console.log(this);
+}
+test();
+```
+
+前面有提到，當我們直接呼叫函式的時候， `this` 會是指向全域而非 `test` 函式本身，所以在嚴格模式底下會因為 `this` 不是定義在執行環境(`test` 函式)中，所以會是 `undefined`。
+
+![Day14-4](https://lh3.google.com/u/0/d/1BPoD-1Oyi0IHNV6Jt5dE-YC_bm-1LyGj=w1298-h1498-iv1)
+
+
+### 物件呼叫方法
+
+如果是 ==呼叫物件的方法，此時的 `this` 指向該物件==
+
+```javascript
+var habbit = "Read books";
+var obj = {
+  habbit: "Read comics",
+  getHabbit : function() {
+    return this.habbit;
+  }
+}
+
+console.log(obj.getHabbit());
+```
+
+此時的 `this` 指向 `obj` 物件。 所以 `getHabbit` 方法中的 `this.habbit` 會取得 `obj` 物件的 `habbit` 的值 `Read comics` ，而不是全域 `habbit` 變數的值 `Read books`。
+
+![Day14-5](https://lh3.google.com/u/0/d/1C5D6xL6LzPJgwqqX3eE_LzvHJPBF9nOI=w1298-h1498-iv1)
+
+==以下注意!!!!==
+
+讓我們改寫一下測試的例子:
+
+```javascript
+var habbit = "Read books";
+var obj = {
+  habbit: "Read comics",
+  getHabbit : function() {
+    console.log('getHabbit方法的habbit值: ' + this.habbit);
+    function getAnotherHabbit(){
+      console.log('getAnotherHabbit方法的habbit值: ' + this.habbit);
+    }
+    getAnotherHabbit();
+  }
+}
+obj.getHabbit();
+```
+
+這時候依序會獲得什麼值呢?
+
+解析的流程如下:
+
+1. 呼叫 `obj` 物件的 `getHabbit` 方法，此時的 `this` 指向 `obj` 物件，所以可以看到 `getHabbit` 方法的值為 `Read comics`
+2. 執行 `getHabbit` 的程式內容時，會執行 `getAnotherHabbit` 這個函式，由於在 `getHabbit` 方法是==直接呼叫 `getAnotherHabbit`== ，所以此時的 `this` 已變成指向全域(就是Window物件)。
+3. 因為 `getAnotherHabbit` 函式的 `this` 指向全域，所以就取得位於全域的變數值 `Read books`。
+
+![Day14-6](https://lh3.google.com/u/0/d/167_GlrhL61N0cjpBr1eqdkAD0ESJQZ5A=w1298-h1498-iv1)
+
+
+
+### `that` 、 `self` 怎麼用?
+
+`this` 很常在執行過程中因為呼叫函式的方式改變，而 `this` 也跟著改變。
+
+所以==必須透過一個變數用來承接原本 `this` 的值== ，而常見的寫法就是`that `或者 `self`  。 
+
+將前一個測試例子改寫一下:
+
+```javascript
+var habbit = "Read books";
+var obj = {
+  habbit: "Read comics",
+  getHabbit : function() {
+    var that = this;
+    console.log('getHabbit方法的habbit值: ' + this.habbit);
+    function getAnotherHabbit(){
+      console.log('getAnotherHabbit方法的habbit值: ' + that.habbit);
+    }
+    return getAnotherHabbit();
+  }
+}
+
+obj.getHabbit();
+```
+
+從圖中可以得知: 因為 `that` 的值為 ==`this` 指向 `obj` 物件時候的值==，所以 `that.habbit` 自然也就會拿到 `obj` 物件中的 `habbit` 的值 `Read comics`。
+
+而 `that` 則取得 `obj` 這個物件的相關資訊。
+
+![Day14-7](https://lh3.google.com/u/0/d/1rT_ySHAVkmiXG893z0Kj4pXp0Yxw-EkP=w1298-h1498-iv1)
+
+
+### 在事件(event)中的 `this`
+
+==事件中的 `this` 會指向那個綁定事件的元素==
+
+寫個例子來驗證:
+
+```html
+<ul class="orderList">
+  <li>列表A</li>
+  <li>列表B</li>
+  <li>列表C</li>
+  <li>列表D</li>
+  <li>列表E</li>
+</ul>
+```
+
+```javascript
+var orderList = document.querySelector('.orderList');
+orderList.addEventListener('click',getListText);
+
+function getListText(e){
+  console.log(this);
+}
+```
+
+這裡在` <ul></ul>` 上 綁定 `click` 事件，所以當點擊 `<ul></ul>` ，會得到 `this` 值為 `<ul></ul>` 這個 html 標籤的所有元素。
+
+![Day14-8](https://lh3.google.com/u/0/d/1vD84IxHfNq6EQ2X1S-pXyb_mN0Q-PIdd=w1298-h1498-iv1)
+
+
+### 立即函式(Immediately Invoked Function Expression, IIFE)的 `this`
+
+關於立即函式(IIFE)，在MDN中這麼解釋:
+
+> MDN: IIFE (Immediately Invoked Function Expression) 是一個定義完馬上就執行的 JavaScript function。
+
+且==立即函式的 `this`會指向全域==
+
+來個測試例子:
+
+```javascript
+(function(){
+  console.log(this);
+})();
+```
+
+![Day14-9](https://lh3.google.com/u/0/d/1uHJ0G7Z4Q3avUjIyUIQI5c_IDxu_sMYC=w1298-h1498-iv1)
+
+### 使用 `call`、`apply` 及 `bind` 指定 `this` 的值
+
+當我們如果需要一個特定的 `this` 值的時候，這時也許就會用到 `call`、`apply` 及 `bind` 強迫綁定 `this`。
+
+關於 `call`、`apply` 及 `bind` 就讓我們依序往下看吧
+
+#### Function.prototype.call
+
+關於 ` Function.prototype.call` 在MDN有這麼一段解釋:
+
+> [MDN: Function.prototype.call](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Function/call) 
+> 使用給定的 `this` 參數以及分別給定的參數來呼叫某個函數
+
+```javascript
+fun.call(thisArg[, arg1[, arg2[, ...]]])
+```
+
+簡單來說， ==自己定義 `this` 的值並傳給目標函式當作該函式的 `this` 值==
+
+而MDN定義中提到的**其他分別給定的參數**則是 ==如果有設定除了 `this` 以外的參數，會將那些參數一併傳入目標函式中==，如果不需要則不用設定。
+
+還是很文謅謅，所以趕緊來寫個測試例子驗證看看:
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read Books"
+}
+
+function introduce(){
+  console.log(this);
+  console.log(this.name + '\'s habbit is ' + this.habbit);
+}
+
+introduce.call(obj);
+```
+
+前面有提到，當 ==直接呼叫函式的時候， `this` 指向全域==
+
+但是當我們透過 `call()` 方法 ==將 `obj` 物件當作 `this` 傳入 `introduce` 函式的時候==，此時已經綁定 `this` ，所以 `introduce` 函式才得以使用 `obj` 物件中的值。
+
+![Day14-10](https://lh3.google.com/u/0/d/1RNd0bEpmd8wWe9rIGZTNUn3BRW5WOeva=w1298-h1498-iv1)
+
+
+來看看有額外設定其他參數時的情況:
+
+```javascript
+function add(a,b){
+  console.log(this);
+  console.log('總和為: ' + (a+b));
+}
+add.call(null,2,3);
+```
+
+![Day14-11](https://lh3.google.com/u/0/d/1_EOQieUqWb6ZafLwN33B2ZzdHGfJvyle=w1298-h1498-iv1)
+
+從結果可以看到， `this` 會是指向全域，而數值2及數值3被傳入  `add` 函式中，所以可以獲得加總後的值為 5。
+
+#### Function.prototype.apply()
+
+關於 ` Function.prototype.apply` 在MDN有這麼一段解釋:
+
+> [MDN: Function.prototype.apply](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Function/apply) 
+> apply() 方法會呼叫一個以 `this` 的代表值和一個陣列形式的值組(或是一個 array-like object )為參數的函式。
+
+```javascript
+fun.apply(thisArg, [argsArray])
+```
+
+和 `call()` 差別在於 ==`call()`接受一連串的參數傳入，而 `apply()` 只接受陣列型式的參數==
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read Books"
+}
+
+function introduce(){
+  console.log(this);
+  console.log(this.name + '\'s habbit is ' + this.habbit);
+}
+introduce.apply(obj);
+```
+
+可以這邊看起來和 `call()` 執行結果沒有差別
+
+![Day14-12](https://lh3.google.com/u/0/d/1ojdayKV99LfsU60Qi6a4X1DptpxE6QVj=w1298-h1498-iv1)
+
+所以我們再往下看看有額外的參數需要被輸入時的情形:
+
+```javascript
+function add(numberAry){
+  console.log(numberAry);
+  const sumTotal = numberAry.reduce((acc,number)=> acc + number,0)
+  console.log('總和為: ' + sumTotal);
+}
+add.call(null,[2,3]);
+```
+
+因為接受陣列型別的參數，所以可以透過陣列的方法操作元素中的值，獲得總和值為 `5`。
+
+![Day14-13](https://lh3.google.com/u/0/d/1_NurCl_g7pYzL8SfqVF-O4UuSLFFEJig=w1298-h1498-iv1)
+
+
+
+#### Function.prototype.bind()
+
+最後一個是 `bind()` 方法， 在MDN有這麼一段解釋:
+
+> [MDN: Function.prototype.bind()](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) 
+> bind() 方法，會建立一個新函式。該函式被呼叫時，會將 this 關鍵字設為給定的參數，並在呼叫時，帶有提供之前，給定順序的參數。
+
+```javascript
+fun.bind(thisArg[, arg1[, arg2[, ...]]])
+```
+
+和前兩者差別為 ==使用 `bind()` 會回傳一個綁定自定義 `this` 值的函式提供我們呼叫。==
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read Books"
+}
+
+function introduce(){
+  console.log(this);
+  console.log(this.name + '\'s habbit is ' + this.habbit);
+}
+
+const newIntroduce = introduce.bind(obj);
+console.log(newIntroduce);
+newIntroduce();
+```
+
+從圖中可以看到透過變數 `newIntroduce` 儲存了 ==已經綁定 `this` 後的 `introduce`函式==，而這裡的 `this` 指向的是 `obj` 物件。
+
+所以當我們呼叫 `newIntroduce` 函式時，就可以取得與 `call()` 、 `apply()` 一樣的結果。
+
+![Day14-14](https://lh3.google.com/u/0/d/1Ugi0uzmUMuFg1DvUTWERgoscJJ_Du6Tz=w1314-h1530-iv1)
+
+
+### 建構式的 `this`
+
+==建構式的 `this` 指向使用 `new` 關鍵字所建立的物件==
+
+```javascript
+function Person(name,age,habbit){
+   this.name = name;
+   this.age = age;
+   this.habbit = habbit;
+   console.log(this);
+}
+
+const person1 = new Person('Bill',22,'Read');
+```
+
+![Day14-15](https://lh3.google.com/u/0/d/16PG6Wdt74WMthgCvhQRvLz5EQ_6anmp2=w1314-h1530-iv1)
+
+
+## ES6之後的 `this`
+
+ES6之後對於 `this` 有了額外的定義:
+
+### 箭頭函式(arrow function) 的`this`
+
+> 箭頭函式並不擁有自己的 this 變數；使用的 this 值來自封閉的文本上下文，也就是說，箭頭函式遵循常規變量查找規則。因此，如果在當前範圍中搜索不到 this 變量時，他們最終會尋找其封閉範圍。
+> [箭頭函式的this](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Functions/Arrow_functions#this_%E4%B8%8D%E5%88%86%E5%AE%B6)
+
+簡單來說，大致可以歸納出幾個重點:
+1. 箭頭函式(arrow function) ==沒有自己的 `this`==
+2. 箭頭函式(arrow function)的 `this` 綁定會透過 範圍鏈(scope chain) 的觀念找到其作用域的this指向，並當作自己的this。
+
+在往下講之前，需要先稍微了解一下什麼是範圍鏈(scope chain)。
+
+範圍鏈(scope chain) 的概念會於閉包(closure)的篇幅來詳細的理解。
+
+這邊只要知道 ==當變數在自己的執行環境中如果找不到該變數，就會往外層尋找，直到找到後才停止==
+
+來看個測試例子:
+
+```javascript
+const name = "Bill";
+function getName(){
+  console.log(name);
+}
+getName();
+```
+
+當執行 `getName` 函式時，因為在函式的執行環境中沒有 `name` 這個變數，所以會依照範圍鏈(scope chain)的概念往外層尋找，所以會找到位於全域的 `name` 變數的值 `Bill`
+
+了解箭頭函式(arrow function)的 `this` 與範圍鏈(scope chain)的觀念後，再來要看看測試的例子
+
+```javascript
+var name = "Jack";
+var obj = {
+  name: "Bill",
+  checkThis: () => { console.log(this.name);}
+}
+
+obj.checkThis();
+```
+
+箭頭函式的 `this` 會透過範圍鏈(scope chain)的觀念往外層尋找看看作用域的 `this` 是指向誰，會發現 `this` 指向 全域(因為`obj`物件位於全域)，所以箭頭函式的 `this` 指向 全域，於是就會得到 `name` 的值 `Jack`
+
+讓我們再看看另一個例子
+
+
+```javascript
+var name = "Jack";
+var obj = {
+  name: "Bill",
+  checkThis: function(){
+    test = () => {console.log(this.name);}
+    test(); 
+  }
+}
+obj.checkThis();
+```
+
+箭頭函式的 `this` 會透過範圍鏈(scope chain)的觀念往外層尋找看看作用域的 `this` 是指向誰，會發現 `this` 指向`obj` 物件(因為箭頭函式 `test` 的外層 `checkThis` 函式指向 `obj`物件)，於是就會得到 `name` 的值 `Bill`。
+

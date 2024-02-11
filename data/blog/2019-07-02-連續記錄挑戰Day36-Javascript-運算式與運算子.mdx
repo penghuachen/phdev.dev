@@ -1,0 +1,191 @@
+---
+title: '連續記錄挑戰Day36-Javascript-運算式與運算子'
+date: "2019-07-02 19:33:39"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+# 運算式與運算子
+
+Javascript直譯器可以透過計算運算式產生一個結果值，而複雜的運算式則是由運算子建構而成。
+
+
+Outline
+- 運算式
+    - 基本運算式
+    - 物件與陣列的初值設定式 (概觀)
+    - 函式運算式 (概觀)
+    - 特性存取運算式 (概觀)
+    - 調用運算式 (概觀)
+    - 物件創建運算式(概觀)
+    - 算術運算式
+    - 關係運算式
+    - 邏輯運算式
+
+## 運算式
+
+### 基本運算式
+
+包括：常數(constant)或字面值(literal value)、保留字、變數參考
+- 常數(constant)或字面值(literal value): 1.23 / "hello world"
+- 語言關鍵字: 
+    - true / false 結果值為布林值的 true / false值
+    - null 結果值為 null
+    - this 結果值為物件
+- 變數參考:
+    - undefined 
+    - sum (結果值為sum的值)
+
+### 物件與陣列的初值設定式(概觀)
+
+物件與陣列的初值設定式是一種運算式，其結果值為新創建的物件或陣列。
+
+### 函式運算式(概觀)
+
+運算值為定義的函式:
+
+```js
+    var square = function(x){return x*x;}
+```
+
+### 特性存取運算式(概觀)
+
+運算值為物件的特性值或者陣列的元素值。
+
+```js
+    var o = {x:1,y:{Z:3}};
+    var a - [o,4,[5,6]];
+    console.log(o.x) // 運算式o的特性x
+    console.log(a[0].x) // 運算式a[0]的特性x
+```
+
+### 調用運算式(概觀)
+
+- Javascript用來呼叫(調用)函式或方法的語法。
+- 如果呼叫(調用)的是特性存取運算式，則稱為呼叫(調用)了物件的**方法**
+
+### 物件創建運算式
+
+透過 new 語法建立新物件，也稱為**建構式**
+
+```js
+    new point(2,3);
+```
+
+
+### 算術運算式
+
+- 運算子的權重 : [運算子優先序](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
+    Ex:加減乘除中，其運算子的權重為->加(13)減(13)乘(14)除(14)，所以處理的優先順序為 **先乘除，後加減**。
+    
+- 關於 + 運算子
+    1. 讓字串串接有較高的優先序，**只要有任一個值為字串，或者可以轉換為字串，那麼另一個值就型別就會轉為字串**
+    Ex:
+    ```js
+        //小細節： google 開發者工具下的數字為藍色，而文字為黑色，可以幫助判別
+        console.log("1"+2); // '12'
+        console.log(1 + {}); // 1[object object]
+    ```
+
+### 關係運算式
+
+用於檢查值與值之間的關係，並回傳 true / false。
+
+- 相等性運算子 ==
+     - **允許在型別轉換、較寬鬆的同等性定義下檢查**兩個值是否相等。
+    
+|==的檢查模式|檢查兩個值的關係|
+|-|-|
+|一個為null、一個為undefined|相等|
+|值為true|轉為1後比較|
+|值為false|轉為0後比較|
+|一個為字串、一個為數字|型轉後若值相同則相等|
+    
+
+- 嚴格相等性運算子 ===
+    - **不允許型別轉換，並用嚴格的同等性定義檢查。**
+    
+|===的檢查模式|檢查兩個值的關係|
+|-|-|
+|型別都不同|不相等|
+|兩者都是NaN、單一個NaN|都不相等|
+|兩者都是null|相等|
+|兩者都是undefined|相等|
+|兩者都是true|相等|
+|兩者都是false|相等|
+|0和-0|相等|
+|兩者參考到同一個物件|相等|
+
+### 邏輯運算式
+
+- AND && : 條件需要都為true時，才會是true
+- OR || : **由左至右判斷，當任一條件**為true時即為true
+- NOT ! : 反轉布林值
+
+
+
+## 額外的練習：
+
+
+1. Ex1 null / '' / undefined
+
+```javascript
+
+let a = '';
+let b = undefined;
+let c= null
+
+if(!a){console.log(a);} // false才會顯示空值
+if(!b){console.log(b);} //false才會顯示undefined
+if(!b){console.log(b);}// false才會顯示undefined
+
+console.log(null == undefined); // true
+console.log(null === undefined); // false
+console.log(null == ' '); // false
+console.log(undefined == ' '); // false
+
+
+```
+
+2. Ex2 Number.isNaN(NaN)
+
+```javascript
+
+// MDN
+
+Number.isNaN(NaN);        // true
+Number.isNaN(Number.NaN); // true
+Number.isNaN(0 / 0)       // true
+
+
+Number.isNaN(undefined);  // false
+Number.isNaN({});         // false
+Number.isNaN("blabla");   // false
+
+// 下面的都返回 false
+Number.isNaN(true);
+Number.isNaN(null);
+Number.isNaN(37);
+Number.isNaN("37");
+Number.isNaN("37.37");
+Number.isNaN("");
+Number.isNaN(" ");
+```
+
+3. Ex3. 字串與數字執行四則運算時。
+
+```javascript
+    console.log("1" + 2); //"12"
+    console.log("3" - 2); // 1
+    console.log("3" * 2); // 6
+
+```
+
+4. Ex4. 字串與數字的相等性
+
+```javascript
+    console.log('1' == 1); //true
+    console.log('1' === 1); //false
+```

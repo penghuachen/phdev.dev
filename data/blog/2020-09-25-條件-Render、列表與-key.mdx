@@ -1,0 +1,154 @@
+---
+title: 條件 Render、列表與 key
+date: "2020-09-25 11:54:58"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+今天要學習的是如何根據**條件判斷，渲染(render)對應需求的元件(Component)，以及根據資料渲染多個相同的元件(Component)**。
+
+
+這個部分要先掌握著一個很重要的觀念， **在 React 的條件渲染(render) 與 JavaScript 一致，並沒有不同。** 一樣可以透過三元運算子或者 if 建立與目前 state 中狀態一致的 React element，並更新畫面(UI)。
+
+而渲染列表的部分同樣與 JavaScript 一致，我們可以**透過 `map` 方法回傳一個具有 React element 元素的陣列來達成。**
+
+接著，讓我們先個別看看怎麼撰寫，並在最後一樣透過情境來練習這個部分吧!
+
+## 條件 Render React element
+
+在 Vue 中如果我們需要透過條件判斷對應渲染的 DOM 部分，我們會透過 `v-if` 的方式達成:
+
+```html
+<template>
+  <div>
+    <p v-if="isShow">I'm here!</p>
+  </div>
+</template>
+```
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/stupefied-galileo-twose?file=/src/App.vue:244-245)。
+
+透過控制 `isShow` 的方式，決定是否要建立或銷毀這個 dom，而在 React 中則跟 JavaScript 的方式一樣，如果你曾經寫過類似下面的程式碼，那對於在 React 中如何條件渲染就不會太陌生:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/goofy-shannon-bkl34)。
+
+```javascript
+const dom = `
+  <div>
+    ${ isShow ? '<p>I\'m here!<p>' : null }
+  </div>
+`;
+```
+
+上述的方式是透過判斷 `isShow` 來決定是否渲染 `<p>I\'m here!</p>` ，接著讓我們看看如果是在 JSX 中的寫法，以 function component 為例:
+
+```jsx=
+const Test = () => {
+  return (
+    <div>
+      { isShow ? <p>I'm here!</p> : null }
+    </div>
+  );
+}
+```
+
+比較上面原生寫法與 React 的寫法是不是幾乎一樣呢?
+
+了解了條件渲染後，接著來看看如何關於列表渲染的部分。
+
+## 列表與 key
+
+如同前面提到的部分：「**透過 `map` 方法回傳一個具有 React element 元素的陣列來達成列表渲染。**」，來看看一個簡單的情境：
+
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/admiring-water-p2y7l?file=/src/App.js)。
+
+```jsx=
+import React, { Component } from "react";
+import "./styles.css";
+
+export default class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <h1>透過 map 渲染一個列表 List</h1>
+        <ul>
+          {[1, 2, 3, 4, 5].map((num) => {
+            return <li key={index}>這是數字: {num}。</li>;
+          })}
+        </ul>
+      </div>
+    );
+  }
+}
+```
+
+上述的寫法也可以寫成如下的方式：
+
+
+```jsx=
+import React, { Component } from "react";
+import "./styles.css";
+
+const arr = [1, 2, 3, 4, 5];
+
+const Elements = ({ arr }) => {
+  return arr.map((num, index) => {
+    return <li key={index}>這是數字: {num}。</li>;
+  });
+};
+
+export default class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <h2>透過 map 渲染一個列表 List</h2>
+        // ... 略
+        <hr />
+        <h2>另一種渲染列表的方式</h2>
+        <ul>
+          <Elements arr={arr} />
+        </ul>
+      </div>
+    );
+  }
+}
+
+```
+
+在 React 中可以透過不同的寫法達到相同的結果，是不是很彈性呢?
+
+關於列表渲染的部分，最後要提的是 Key 這個獨特的屬性，來看看 React 對於 key 的解釋:
+
+> Key 幫助 React 分辨哪些項目被改變、增加或刪除。在 array 裡面的每個 element 都應該要有一個 key，如此才能給予每個 element 一個固定的身份。
+
+透過 `key` 才能讓列表中的每一個 React element 都是唯一的，讓我們替上面的例子新增一個 `key` 吧！
+
+```jsx
+const arr = [1, 2, 3, 4, 5];
+
+const Elements = arr => {
+  return arr.map((num, index) => {
+    return <p key={ index }>這是數字: {num}。</p>;
+  });
+};
+
+const Test = () => {
+  return (
+    <div>
+      <Elements arr={ arr } />
+    </div>
+  )
+};
+```
+
+這邊需要注意的部分有以下幾點:
+
+1. React 不建議透過索引值作為 key，因為 key 可能會因為資料順序改變而改變 key 值，這對效能會產生不好的影響。
+2. 如果不明確的分配 key 值的話，預設會使用**索引值** 作為 key
+3. 如果資料是有固定的 `id` 值，請使用 `id` 作為 key 的值
+4. React Component 不能讀取透過 props.key 的方式讀取到 key 的值，如果需要，則額外提供其他名稱作為 prop 到元件中的值。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)

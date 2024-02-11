@@ -1,0 +1,192 @@
+---
+title: 把玩 vue-leaflet
+date: "2021-05-09 11:08:05"
+tags: ['Vue2', 'map']
+draft: false
+summary: ''
+---
+
+![](https://i.imgur.com/mxzFK5g.png)
+
+## 前言
+
+vue Leaflet 是一套將開源的地圖服務 [Leaflet](https://leafletjs.com/) 封裝成 vue 版本的服務，所以如果曾經使用過 Leaflet 的讀者相信在上手這一個套件可以很快瞭解怎麼使用。
+
+
+如果還沒有用過 [Leaflet](https://leafletjs.com/) 的讀者可以先前往筆者另外一篇 [把玩 Leaflet](https://penghuachen.github.io/2021/05/05/%E6%8A%8A%E7%8E%A9-Leaflet/) 文章先瞭解看看 Leaflet 怎麼使用哦！
+
+該篇文章以 [Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/) 的官方快速入門文件為依據並且一一測試篇幅中提到的部分，以及加上筆者自己額外過程中的理解而寫成的文章，有興趣的讀者可以前往查看。
+
+另外為了方便讀者閱讀，這裡整理出來方便讀者梳理文章的重點：
+
+1. 安裝 vue-leaflet
+2. 建立第一個地圖(Map)，設定座標中心點
+3. 使用圖層服務設定地圖風格
+4. 在地圖上畫出範圍(range)：以圓形(circle)和多邊形(polygon)為例
+5. 設定第一個 marker 、建立一個 marker 的點擊(click)事件與使用 popup
+6. 解決在 vue-leaflet 中 marker icon 無法顯示的問題
+7. 如何在 vue-leaflet 中使用 leaflet 提供的方法
+
+
+而本篇幅會依據使用情境的增加，逐步的更新上來，所以有興趣把玩 Leaflet 的讀者可以持續追蹤哦！
+
+## 安裝 vue-leaflet
+
+參考官方文件的安裝方式，這邊筆者透過 Yarn 的方式安裝：
+
+- Npm
+```bash=
+npm install leaflet vue2-leaflet --save
+```
+
+- Yarn
+```bash=
+yarn add leaflet vue2-leaflet
+```
+
+- CDN
+```htmlembedded=
+<link rel="stylesheet" href="//unpkg.com/leaflet/dist/leaflet.css" />
+<script src="//unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="//unpkg.com/vue2-leaflet"></script>
+```
+
+## 建立第一個地圖(Map)，設定座標中心點
+
+在 vue 我們可以透過註冊在全域的方式讓整個專案都可以使用 leaflet，也可以只在想要的 component 中使用，這邊採取在特定的 component 中使用的方式
+
+此外可以記得一個使用的要領： **vue-leaflet 把所有在 leaflet 使用的如 marker 等等都封裝成 component ，讓我們可以直接在 vue template 中使用**
+
+然後要記得無論採取哪一種都要在 `main.js` 中引入 leaflet 的 css 檔案哦！
+
+![](https://i.imgur.com/gxWV3wI.png)
+
+接著我們來建立第一個地圖：
+
+vue-leaflet **將 leaflet 的 map 封裝成 `LMap`，因此我們需要透過 `ref="myMap"` 的方式來使用 leaflet 中提供的方法**
+
+而透過 `this.$refs.myMap.mapObject` 取得的結果其實就和在 leaflet 中使用 `L.map('map')` 初始化地圖後取得的結果一樣(都會取得一個回傳的 mapOject)
+
+然後我們透過 `setView()` 為這個地圖設定一個中心點座標：
+
+![](https://i.imgur.com/phnwGhH.png)
+
+如果你有看到如下的畫面代表你已經成功建立地圖囉！
+
+至於什麼都看不到並不是因為壞掉，而是因為我們還沒有幫他加上圖層(tile layer)，接著我們來幫他加上圖層顯示地圖的內容吧！
+
+![](https://i.imgur.com/PLCD9XR.png)
+
+## 使用圖層服務設定地圖風格
+
+設定圖層風格時我們需要使用 `LTileLayer` component，並且設定好對應需要的參數資料。
+
+以目前的測試為例，我們要使用的是 [mapbox](https://www.mapbox.com/) 這個服務中圖層風格，所以我們如下的參數：
+
+![](https://i.imgur.com/Ohi75p3.png)
+
+如果不知道如何在 mapbox 中取得 `accessToken` 的話，可以參考 [request an access token](https://www.mapbox.com/studio/account/tokens/)
+
+至於有些參數為什麼要這樣設定則可以參考 [mapbox - Leaflet implementations](https://docs.mapbox.com/help/troubleshooting/migrate-legacy-static-tiles-api/#leaflet-implementations)
+
+沒意外的話，應該可以成功看到以下內容囉：
+
+![](https://i.imgur.com/osp0WnD.jpg)
+
+接著我們在地圖上設計些內容吧！
+
+## 在地圖上畫出範圍(range)：以圓形(circle)和多邊形(polygon)為例
+
+在 vue leaflet 中要畫出一個圓形的範圍，需要透過 `LCircle` 元件，可以設定的參數可以參考 [LCircle](https://vue2-leaflet.netlify.app/components/LCircle.html)。
+
+而要畫出一個多邊形則需要 `LPolygon` ，可以設定的參數則參考 [LPolygon](https://vue2-leaflet.netlify.app/components/LPolygon.html)
+
+接著我們在測試範例中加上這兩個元件吧！
+
+我們將圓形和多邊形範圍設定需要的參數設定好
+
+- 圓形
+![](https://i.imgur.com/Epc9LkL.png)
+
+- 多邊形
+![](https://i.imgur.com/pLh0W85.png)
+
+並在 `template` 中使用 `LCircle` 、 `LPolygon` 元件
+
+![](https://i.imgur.com/zMMQN0d.png)
+
+設定之後可以在地圖上看到以下內容囉！
+
+![](https://i.imgur.com/VG8swrq.jpg)
+
+## 設定第一個 marker 、建立一個 marker 的點擊(click)事件與使用 popup
+
+marker 應該是在地圖上最常遇到的應用，通常會搭配 popup 視窗呈現一些資訊
+
+而在 vue leaflet 中使用的方式也很簡單
+
+在 `template` 中將 `LMarker` 寫在 `LMap` 中：
+
+![](https://i.imgur.com/sC0OpJU.png)
+
+然後設定好座標 `lat-lng`:
+
+![](https://i.imgur.com/FMYTiis.png)
+
+就可以在畫面上看到 marker 囉！
+
+![](https://i.imgur.com/SH58biZ.jpg)
+
+接著我們替這個 marker 建立一個點擊事件，並且在被點擊時顯示彈跳視窗，內容為目前這個 marker 的座標資訊
+
+![](https://i.imgur.com/Vv39qhE.png)
+
+在 `LMarker` 中設定一個 `LPopup` ，我們就可以把想要的內容呈現在 popup 中，所以當點擊 marker 時，我們可以看到這樣的呈現：
+
+![](https://i.imgur.com/4JetJG8.jpg)
+
+## 解決在 vue-leaflet 中 marker icon 無法顯示的問題
+
+如果是第一次使用 `LMarker` 時可能會發現 Icon 無法正常顯示，而這部分在文件中也有提到解決的方案，可以參考 [fix marker icon missing in vue-leaflet](https://vue2-leaflet.netlify.app/quickstart/#marker-icons-are-missing) 篇幅。
+
+讓我們在專案中將這個修復方案加上：
+
+![](https://i.imgur.com/yaCHf0n.png)
+
+## 如何在 vue-leaflet 中使用 leaflet 提供的方法
+
+在 Leaflet 中，調用它提供的方法通常都會是透過 `L` 這個 reference 來呼叫，而這在 vue-leaflet 如果想要的話也是可以的
+
+這裡我們設計一個情境：不透過 `LMarker` 建立一個 marker，改用 `L.maker` 的方式在地圖上再加入一個 marker，並可以點擊出現一個資訊視窗呈現一些內容
+
+首先我們要使用 `L` 這個 reference 必須先引入：
+
+![](https://i.imgur.com/p6SJbTq.png)
+
+然後在初始化地圖時建立一個 marker:
+
+![](https://i.imgur.com/DtJZQib.png)
+
+如果是單純使用 Leaflet 的話，寫法就會如下方的方式在地圖中加入我們需要的內容
+
+
+沒意外的話，可以成功看到一個直接開啟的訊息視窗囉！
+
+![](https://i.imgur.com/1ZcmIC2.jpg)
+
+## 測試範例
+
+測試範例，[點擊前往](https://codesandbox.io/s/vue-leaflet-43cpe?file=/src/components/MapComponent.vue)。
+
+## 參考
+
+- [vue leaflet](https://vue2-leaflet.netlify.app/)
+- [Leaflet](https://leafletjs.com/)
+- [把玩 Leaflet](https://penghuachen.github.io/2021/05/05/%E6%8A%8A%E7%8E%A9-Leaflet/)
+- [Leaflet Quick Start Guide](https://leafletjs.com/examples/quick-start/)
+- [mapbox](https://www.mapbox.com/)
+- [request an access token](https://www.mapbox.com/studio/account/tokens/)
+- [mapbox - Leaflet implementations](https://docs.mapbox.com/help/troubleshooting/migrate-legacy-static-tiles-api/#leaflet-implementations)
+- [LCircle](https://vue2-leaflet.netlify.app/components/LCircle.html)
+- [LPolygon](https://vue2-leaflet.netlify.app/components/LPolygon.html)
+- [fix marker icon missing in vue-leaflet](https://vue2-leaflet.netlify.app/quickstart/#marker-icons-are-missing)

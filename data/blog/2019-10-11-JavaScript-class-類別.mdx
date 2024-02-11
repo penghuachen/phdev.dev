@@ -1,0 +1,242 @@
+---
+title: JavaScript class 類別
+date: "2019-10-11 13:59:01"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# JavaScript class 類別
+
+今天要學習的部分是 `class` 類別。
+
+
+`class` 類別是 ES6 新引進的語法，但總是被戲稱為「語法糖」，至於原因讓我們來看看 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Classes) 怎麼描述這個語法:
+
+> ECMAScript 6 中引入了類別 (`class`) 作為 JavaScript 現有原型程式(prototype-based)繼承的語法糖。 類別語法並不是要引入新的物件導向繼承模型到 JavaScript 中，而是提供一個更簡潔的語法來建立物件和處理繼承。
+
+也因此在 JavaScript 的 `class` 其實與多數語言的對於 `class` 定義是不太一樣的。
+
+接下來，讓我們看看如何透過這個語法改寫傳統函式建立物件與處理繼承的部分吧。
+
+## ES6 `class` 類別比較與使用
+
+首先，我們先透過傳統寫法來建立物件的原型。
+
+先來看看這個測試的例子：
+
+```javascript
+function Person(name,age,habbit){
+  this.name = name;
+  this.age = age;
+  this.habbit = habbit;
+}
+
+Person.prototype.sayHi = function(){
+  console.log('Hello!');
+}
+
+let Bill = new Person('Bill',22,'Read books');
+console.log(Bill);
+Bill.sayHi();
+```
+
+在 ES6 之前，我們都是透過這樣的方式設定原型物件並透過繼承這個原型來建立物件。
+
+![Day16-1](https://lh3.google.com/u/0/d/1KP3uwH8_M-8_yZsC2cSt7fn_PhbYX9Uy=w1318-h1530-iv1)
+
+接下來讓我們看看如何使用 ES6 `class` 達到同樣的目的：
+
+```javascript
+class Person{
+  constructor(name,age,habbit){
+    this.name = name;
+    this.age = age;
+    this.habbit = habbit;
+  }
+  
+  sayHi(){
+    console.log('Hello');
+  }
+}
+
+const Bill = new Person('Bill',22,'Read books');
+console.log(Bill);
+Bill.sayHi();
+```
+
+![Day16-2](https://lh3.google.com/u/0/d/1HQJNBLxJRRtnpb6NVznChbdaItiwu4Z3=w1318-h1530-iv1)
+
+來逐一的比較兩者的差別吧！
+
+首先是:
+
+```javascript
+// 此區塊僅用於比較差異，無法正常運作
+// 傳統透過 function 建立原型物件的寫法
+function Person(name,age,habbit){
+  this.name = name;
+  this.age = age;
+  this.habbit = habbit;
+}
+
+// class 類別建立原型物件的寫法
+class Person{
+  constructor(name,age,habbit){
+    this.name = name;
+    this.age = age;
+    this.habbit = habbit;
+  }
+}
+```
+
+不難看出其實 ==`constructor(){...}` 與 `function Person(){...}`都是用於新增原型的特性==。
+
+`constructor()` 用來建立和初始化類別的物件，且一個類別只能有一個 `constructor()`，否則就會報錯。
+
+再來是:
+
+```javascript
+// 此區塊僅用於比較差異，無法正常運作
+// 傳統透過 `prototype` 新增原型方法的方式
+Person.prototype.sayHi = function(){
+  console.log('Hello!');
+}
+
+// class 類別新增原型方法的方式
+class Person{
+  constructor(){
+    ...
+  }
+  
+  sayHi(){
+    console.log('Hello');
+  }
+}
+```
+
+可以發現 class 的語法將 `sayHi` 方法包於自己的區塊中。
+  
+另外還有一個必須要提醒的部分是: ==一定要先宣告 `class`才可以使用，否則就會報錯。==
+
+```javascript
+const Bill = new Person('Bill',22,'Read books');
+console.log(Bill);
+Bill.sayHi();
+
+class Person{
+  constructor(name,age,habbit){
+    this.name = name;
+    this.age = age;
+    this.habbit = habbit;
+  }
+  
+  sayHi(){
+    console.log('Hello');
+  }
+}
+```
+
+![Day16-3](https://lh3.google.com/u/0/d/1hzREit1BnylLDoZojuoTMPk3jYr8BXXE=w1318-h1530-iv1)
+
+## 靜態方法 (static method)
+
+如果將 `class` 類別中的方法設定為 `static` 的話，這個方法可以==直接透過這個類別呼叫，但是不能透過被建立的物件實體呼叫==
+
+來改寫一下上面的例子：
+
+```javascript
+class Person{
+  constructor(name,age,habbit){
+    this.name = name;
+    this.age = age;
+    this.habbit = habbit;
+  }
+  
+   static sayHi(){
+    console.log('Hello');
+  }
+}
+
+let Bill = new Person('Bill',22,'Read books');
+console.log(Bill);
+Person.sayHi();
+Bill.sayHi();
+```
+
+從結果可以看到設定為 `static` 的方法不能讓被建立的物件使用，但卻可以給 `Person` 類別做使用。
+
+
+![Day16-4](https://lh3.google.com/u/0/d/1mho8mk8ng_TBgHl9TEt28eZw0SNhQuHm=w1318-h1530-iv1)
+
+
+##  `extends` 建立子類別 與 透過 `super` 使用主類別的特性
+
+如果除了==主類別的設定滿足不了當前建立物件的需求==，這時候就可以使用 `extends` 。
+
+透過 `extends` 可以建立自己額外擴充需求的子類別。
+
+而透過 `super` 則可以使用主類別定義好的的特性與方法。
+
+來看看這個測試例子:
+
+```javascript
+class Person{
+  constructor(name,age,habbit){
+    this.name = name;
+    this.age = age;
+    this.habbit = habbit;
+  }
+  
+    sayHi(){
+    console.log('Hello');
+  }
+}
+
+class Assets extends Person{
+  constructor(name,age,habbit,house){
+    super(name,age,habbit);
+    this.house = house;
+  }
+  sayHi(){
+    super.sayHi();
+    console.log('Hello everyone');
+  }
+}
+
+const Bill = new Assets('Bill',22,'Read books',1);
+console.log(Bill);
+Bill.sayHi();
+```
+
+從結果可以得到幾個結論:
+
+1. 透過 `extends` 擴充了 `Assets` 子類別，並新增 `house` 特性到這個子類別中。
+2. 因為使用 `super` 語法，所以可以使用主類別 `Person` 的特性(`name`、`age`、`habbit`、`habbit`)以及 `sayHi` 這個方法。
+3. 當 `Assets` 子類別有自己的 `sayHi` 方法時，如果也需要使用 `Person` 主類別的方法，則必須透過 `super` 語法，才可以得到兩個值分別為 `Hello` 、 `Hello everyone` 。
+
+![Day16-5](https://lh3.google.com/u/0/d/1bO7PEhX-jsPh6QwXEukil7Kilb8dfp6i=w1318-h1530-iv1)
+
+## `instanceof`
+
+如果要判斷某個實體是否透過某個類別建立而成，就需要用 `instanceof`。
+
+來看看測試例子:
+
+```javascript
+class FormatError extends Error{
+  constructor(msg){
+    super(msg)
+  }
+}
+const err = new FormatError('Error');
+console.log(`err 實體是否是透過 FormatError 類別建立: ${err instanceof FormatError}`);
+```
+
+`err instanceof FormatError` 表示==檢驗 `err` 是否是透過 `FormatError` 類別建立而成==。
+
+這邊回傳 `true` ，所以代表 `err` 是透過 `FormatError` 類別建立而成。
+
+![Day16-６](https://lh3.google.com/u/0/d/14Z2nqH1qz4rMHtQVZ8csTYABZtl0fLC2=w1318-h1530-iv1)
+
+關於 class 類別的學習就到這裡囉

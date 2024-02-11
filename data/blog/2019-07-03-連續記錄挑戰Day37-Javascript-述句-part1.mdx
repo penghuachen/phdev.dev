@@ -1,0 +1,240 @@
+---
+title: 連續記錄挑戰Day37-Javascript-述句-part1
+date: "2019-07-03 22:26:20"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 述句(statements) part1
+
+述句(statements)就像是js的句子。
+
+當述句被執行時，會執行句中的設定，使得某些事情發生。
+
+
+Outline:
+
+- 宣告述句
+    - var 
+    - function
+- 條件句
+    - if
+    - switch
+- 迴圈
+    - while
+    - do/while
+    - for
+
+## 宣告述句
+
+### var 
+
+宣告一組變數或一個變數。
+
+```js
+    var a = 'Hello world!';
+    var b = 1,
+        c = function(){return x*x;};
+```
+
+### function 
+
+function關鍵字來用定義函式，而且有三種建立函式的方式：
+
+- 函數宣告式 (這裡指的函式宣告述句)
+    ```js
+        function test(x){return x*x;}
+    ```
+- 函數運算式
+    ```js
+        //這裡的函式也稱為匿名函式
+        var test = function(x){return x*x;}
+        
+        //這裡的函式也可以有名稱
+        var test = function own(x){return x*x;}
+```
+
+- 透過 new Function關鍵字建立
+```js
+    //注意F大寫，且此方法會產生一個新的Function物件。
+    var test = new Function('x','return x*x')
+```
+## 條件句
+
+### if 條件句
+
+- if 
+- if-else
+- if-elseif-else
+
+透過設定的條件，當條件為true時執行對應的內容，否則執行條件為false中的內容。
+
+
+缺點:if條件句會將值帶入所有條件中進行判斷，直到符合條件後停止。
+
+Ex1: if條件句
+```js
+    /*題目：當數字大於20時，顯示:「你輸入的數字大於20」*/
+    /*備註:因為沒有設定條件為false的內容，所以當數字小於20時不會有任何顯示。*/
+    
+    var number = 25;
+    if(number >20){console.log('你輸入的數字大於20');}
+```
+
+Ex2: if-else條件句
+
+```js
+    /*題目：當數字大於20時，顯示:「你輸入的數字大於20」，否則顯示「你輸入的數字小於20」*/
+    
+    var number = 25;
+    if(number > 20){console.log('你輸入的數字大於20');}
+    else{console.log('你輸入的數字小於20');}
+```
+
+Ex2: if-elseif-else條件句
+
+```js
+    /*題目：當數字小於20時，顯示:「你輸入的數字小於20」，當數字大於20且小於50時，顯示:「你輸入的數字介於20~50之間」，否則顯示「你輸入的數字大於50」*/
+    
+    var number = 25;
+    if(number < 20){console.log('你輸入的數字小於20');}
+    else if(number > 20 && number < 50){console.log('你輸入的數字介於20~50之間');}
+    else {console.log('你輸入的數字大於50');}
+```
+    
+### switch 條件句
+- 語法: 
+
+    ```js
+        switch(expression){
+            statement
+            }
+    ```
+    
+- **switch會透過expression與*case標籤後面的運算式判斷是否符合(使用===判斷)*，才執行條件中的內容。**
+- 如果**完全不符合條件，則找default的條件式執行**，然而如果沒有default，則跳出switch程式碼。
+- ECMAScript標準允許每個case後面可以是任意運算式，但使用switch最好的方式還是將case後的運算式限制為**常數運算式**。
+
+Ex1: 
+
+```js
+    /*swtich會透過expression與case標籤的運算值比較(使用===判斷)獲得符合條件的值*/
+    
+    /*判斷輸入的顏色為何，顯示對應的文字*/
+    var color = 'blue';
+    switch(color){
+        case 'red':
+            console.log('輸入為red');
+            break;
+        case 'blue':
+            console.log('輸入為blue');
+            break;
+        default:
+            console.log('沒有符合的選項');
+            break;
+    }
+    
+```
+
+Ex2:實現和if條件式相同的判斷方式:
+
+```js
+/*
+  題目：當數字小於20時，顯示:「你輸入的數字小於20」，
+  當數字大於20且小於50時，顯示:「你輸入的數字介於20~50之間」，否則顯示「你輸入的數字大於50」    
+*/
+/*
+  1.將switch的expression設定為true時，會與case中的運算式比較。
+  2.case後面的運算式會得到為true/false並找出與expression匹配的條件。
+*/
+var number = 23;
+switch (true) {
+  case number < 20:
+    console.log('你輸入的數字小於20');
+    break;
+  case number > 20 && number < 50:
+    console.log('你輸入的數字介於20~50之間');
+    break;
+  case number > 50:
+    console.log('你輸入的數字大於50');
+    break;
+  default:
+    break;
+  }
+```
+
+
+## 迴圈 
+
+透過條件的限定，當條件符合時，重複執行某段程式碼。
+
+### while 
+
+條件符合時會執行迴圈中的內容
+
+- 語法：
+
+  ```js
+      //當expression為true時，執行statement
+      //statement中一定要有個會隨著每次執行時而改變的變數，不然會造成無窮迴圈
+      while(expression){
+          statement
+      }
+  
+  ```
+  Ex1:
+
+  ```js
+
+      /*當b=5時，跳出while迴圈*/
+      var b = 0;
+      while(b<5){
+      /*b 隨著每次執行時而改變，不然會造成無窮迴圈*/
+          console.log(b);
+          b++;
+      }    
+
+  ```
+    
+### do/while
+
+程式碼會先執行一次後在依照條件判斷是否要繼續執行
+
+```js
+
+  /* 先執行一次console.log(b)後在依照條件判斷下次是否執行*/
+  
+  var b = 0;
+  do{
+      console.log(b);
+      b++;
+  }while(b<1);
+
+```
+
+### for
+
+條件符合時會執行迴圈中的內容
+
+- 語法：
+
+```js
+  /*
+      initialize:初始化值，是個述句
+      condition : 條件判斷
+      increment: initialize變數的增量
+  */
+  
+  for(initialize;condition;increment){
+      statement
+  }
+```
+
+Ex:
+
+```js
+  for(var i=0;i<5;i++){
+      console.log(i);
+  }
+```

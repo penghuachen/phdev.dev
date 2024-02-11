@@ -1,0 +1,82 @@
+---
+title: 連續記錄挑戰Day13-純CSS手刻三角形
+date: "2019-06-09 13:42:16"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 純CSS手刻三角形
+
+對於手刻三角形之前一直都搞不清楚，也常常為了特定方向的三角形而弄了半天，所以剛好趁著連續記錄這個挑戰順便記錄一番。
+
+而這篇記錄文章會依照下列順序記錄：
+
+1. 關於盒模型 (Box model)
+2. 比較1 : border-width不同 
+3. 比較2 : 保留比較1的border-width設定，將**內容區寬度及高度變成50px並為四邊border設定不同顏色**
+4. 比較3 : 保留比較1的border-width設定，將**寬度及高度變成0px並為四邊border設定不同顏色**
+
+
+
+
+## 關於盒模型(box model)
+
+![](https://i.imgur.com/YOlDrTp.png)
+
+## 比較1：border-width不同 
+
+- ![](https://i.imgur.com/AsgWbZn.png)
+
+- ![](https://i.imgur.com/oFrU3M2.png)
+         
+## 比較2:保留比較1的border-width設定，將**內容區寬度及高度變成50px並為四邊border設定不同顏色**：
+
+- ![](https://i.imgur.com/ictROBx.png)
+
+- ![](https://i.imgur.com/3vf3kxw.png)
+    
+    
+## 比較3:保留比較1的border-width設定，將**寬度及高度變成0px並為四邊border設定不同顏色**：
+
+- 顏色設定：border-color: #aad #ada #dda #dad;
+
+- ![](https://i.imgur.com/DBYgMSi.png)
+
+## 活用：
+
+示意圖：![](https://i.imgur.com/0G74DVN.png)
+
+1. 狀況ㄧ：只顯示d區塊
+    ```html
+    <div class="box"></div>
+    ```
+    ```html
+    .box{
+        width:0px;
+        height:0px;
+        border-style:solid;
+        border-color: transparent transparent transparent #dad;
+        border-width:80px;
+    }
+    ```
+
+---
+
+2. 狀況二：顯示b+c區塊
+    ```html
+    <div class="box"></div>
+    ```
+    ```html
+    .box{
+            width:0px;
+            height:0px;
+            border-style:solid;
+            border-color: transparent #ada #dda transparent;
+            border-width:80px;
+    }
+    ```
+
+
+
+> Ref : [Wibibi Box model](https://www.wibibi.com/info.php?tid=CSS_box_model_%E7%9B%92%E5%AD%90%E6%A8%A1%E5%9E%8B)

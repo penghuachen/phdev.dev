@@ -1,0 +1,486 @@
+---
+title: Class-based Component 的生命週期
+date: "2020-09-22 06:43:06"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# Class-based Component 的生命週期
+
+今天要學習關於 Class-based Component 的生命週期(lifecycle)，了解元件(Component)在建立、更新及銷毀時會經歷過哪些階段、元件和子元件之間的建立順序與我們可以在這些時候做些什麼事情。
+
+
+而這些生命週期的方法只能在**Class-based Component 中使用，在 Function Component 中則是需要透過 React hooks 的方式達成，但這個我們留待後面的篇幅在做學習。**
+
+而 Class-based Component 的生命週期會拆分兩篇來做學習，今天先透過測試範例，一步步了解 Class-based Component 中建立元件、更新元件以及銷毀元件時會用到的生命週期方法:
+
+明天的部分則是針對這些方法來了解官方的定義。
+
+接著讓我們趕緊進入正題吧!
+
+## Class component 的生命週期
+
+在官方文件中有提供一份清楚易懂的[生命週期示意圖](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)。
+
+![](https://i.imgur.com/Ongt46L.png)
+
+接著，讓我們先透過幾個簡單的測試範例來了解關於生命週期，後續再來看看官方對於每個方法又是怎麼定義的吧!!
+
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/runtime-pine-8imyu)
+
+
+首先我們建立 `Card` 元件，並在 App 中將 `state` 的中 `persons` 的資料 `props` 到 Card 元件:
+
+```jsx=
+// App.js
+import React, { Component } from 'react';
+import './App.css';
+import Card from './Card';
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      persons: [
+        { name: 'Bill', age: 27, habbit: 'Play ball'}
+      ]
+    }
+  }
+  render() {
+    return (
+      <div className="App">
+        <Card persons={ this.state.persons }/>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+```jsx=
+// Card.js
+
+import React, { Component } from 'react';
+import './index.css';
+
+class Card extends Component {
+  render() {
+    return (
+      <div className="card">
+        <h1>{ this.props.persons[0].name }</h1>
+        <p>{ this.props.persons[0].age }</p>
+        <p>{ this.props.persons[0].habbit }</p>
+      </div>
+    );
+  }
+}
+
+export default Card;
+```
+
+接著在 `App` 這個 containers 與 `Card` 這個元件中，我們依據官方提供的示意圖，設定好生命週期的方法。
+
+這邊我們先觀察 **Mounting 時的階段**，依如下順序在 App, Card 中設定:
+
+- `constructor`
+- `static getDerivedStateFromProps`
+- `render`
+- `componentDidMount`
+
+```jsx=
+// App.js Mounting life cycle
+import React, { Component } from 'react';
+import './App.css';
+import Card from './Card';
+
+class App extends Component {
+  constructor() {
+    console.log('[App.js]: constructor');
+    super();
+    this.state = {
+      persons: [
+        { name: 'Bill', age: 27, habbit: 'Play ball'}
+      ],
+    }
+  }
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[App.js]: getDerivedStateFromProps');
+    console.log('props', props);
+    console.log('state', state);
+    console.log('----------------');
+    return state;
+  }
+
+  componentDidMount() {
+    console.log('[App.js]: componentDidMount');
+  }
+  render() {
+    console.log('[App.js]: render');
+    return (
+      <div className="App">
+        <Card persons={ this.state.persons }/>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+```jsx=
+// Card.js Mounting life cycle
+import React, { Component } from 'react';
+import './index.css';
+
+class Card extends Component {
+  constructor() {
+    super();
+    console.log('[Card.js]: constructor');
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[Card.js]: getDerivedStateFromProps');
+    console.log('props', props);
+    console.log('state', state);
+    console.log('----------------');
+    return null;
+  }
+
+  componentDidMount() {
+    console.log('[Card.js]: componentDidMount');
+  }
+
+  render() {
+    console.log('[Card.js]: render');
+    return (
+      <div className="card">
+        <h1>{ this.props.persons[0].name }</h1>
+        <p>{ this.props.persons[0].age }</p>
+        <p>{ this.props.persons[0].habbit }</p>
+      </div>
+    );
+  }
+}
+
+export default Card;
+```
+
+此時會得到這樣的結果：
+
+![](https://i.imgur.com/LZnSNWk.png)
+
+而其中在 `Card` 元件中使用 `getDerivedStateFromProps` 方法會報錯的部分是因為 `Card` 元件這邊是接收 App `props` 進來的值，而本身沒有 init state，所以才會報錯，而稍後我們會了解 `getDerivedStateFromProps` 這個方法的定義。
+
+不過從結果可以得知，==當 App containers 中有子元件 Card 時，在 App 執行到 `render` 方法時，並不會先完成 App 的掛載(componentDidMount)，而是會進入到 Card 中並依據這個元件的生命週期建立後，最後才會回到 App 並完成掛載(componentDidMount)==。
+
+
+接著讓我們往 **Updating 的階段**繼續前進，這邊我們設定一個情境:
+
+點擊卡片時會將名字從「Bill」切換成 「Henry」。
+
+並將如下的生命週期方法依序設定:
+
+- `static getDerivedStateFromProps`
+- `shouldComponentUpdate`
+- `render`
+- `getSnapshotBeforeUpdate`
+- `componentDidUpdate`
+
+相關測試範例： [點擊前往](https://codesandbox.io/s/affectionate-easley-zp0j1?file=/src/App.js)。
+
+
+```jsx=
+// App.js updating life cycle
+import React, { Component } from 'react';
+import './App.css';
+import Card from './Card';
+
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      persons: [
+        { name: 'Bill', age: 27, habbit: 'Play ball'}
+      ],
+    }
+  }
+
+  changeNameHandler = () => {
+    this.setState(state => {
+      const arr = state.persons;
+      arr[0].name = 'Henry';
+      return {
+        persons: arr
+      }
+    });
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[App.js]: getDerivedStateFromProps');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return state;
+  }
+
+  shouldComponentUpdate() {
+    console.log('[App.js]: shouldComponentUpdate');
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(props, state) {
+    console.log('----------------');
+    console.log('[App.js]: getSnapshotBeforeUpdate');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return null;
+  }
+
+  componentDidUpdate() {
+    console.log('[App.js]: componentDidUpdate'); 
+  }
+
+  render() {
+    console.log('[App.js]: render');
+    return (
+      <div className="App">
+        <Card 
+          persons={ this.state.persons } 
+          changeNameHandler={ this.changeNameHandler }
+        />
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+```jsx=
+// Card.js updating life cycle
+import React, { Component } from 'react';
+import './index.css';
+
+class Card extends Component {
+  constructor() {
+    super();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[Card.js]: getDerivedStateFromProps');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return null;
+  }
+
+  shouldComponentUpdate() {
+    console.log('[Card.js]: shouldComponentUpdate');
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(props, state) {
+    console.log('----------------');
+    console.log('[Card.js]: getSnapshotBeforeUpdate');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return null;
+  }
+
+  componentDidUpdate() {
+    console.log('[Card.js]: componentDidUpdate'); 
+  }
+  render() {
+    console.log('[Card.js]: render');
+    return (
+      <div className="card" onClick={ this.props.changeNameHandler }>
+        <h1>{ this.props.persons[0].name }</h1>
+        <p>{ this.props.persons[0].age }</p>
+        <p>{ this.props.persons[0].habbit }</p>
+      </div>
+    );
+  }
+}
+
+export default Card;
+```
+
+可以取得以下結果：
+
+![](https://i.imgur.com/FrNGvte.png)
+
+==這邊比較特別的大概是執行 `getSnapshotBeforeUpdate` 的部分，並不是先完成 `Card` 元件更新的生命週期方法後回到 App 中，而是先回到 App 中執行完 `getSnapshotBeforeUpdate` 方法後才會完成 `Card` 元件的更新，接著才是 `App` 的更新==。
+
+
+
+最後一個階段是 **Unmounting**，這個階段**會在 component 被 unmount 或者 destroy 的時候觸發**，這邊我們一樣給一個情境:
+
+點擊按鈕時，會將卡片隱藏起來
+
+相關測試範例： [點擊前往](https://codesandbox.io/s/frosty-rain-bfoqo)。
+
+
+```jsx=
+// App.js unmounting life cycle
+import React, { Component } from 'react';
+import './App.css';
+import Card from './Card';
+
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      persons: [
+        { name: 'Bill', age: 27, habbit: 'Play ball'}
+      ],
+      isHide: false
+    }
+  }
+
+  changeNameHandler = () => {
+    this.setState(state => {
+      const arr = state.persons;
+      arr[0].name = 'Henry';
+      return {
+        persons: arr
+      }
+    });
+  }
+
+  hideCardHandler = () => {
+    this.setState({ persons: [] });
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[App.js]: getDerivedStateFromProps');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return state;
+  }
+
+  shouldComponentUpdate() {
+    console.log('[App.js]: shouldComponentUpdate');
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(props, state) {
+    console.log('----------------');
+    console.log("props", props);
+    console.log("state", state);
+    console.log('----------------');
+    return null;
+  }
+
+  componentDidUpdate() {
+    console.log('[App.js]: componentDidUpdate'); 
+  }
+
+  componentWillUnmount() {
+    console.log('[App.js]: componentWillUnmount');
+  }
+
+  render() {
+    console.log('[App.js]: render');
+    return (
+      <div className="App">
+        { this.state.persons.map(person => (
+          <Card 
+            persons={ this.state.persons } 
+            changeNameHandler={ this.changeNameHandler }
+            isHide={ this.state.isHide }
+          /> 
+        ))}
+        <button onClick={ this.hideCardHandler }>隱藏卡片</button>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+```jsx=
+// Card.js unmounting life cycle
+import React, { Component } from 'react';
+import './index.css';
+
+class Card extends Component {
+  constructor() {
+    super();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('----------------');
+    console.log('[Card.js]: getDerivedStateFromProps');
+    console.log(props);
+    console.log(state);
+    console.log('----------------');
+    return null;
+  }
+
+  shouldComponentUpdate() {
+    console.log('[Card.js]: shouldComponentUpdate');
+    return true;
+  }
+
+  getSnapshotBeforeUpdate(props, state) {
+    console.log('----------------');
+    console.log('[Card.js]: getSnapshotBeforeUpdate');
+    console.log(props);
+    console.log(state);;
+    console.log('----------------');
+    return null;
+  }
+
+  componentDidUpdate() {
+    console.log('[Card.js]: componentDidUpdate'); 
+  }
+
+  componentWillUnmount() {
+    console.log('[Card.js]: componentWillUnmount');
+  }
+
+  render() {
+    console.log('[Card.js]: render');
+
+    return (
+      <div className="card" onClick={ this.props.changeNameHandler }>
+        <h1>{ this.props.persons[0].name }</h1>
+        <p>{ this.props.persons[0].age }</p>
+        <p>{ this.props.persons[0].habbit }</p>
+      </div>
+    );
+  }
+}
+
+export default Card;
+```
+
+可以得到執行結果如下:
+
+![](https://i.imgur.com/ZvAeyxj.png)
+
+
+由於被 destroy 的是 `Card` 元件，所以可以發現在 `App` 中的 life cycle 一樣會執行，但是 `Card` 元件則是只有觸發了 ComponentWillUnmount 方法。
+
+以上就是關於 Class-based component 中從建立元件、更新元件以及銷毀元件的生命週期展示，下個篇幅就針對上述的生命週期方法，看看官方是怎麼定義的吧!
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [React Lifecycle Methods diagram](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)

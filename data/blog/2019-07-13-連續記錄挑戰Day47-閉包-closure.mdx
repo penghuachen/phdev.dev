@@ -1,0 +1,155 @@
+---
+title: 連續記錄挑戰Day47-閉包(closure)
+date: "2019-07-13 18:44:52"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# JavaScript 閉包(Closure)
+## 閉包(closure)要先懂的一些觀念
+
+1. JavaScript在執行時變數(variable)與函式(function)的流程
+2. 範疇鍊(scope chain)
+3. 閉包可以保留函式執行結束後，其外層作用域函式的變數
+
+
+接下來就來一一對於前面三點做個深入的理解
+
+### JavaScript在執行時變數與函式的運作
+
+1. JavaScript在執行時，會將變數、函式存入記憶體(hoisting行為)
+2. 當變數被賦予值時，將值指定給變數
+3. 函式被調用時，會建立自己的執行環境(Execution Context)，並將函式中的變數或函式一併存入記憶體中等待後續的執行
+4. 執行完成後，JavaScript 會執行垃圾回收的行為(garbage collection)，將執行完成的函式、變數等一併清除。
+
+### 範疇鍊(scope chain)
+
+當函式的變數在 ==自己的範疇(scope)中找不到符合的值時，會往外層範疇(scope)尋找==，直到找到全域後才停止，而這也稱為範疇鍊(scope chain)。
+
+來看看這個測試例子了解一下範疇鍊(scope chain):
+
+```javascript
+var text = "This is a text";
+function getText(){
+  console.log(text);
+}
+getText();
+```
+
+`getText` 函式中因為沒有變數 `text`，所以往外層的全域尋 `text` 變數並使用它的值 `This is a text`。
+
+![Day15-1](https://lh3.google.com/u/0/d/1cwrmXWRupCUot56gHmjNo4h3lrhu9rsG=w1314-h1530-iv1)
+
+
+### 閉包可以保留函式執行結束後，在該函式裡面的變數
+
+直接透過一個測試例子來看看:
+
+```javascript
+function outerScope(){
+  var scope = 'This is outer scope value'; 
+  return function(){
+    return scope;
+  }
+}
+
+var getText = outerScope();
+console.log(getText);
+console.log(getText());
+```
+
+來看看程式碼執行的流程:
+
+1. JavaScript執行時，將 `outerScope` 函式 、 `getText` 變數 存入記憶體中，等待被執行。
+2. 當要取得 `getText` 變數的值時， `outerScope` 函式被執行，建立 `outerScope` 函式的執行環境，回傳內部的函式，到這裡所獲得的是 `console.log(getText);` 的結果。
+3. `outerScope` 函式執行完成後會被JavaScript清除，但是 `scope` 變數會被保留，==因為最內層的函式需要在被執行時取得 `scope` 變數的值。==
+4. 而此時的 `getText` 的值是一個函式，所以當執行這個函式時，裡面的 `scope` 變數在自己的範疇(scope)找不到這個變數，所以往外層 `outerScope` 函式中尋找並得到值 `This is outer scope value`，這裡是`console.log(getText());` 的結果。
+
+而這就是一個完整閉包的運作流程。
+
+![Day15-2](https://lh3.google.com/u/0/d/1gtw13qB6sPD_2Sx_S0ao646GGJdXVhlJ=w1314-h1530-iv1)
+
+
+## 讓我們再看看一個經典的例子:
+
+```javascript
+function test(){
+  var arr =[];
+  for(var i = 0; i < 3; i++){
+    arr.push(function(){
+      console.log(i);
+    })
+  }
+  return arr;
+}
+var result = test();
+result[0]();
+result[1]();
+result[2]();
+```
+
+此時 `result` 的值為一組儲存了三個函式的元素，當依序取出函式中的 `i` 的值時，預期要得到的值分別為 `0`、`1`、`2`。
+
+但透過下圖可以發現結果卻不如預期:
+
+![Day15-3](https://lh3.google.com/u/0/d/1sAmZ4KRA0k1YorITnkUbESm1PFfZL_ge=w1314-h1530-iv1)
+
+來試著了解程式執行的操作流程:
+
+1. JavaScript執行時，將 `test` 函式 、 `result` 變數 存入記憶體中，等待被執行。
+2. 當要取得 `result` 變數的值時， `test` 函式被執行，建立 `test` 函式的執行環境，`for` 迴圈會依序將函式作為元素值存入陣列中，這邊要注意的是==作為陣列元素存入的函式還沒有被執行，所以並不會得到值為 `0`、`1`、`2`。==
+3. 當依序執行 `result[0]()`、`result[1]()`、`result[2]()`時，因為閉包(closure)的觀念，內部函式會取得 `for` 迴圈的 `i` 值，==此時的 `i` 值則是已經跑完 `for` 迴圈後的值，而且因為處於相同的範疇(scope)，所以所有的執行結果最後都會拿到值為 `3`==
+
+因為 JS 在ES6之前是 ==函式範疇(function scope)==，所以上述的程式碼在每次執行時，`i` 都是處於同一個範疇(scope)中，進而得到上述的結論。
+
+那要怎麼樣才能得到預期的結果，輸出為 `0`、`1`、`2` 呢?
+
+剛剛有提到因為處於同一個範疇(scope)中而導致不是預期的結果，所以是不是 ==讓每次的 `i` 值都處於不同的範疇(scope)中就可以解決了?==
+
+## 兩種建立新的範疇(scope)方式:
+
+1. IIEF 立即函式
+2. ES6之後的 `let` 、 `const` 變數
+
+首先先來看看透過 IIFE 立即函式改寫後的測試例子:
+
+```javascript
+function test(){
+  var arr =[];
+  for(var i = 0; i < 3; i++){
+    arr.push((function(){
+      console.log(i);
+    })());
+  }
+  return arr;
+}
+var result = test();
+```
+
+IIFE 會建立一個新的範疇(scope)，所以在每次的 `for` 迴圈都建立一個新的範疇(scope)就能得到預期的值
+
+![Day15-4](https://lh3.google.com/u/0/d/1NK3jkrY9QnNxUkE7mPtJevQmW02Iogcv=w1314-h1530-iv1)
+
+再來看看透過 ES6 的 `let` 、 `const` 變數:
+
+```javascript
+function test(){
+  var arr =[];
+  for(let i = 0; i < 3; i++){
+    arr.push(function(){
+      console.log(i);
+    });
+  }
+  return arr;
+}
+var result = test();
+result[0]();
+result[1]();
+result[2]();
+```
+
+因為 `let` 、 `const` 變數會建立 區塊範疇(block scope)，所以在每次在執行 `for` 迴圈時都是處於不同的範疇(scope)，所以也能達到預期的結果。
+
+![Day15-5](https://lh3.google.com/u/0/d/1dFNygCewZHgyJ2s9EmPk95t0sbYDcHjS=w1318-h1530-iv1)
+

@@ -1,0 +1,52 @@
+---
+title: "連續記錄挑戰Day03 - #2 - Carrom"
+date: "2019-05-30 20:26:09"
+tags: ['把玩CSS', 'CSSBattle']
+draft: false
+summary: ''
+---
+
+# Target #2 - Carrom
+
+![CSSBattle](https://i.imgur.com/370nm4y.png)
+
+## 撰寫思維
+
+1. 設定四個 div 的區塊並使用 flex 語法調整到需求的位置
+
+    - flex-wrap:wrap 此語法可以讓 flex-item(指的是 div)在容器寬度不夠時換行
+    - justify-content:space-between 此語法可以讓 flex-item 在主軸的方向**分配在容器中彈性元素之間及其周圍的空間。**
+
+2. 透過 css selector 的 **nth-child** 和 **~** 這兩個選取器對於**第二個 div 之後的所有 div 都做 margin-top:58px 的設定**
+
+
+
+
+## 最後結果
+
+![Carrom](https://i.imgur.com/miHWuXg.png)
+
+附上 codepen(CSSBattle 目前無法透過附上連結看到別人所寫的程式碼，所以我另外寫在 codepen 方便點擊。可直接複製貼上即可查看結果)
+
+[#2 Carrom](https://codepen.io/kids5346/pen/zQmyJd)
+
+第二關使用 flex 的語法完成，對於排版上會比較容易且方便，但 flex 的觀念需要好好的理解，在使用上才不會覺得搞不清楚。而 flex 學好的話，個人覺得 Bootstrap4 就蠻好上手且修改的，因為該框架的核心觀念就是以 flex 為基底開發的。
+
+個人覺得學習 flex 分為兩個部分:
+
+-   了解主軸 (main axis)、次軸(cross axis)是什麼，怎麼判斷以及相關的語法使用的位置是在容器或者是在元素上
+-   進階一點的部分則是 flex-basis/flex-shrink/flex-basis 的用意以及運算
+
+基本上如果這邊都理解了，對於 flex 的運用也大概可以有一定的程度了～
+
+在此附上 flex 的一些學習連結，之後找機會整理成一篇筆記
+
+1. [w3school](https://www.w3schools.com/cssref/css3_pr_flex.asp)
+2. [MDN](https://developer.mozilla.org/zh-TW/docs/Web/CSS/CSS_Flexible_Box_Layout/Using_CSS_flexible_boxes)
+3. [w3.org](https://www.w3.org/TR/css-flexbox-1/)
+
+第二關也不算太難，也許之後回頭看會有更好的寫法，但目前就先這樣子囉 XD
+
+明天繼續迎接新的一關!! Keep Moving
+
+  

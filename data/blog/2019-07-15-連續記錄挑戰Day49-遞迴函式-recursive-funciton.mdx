@@ -1,0 +1,159 @@
+---
+title: 連續記錄挑戰Day49-遞迴函式(recursive funciton)
+date: "2019-07-15 21:56:25"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+
+# 遞迴函式(recursive function)
+
+這陣子寫到了關於遞迴相關的題目，所以記錄一下關於撰寫時的一些想法。
+
+
+## 遞迴函式的運用
+
+在函式中使用自身的函數進行資料的處理，直到符合條件時回傳值。
+
+Ex1.寫一個遞迴函數 function umleven(n) 來求算 2x4 + 4x6 + 6x8...+(n-2)xn
+(n最小為 4, 只會出現偶數)
+
+```javascript
+
+/*
+ 撰寫思維：
+  1. 資料不能是下列幾種
+    - maxValue < 4
+    - string
+    - float
+  2. 用於遞迴的規則：(maxValue-2)*maxValue 
+*/
+
+const maxValue = Number(process.argv[2]);
+
+valueChecked(maxValue);
+
+//過濾輸入的資料
+function valueChecked(maxValue) {
+
+  if (Number.isNaN(maxValue)) {
+    console.log('你輸入的 ' + process.argv[2] + ' 不是數字，請輸入不小於4的正偶數！');
+    return;
+  }
+
+  if (isFloat()) {
+    console.log('你輸入的數字 ' + process.argv[2] + ' 是小數，請輸入不小於4的正偶數！');
+    return;
+  }
+
+  if (maxValue < 4) {
+    console.log('你輸入的數字為 ' + process.argv[2] + '，請輸入不小於4的正偶數');
+    return;
+  }
+
+  if (maxValue % 2) {
+    console.log('你輸入的數字 ' + process.argv[2] + ' 是奇數，請輸入不小於4的正偶數！');
+    return;
+  }
+
+  const sumTotal = finalResult(maxValue);
+  console.log(sumTotal);
+
+}
+
+
+/*
+ 執行遞迴的區塊，實際運作過程如下(以maxValue=6為例)：
+ 
+ 6*(6-2) + finalResult(4)
+ 6*(6-2) + 4*(4-2) +finalResult(2)
+ 6*(6-2) + 4*(4-2) + 2*(2-2) + finalResult(0);
+ =24+8 = 32
+ 
+ */：
+function finalResult(maxValue) {
+  // !maxValue 可以寫成 maxValue === 0，比較好理解
+  if (!maxValue) {
+    return maxValue;
+  }
+
+  // maxValue*(maxValue-2) +
+  return maxValue * (maxValue - 2) + finalResult(maxValue - 2);
+}
+
+
+//判斷是否為浮點數
+function isFloat() {
+  return (maxValue * 10) % 10 != 0;
+}
+
+```
+
+Ex2:試寫一程式，讓使用者輸入一正整數n值，並撰寫一遞迴函數 function divi(n) 來求算當 n 值不斷除以 3 時，最少要除多少次，小數點後第 2 位會等於 0。
+
+```javascript
+
+/*
+ 需求分析：
+  1.過濾非正整數以外的值
+      - 文字
+      - 負數
+      - 0
+      - 小數
+  2.寫一個遞迴函數讓輸入的數字不斷除以3，取得小數點以下第三位(不四捨五入)的值
+  3.當小數點後第2位為0時停止，並回傳總次數，不然數字就繼續除以3
+
+預計做法：
+    -放置一個計數器，記錄遞迴執行的次數
+    - 將每次除以3後得到的值轉成字串並取得小數點後第二位的值，使用chartAt()方法判斷是否為0，是的話就return 符合條件時的遞迴總次數，不然就繼續執行，直到符合條件
+
+
+*/
+
+const inputNumber = Number(process.argv[2]);
+
+valueChecked(inputNumber);
+//過濾輸入資料
+function valueChecked(inputNumber) {
+  if (Number.isNaN(inputNumber)) {
+    console.log('你輸入的 ' + process.argv[2] + ' 不是數字，請輸入大於零的正整數！');
+    return;
+  }
+
+  if (isFloat()) {
+    console.log('你輸入的數字 ' + process.argv[2] + ' 是小數，請輸入大於零的正整數！');
+    return;
+  }
+
+  if (inputNumber <= 0) {
+    console.log('你輸入的數字 ' + process.argv[2] + ' 小於或等於零，請輸入大於零的正整數！');
+    return;
+  }
+
+  const finalResult = calculate(inputNumber);
+  console.log('需要' + finalResult + '次');
+}
+
+//執行遞迴的區塊
+function calculate(inputNumber, recursiveCount = 0) {
+  recursiveCount++;
+
+  //取得小數點以下第三位的數字
+  let num = parseFloat(inputNumber / 3).toFixed(4).slice(0, -1);
+  
+  let inputNumberString = num.toString();
+  let len = inputNumberString.length;
+  
+  //計算並判斷輸入的數字，直到符合小數點第二位為0的時候停止。
+  if (inputNumberString.charAt(len - 2) === '0') {
+    return recursiveCount;
+  }
+  return calculate(num, recursiveCount);
+}
+
+function isFloat() {
+  return (inputNumber * 10) % 10 != 0;
+}
+
+```

@@ -1,0 +1,29 @@
+---
+title: 連續記錄挑戰Day27-style 標籤寫在 body 後與 body 前有什麽區別
+date: "2019-06-23 21:15:05"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# style 標籤寫在 body 後與 body 前有什麽區別？
+ 
+
+## 將style標籤<span style="color:#f00;">寫於body之前</span>：
+也就是寫在 head 標籤中，瀏覽器會依照其渲染流程。
+
+
+## 將style標籤<span style="color:#f00;">寫於body中</span>：
+會導致**當樣式的加載晚於HTML加載時，造成頁面停止渲染直到樣式被加載後重新渲染頁面**，而這樣子的狀況就會導致FOUC(flash of unstyled content)，造成頁面會有閃爍狀況。
+
+## 將style標籤<span style="color:#f00;">寫於body之後</span>：
+導致**瀏覽器會等到css也加載完之後在開始渲染**，而這樣子的狀況就會導致頁面會有一小段時間呈現白屏情形
+
+## 結論：
+將css樣式放入 head 標籤中使瀏覽器可以在此階段就完成DOM Tree和CSS rule Tree的生成，並透過 render tree將其繪製後渲染到螢幕上是最好的方法。
+
+
+>[FOUC(無樣式內容閃爍)](http://xbhong.top/2018/04/14/FOUC/) 
+
+
+  

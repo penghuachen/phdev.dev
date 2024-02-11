@@ -1,0 +1,70 @@
+---
+title: 連續記錄挑戰Day19-transform初探- part3
+date: "2019-06-15 19:20:55"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+### transform origin : 可以改變元素原點的位置，預設值為元素的中心點(transform-origin(50%,50%))。
+|           語法         |      允許值      |
+|            -          |         -       |
+|transform origin       | [left、right、center、top、bottom、percentage(%)、length] 、 [left、right、center、top、bottom、percentage(%)、length] 、 [length]        |
+    
+  - 備註： 最後一個length為Z軸設定長度的參數
+
+
+### transform-style : 設定後可以看到元素如同處在3D的空間的樣貌。
+|           語法         |      允許值      |
+|            -          |         -       |
+|transform-style         | [flat]、[preserve-3d]        |
+    
+  下列屬性為設定transform:preserve-3d時屬性的預設值，所以當3d轉換突然變為2d平面時，很可能是下列任一屬性有被修改：
+  - over-flow:visible
+  - filter:none
+  - clip:auto
+  - clip-path:none
+  - mask-image:none
+  - mask-border-source:none
+  - mix-blend-mode:normal
+
+### perspective: 與perspective()函式不同之處在於：
+|           語法       |      差別      |
+|            -        |         -       |
+|perspective          | **會讓元素共享同一個3d空間，且效果會套用到所有元素上**    |
+|perspective()        | **會讓元素有各自的3d空間，且效果只會套用在指定的元素上**    |
+
+
+|           語法        |      允許值      |
+|            -          |         -       |
+|perspective        | [none]、[length]    |
+
+### perspective-origin:在允許元素呈現的3D效果的前提下，可以針對透視的原點(也稱為消失點)，改變其位置(預設perspective-origin: 50% 50%)。
+|           語法         |      允許值      |
+|            -          |         -       |
+|perspective origin       | [left、right、center、top、bottom、percentage(%)、length] 、 [left、right、center、top、bottom、percentage(%)、length] 、 [length]         |
+
+- 備註： 最後一個length為Z軸設定長度的參數
+
+比較： transform-origin 、 perspective-origin差別
+
+|           語法            |      差別     |
+|            -             |         -    |
+|transform-origin          | 元素中心點的變換|
+|perspective origin        | 視線收斂的點   |
+
+### backface-visibility：設定後可以渲染元素背面的內容給使用者看到，
+
+|           語法            |      差別     |
+|            -             |         -    |
+|backface-visibility       | [visible]、[hidden]|
+
+
+總算是將這一個章節記錄到一個段落了，於是決定給自己一個練習：手刻一個3D正方體，練習連結如下：
+
+ [使用tranform語法寫出正方體](https://codepen.io/kids5346/pen/EBVEMO)
+
+
+
+
+    

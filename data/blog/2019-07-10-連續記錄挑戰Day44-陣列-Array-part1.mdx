@@ -1,0 +1,120 @@
+---
+title: 連續記錄挑戰Day44-陣列-Array-part1
+date: "2019-07-10 19:21:00"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 陣列(Array)
+
+今天的學習紀錄要記錄的是陣列的部分，著重的重點在於什麼是陣列及如何使用陣列。
+
+關於陣列的相關方法則會在後面的篇幅做詳細的介紹與運用。
+
+
+## 關於陣列
+
+陣列是什麼？在ES6大全中提到了關於陣列的定義與一些特性:
+
+1. 是**一組值的有序群集**，而值也稱為元素(element)，數值所在的位置稱為索引(index)
+    
+2. **陣列的索引值從0開始**
+
+![](https://i.imgur.com/NvN49Xu.png)
+
+3. 陣列中的元素可以是不同型別的組成 
+
+```javascript
+let a =[1,'Hello world',{name:'Bill'}];
+```
+
+4. 陣列是**一種特殊形式的物件**，所以其實也可以透過物件指定值的方法將值新增到陣列
+
+先複習一下將值指定給物件的其中一種方式:
+
+```javascript
+let obj={};
+obj['str'] = "Hello world";
+console.log(obj.str); // {str:2}
+```
+
+然後再看看下面的例子，透過任意字串作為索引值:
+
+```javascript
+let a = [];
+a["str"] = 2;
+console.log(a); // [str:2]
+console.log(a.length); // 0
+```
+但有一點需要注意的是，**透過上述的方式所新增的元素，是不會計入陣列長度計算的。**
+
+所以使用數字作為索引值存取陣列才是比較好的方式。
+
+
+5. 自Array.prototype繼承特性，且Array.prototype定義了ㄧ組陣列操作方法，不只可以在陣列使用，而部分的方法也可以在類陣列(array-like)中使用
+
+```javascript
+//可以查看陣列的原型物件定義了哪些方法
+console.log(Array.prototype);
+```
+
+
+## 建立陣列的方法
+
+1. 陣列字面值
+```javascript
+let a = [];
+let b = [1,2,3,4];
+// 指定陣列位置並賦予值
+b[4]=5;
+console.log(b);
+```
+
+2. Array 建構式:
+    - 不帶引數的呼叫：等同空陣列`[]`
+    - 帶入單一數值作為引數的呼叫：用於指定陣列的長度
+    - 帶入兩個(含)以上的元素或者單一非數值作為引數的呼叫：建立陣列並將元素依序放入
+
+```javascript
+let a = new Array();
+//[]
+console.log(a);
+
+let b = new Array(10);
+//[empty x 10]
+console.log(b);
+
+let c = new Array(1,4,"test");
+//[1,4,"test"]
+console.log(c);
+```
+
+## 陣列讀取與寫入元素
+
+- 讀取：透過 `array[index]` 讀取陣列中index位置的元素
+- 寫入：透過 `array[index] = element` 的方式將元素新增到陣列索引值為index的位置
+
+```javascript
+let a =['test'];
+//陣列元素讀取，取得test
+console.log(a[0]); 
+
+//元素寫入陣列，放在陣列索引為1的位置
+a[1] = 'add element';
+console.log(a); 
+```
+
+## 陣列長度
+
+- 可以得到該陣列的總長度
+- array.length
+
+```javascript
+let a = [1,2,3];
+Object.defineProperty(a,a[0],{
+    writable:false,
+    configurable:false,
+    enumerable:false
+});
+```

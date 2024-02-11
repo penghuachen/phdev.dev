@@ -1,0 +1,280 @@
+---
+title: 在 Class-based Component 中的 State 與事件處理
+date: "2020-09-20 11:29:43"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 在 Class-based Component 中的 State 與事件處理
+
+今天 React 好朋友要帶我學習的部分是如何在 Class-based 的元件(component)中透過**修改 state 的值來達到更新畫面(UI)**，而為了幫助自己更快了解，這邊會同時將 React 中事件處理的部分也一併學習，並且搭配一個簡單的測試情境，才可以更好地吸收。
+
+
+## 在 Class-based 的元件(component)中的 state
+
+很重要的一個觀念: **state 可以用來在 class-based 的元件(component)中，對於資料進行更新。**
+
+**而在還沒有 React Hook 的時期，這是透過資料來更新畫面(UI)的唯一撰寫方式**，然而 React Hook 的出現，使得寫法得以有所變化：**這讓我們可以在 Functional 元件(component)中透過修改 state 的值來重新渲染畫面(UI)**
+
+這邊我們模擬一個使用情境，並透過這個情境來了解如何在 **Class-based 的元件(component)中修改 state 中的資料並觸發 React 重新更新畫面(UI)。**
+
+### 情境: 透過點擊(click)按鈕，將目前元件中的姓名與年齡替換成另一組資料
+
+#### 首先: 先將 Function component 轉換成 Class-based component:
+
+(P.S. 這裡將 Function component 轉換成 Class-based component 的目的是在於了解這兩者之間該如何轉換哦!)
+
+我們先設定一個 Function component 需要的樣子:
+
+```jsx=
+const Person = () => {
+  return (
+    <div className="person">
+      <h1>Bill</h1>
+      <p>Your Age: 29</p>
+    </div>
+  );
+};
+```
+
+接著，我們將它改寫成 Class-based component，並且也在 state 中新增資料，用來取代目前寫死的值，這邊有幾個小訣竅:
+
+1. 作為渲染畫面(UI)的 React element，**在 class 中要透過調用 `render()` 方法實現**
+2. 由於 ES7 之後在 class 的寫法上又更加的簡化，並且可以透過 babel 轉譯，所以寫不寫 `constructor` 則看個人怎麼決定，而這邊我們將兩種寫法都寫出來比較：
+
+```jsx=
+// 沒有 constructor 的寫法
+class Person extends React.Component {
+  state = {
+    person: [
+      { name: "Bill", age: "29" },
+    ]
+  };
+  
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="person">
+        <h1>{ person[0].name }</h1>
+        <p>Your Age: { person[0].age }</p>
+      </div>
+    );
+  };
+}
+```
+
+```jsx=
+// 有 constructor 的寫法
+class Person extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      person: [
+        { name: "Bill", age: "29" },
+      ]
+    };
+  }
+  
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="person">
+        <h1>{ person[0].name }</h1>
+        <p>Your Age: { person[0].age }</p>
+      </div>
+    );
+  };
+}
+```
+
+上述的設定，我們已經準備好了一個具有 state 的 Class-based 元件(component)，接下來我們還需要先學習一個部分才能更好地觀察元件(component)重新渲染(render)，所以我們必須先了解如果在 React 中使用事件(event)。
+
+## 事件處理
+
+在 React 官方文件提到：
+
+> 使用 React element 處理事件跟使用 DOM element 處理事件是十分相似的。
+
+但是依然有一些差異之處:
+
+1. **事件的名稱在 React 中都是 camelCase，而在 HTML DOM 中則是小寫。**
+2. **事件的值在 JSX 中是一個 function，而在 HTML DOM 中則是一個 string。**
+
+第一點相信大家都可以了解，是基於在 JS 與 HTML 中的命名規則。
+
+而第二點在文件中也給出了兩個小範例：
+
+```html
+<button onclick="activateLasers()">
+  Activate Lasers
+</button>
+```
+
+```jsx=
+<button onClick={activateLasers}>
+  Activate Lasers
+</button>
+```
+
+由於**事件的值在JSX 中是一個 function**，這意謂著如果今天我們改成如下寫法時，會是直接執行這個 function：
+
+```jsx=
+<button onClick={activateLasers()}>
+  Activate Lasers
+</button>
+```
+
+了解基本使用事件處理的方式後，接著我們替剛剛改寫成 Class-based 的元件(component)添加一個按鈕，用來改變 state ：
+
+```jsx=
+class Person extends React.Component {
+  state = {
+    person: [
+      { name: "Bill", age: "29" },
+    ]
+  };
+  
+  switchNameHandler = () => {
+    console.log('check clicked!');
+  }
+  
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="person">
+        <h1>{ person[0].name }</h1>
+        <p>Your Age: { person[0].age }</p>
+        <button onClick={ this.switchNameHandler }>Switch Name</button>
+      </div>
+    );
+  };
+}
+```
+
+這邊我們掛上一個 `onClick` 事件，用來觸發 `switchNameHandler` 函式，此時應該可以成功取得 `check clicked!` 的值。
+
+確認 `switchNameHandler` 函式可以執行後，接著我們要來了解修改 state 的可行與不可行的方式。
+
+首先是不可行的方式，那就是**直接修改 state**
+
+在文件中[正確的使用 State](https://zh-hant.reactjs.org/docs/state-and-lifecycle.html#using-state-correctly)中有提到：
+
+> 請不要直接修改 State
+
+這並不會導致重新 render component，比如這個範例:
+
+```jsx=
+this.state.comment = 'Hello';
+```
+
+而正確修改 state 的方式，**就是使用 `setState()`**，我們將上述的程式碼在修正成符合情境的設定：
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/holy-glade-81xgu?file=/src/components/Person/Person.jsx)。
+
+```jsx=
+class Person extends React.Component {
+  state = {
+    person: [
+      { name: "Bill", age: "29" },
+    ]
+  };
+  
+  switchNameHandler = () => {
+    this.setState({
+      person: [
+        { name: "Alex", age: "25" },
+      ]
+    })
+  }
+  
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="person">
+        <h1>{ person[0].name }</h1>
+        <p>Your Age: { person[0].age }</p>
+        <button onClick={ this.switchNameHandler }>Switch Name</button>
+      </div>
+    );
+  };
+}
+```
+
+透過 `setState` 可以讓我們更新資料的狀態(state)，而更新的方式不只一種，上面只是其中一種簡單的方式。
+
+接著讓我們從[文件](https://zh-hant.reactjs.org/docs/react-component.html#setstate)中來看看還有哪幾種更新的方式吧!
+
+在文件中提到了幾個關於使用 `setState` 的重點，這邊一一條條列出來:
+
+1. setState() 會將改變排進一個 queue 中，並告知 React 這個 component 以及它的 children 需要用更新後的 state 重新 render。
+2. **請把 setState() 想成一個請求而非一個馬上對 component 進行更新的指令。為了達到更好的效能，React 也許會延遲這個請求，然後一次更新數個 component。React 並不保證 state 的改變會馬上發生。**
+3. **如果要在 `setState` 之後就馬上讀取 `this.state` 的話，因為 `setState` 並不會總是馬上更新元件，所以如果需要的話則要透過 `setState(updater, callback)` 的方式處理。 `callback` 會在完成 component 被重新 render 之後被執行。**
+4. **會 merge 到目前的 state，並且不影響其他在 state 中的屬性(property)，這代表我們只要設定想要更新的屬性(property)而不用總是在 `setState` 中提供完整的 state。**
+
+接著我們改寫一下上面的程式碼來呈現吧!
+
+```jsx=
+// Person.jsx
+import React from "react";
+import "./person.css";
+
+export default class Person extends React.Component {
+  state = {
+    person: [{ name: "Bill", age: "29" }]
+  };
+
+  // 透過物件的方式進行更新
+  switchNameHandler = () => {
+    this.setState({
+      person: [{ name: "Alex", age: "25" }]
+    });
+  };
+
+  // 透過 updater 的方式更新
+  // switchNameHandler = () => {
+  //   this.setState((state) => {
+  //     return {
+  //       person: [{ name: "Alex", age: "25" }]
+  //     };
+  //   });
+  // };
+
+  // 如果需要在更新元件後做某件事情時
+  // switchNameHandler = () => {
+  //   this.setState(
+  //     (state) => {
+  //       return {
+  //         person: [{ name: "Alex", age: "25" }]
+  //       };
+  //     },
+  //     () => {
+  //       console.log("do something here....");
+  //     }
+  //   );
+  // };
+
+  render() {
+    const { person } = this.state;
+    return (
+      <div className="person">
+        <h1>{person[0].name}</h1>
+        <p>Your Age: {person[0].age}</p>
+        <button onClick={this.switchNameHandler}>Switch Name</button>
+      </div>
+    );
+  }
+}
+```
+
+關於在 Class-based 元件中更新 state 的學習就先暫時到這裡囉。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+##  資源
+
+- [State 和生命週期](https://zh-hant.reactjs.org/docs/state-and-lifecycle.html#using-state-correctly)
+- [事件處理](https://zh-hant.reactjs.org/docs/handling-events.html)
+- [SyntheticEvent](https://zh-hant.reactjs.org/docs/events.html)
+- [setState()](https://zh-hant.reactjs.org/docs/react-component.html#setstate)

@@ -1,0 +1,299 @@
+---
+title: 連續記錄挑戰Day30-CSS3有什麼新特性？
+date: "2019-06-26 18:44:39"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+在爬面試題目找關於css3的新增的部分時，找到了 [TutorialRepublic](https://www.tutorialrepublic.com/)這個網站，對於css3的新特性整理的很詳細、易懂，於是我就摘錄了關於新增特性的部分並另外彙整支援度(CanIUse)w3.org的定義以及w3school的範例Demo。
+
+
+# CSS3 有哪些新特性？
+
+僅列舉新增的特性。
+
+## Animation
+
+| Property  | Description |
+| - | - |
+| animation | Specifies the keyframe-based animations. |
+| animation-delay | Specifies when the animation will start. |
+| animation-direction | Specifies whether the animation should play in reverse on alternate cycles or not. |
+| animation-duration  | Specifies the number of seconds or milliseconds an animation should take to complete one cycle. |
+| animation-fill-mode  | Specifies how a CSS animation should apply styles to its target before and after it is executing. |
+| animation-iteration-count  | Specifies the number of times an animation cycle should be played before stopping. |
+| animation-name (@keyframes)  | Specifies the name of @keyframes defined animations that should be applied to the selected element. |
+| animation-play-state  | Specifies whether the animation is running or paused. |
+| animation-timing-function  | Specifies how a CSS animation should progress over the duration of each cycle. |
+
+
+支援度：[caniuse](https://caniuse.com/#feat=css-animation)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-animation-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_animations.asp)
+
+## Background
+
+| Property  | Description |
+| - | - |
+| background-clip  | Specifies the painting area of the background. |
+| background-origin  | Specifies the positioning area of the background images. |
+| background-size  | 	Specifies the size of the background images. |
+
+支援度：[caniuse](https://caniuse.com/#feat=multibackgrounds)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css-background-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_backgrounds.asp)
+
+
+## Border
+
+| Property  | Description |
+| - | - |
+| border-bottom-left-radius   | Defines the shape of the bottom-left border corner of an element. |
+| border-bottom-right-radius  | Defines the shape of the bottom-right border corner of an element. |
+| border-top-left-radius 	  | 	Defines the shape of the top-left border corner of an element. |
+| border-top-right-radius   | 	Defines the shape of the top-right border corner of an element. |
+| border-image   | 	Specifies how an image is to be used in place of the border styles. |
+| border-image-outset   | 	Specifies the amount by which the border image area extends beyond the border box. |
+| border-image-repeat   | 	Specifies whether the image-border should be repeated, rounded or stretched. |
+| border-image-slice   | 		Specifies the inward offsets of the image-border. |
+| border-image-source   | 	Specifies the location of the image to be used as a border. |
+| border-image-width   | 	Specifies the width of the image-border. |
+| border-radius   | 	Defines the shape of the border corners of an element. |
+
+支援度：[caniuse](https://caniuse.com/#search=Border)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css-border-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_border_images.asp)
+
+
+## Color
+
+| Property  | Description |
+| - | - |
+| opacity    | 	Specifies the transparency of an element. |
+
+
+支援度：[caniuse](https://caniuse.com/#search=opacity)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css-color-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_colors.asp)
+
+## Flexible Box 
+
+| Property  | Description |
+| - | - |
+| flex    | 	Specifies the components of a flexible length. |
+| flex-basis     | 	Specifies the initial main size of the flex item. |
+| flex-direction    | 	Specifies the direction of the flexible items. |
+| flex-flow     | 	A shorthand property for the flex-direction and the flex-wrap properties. |
+| flex-grow     | 	Specifies how the flex item will grow relative to the other items inside the flex container. |
+| flex-shrink     | 	Specifies how the flex item will shrink relative to the other items inside the flex container. |
+| flex-wrap     | 	Specifies the transparency of an element. |
+| align-content    | 		Specifies the alignment of flexible container's items within the flex container. |
+| align-items    | 	Specifies the default alignment for items within the flex container. |
+| align-self     | 		Specifies the alignment for selected items within the flex container. |
+|justify-content    | 	Specifies how flex items are aligned along the main axis of the flex container after any flexible lengths and auto margins have been resolved. |
+| order     | 	Specifies the order in which a flex items are displayed and laid out within a flex container. |
+
+
+支援度：[caniuse](https://caniuse.com/#feat=flexbox)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-flex-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_flexbox.asp)
+
+## Font Properties
+
+| Property  | Description |
+| - | - |
+| font-size-adjust     | 	Preserves the readability of text when font fallback occurs. |
+| font-stretch      | 	Selects a normal, condensed, or expanded face from a font. |
+
+支援度：
+
+[font-size-adjust](https://caniuse.com/#search=font-size-adjust)
+
+[font-stretch](https://caniuse.com/#search=font-stretch)
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css-color-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_colors.asp)
+
+## Multi-column Layout Properties
+
+| Property  | Description |
+| - | - |
+| columns | A shorthand property for setting column-width and column-count properties. |
+| column-count | 	Specifies the number of columns in a multi-column element. |
+| column-fill      | 	Specifies how columns will be filled. |
+| column-gap       | 		Specifies the gap between the columns in a multi-column element. |
+| column-rule       | 	Specifies a straight line, or "rule", to be drawn between each column in a multi-column element. |
+| column-rule-color       | 	Specifies the color of the rules drawn between columns in a multi-column layout. |
+| column-rule-style      | 	Specifies the style of the rule drawn between the columns in a multi-column layout. |
+| column-rule-width      | 	Specifies the width of the rule drawn between the columns in a multi-column layout. |
+| column-span      | 	Specifies how many columns an element spans across in a multi-column layout. |
+| column-width      | 	Specifies the optimal width of the columns in a multi-column element. |
+
+支援度：
+
+[caniuse](https://caniuse.com/#search=column)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-columns-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_multiple_columns.asp)
+
+
+## Outline Properties
+
+| Property  | Description |
+| - | - |
+| outline-offset     | 	Set the space between an outline and the border edge of an element. |
+
+
+支援度：[caniuse](https://caniuse.com/#search=outline-offset)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css-outline-property.php)
+
+>[w3schools](ss/css_outline.asp)
+
+## Text Properties
+
+| Property  | Description |
+| - | - |
+| tab-size     | Specifies the length of the tab character.	 |
+| text-align-last     | Specifies how the last line of a block or a line right before a forced line break is aligned when text-align is justify.	 |
+| text-decoration-color     | Specifies the color of the text-decoration-line.	 |
+|  text-decoration-line    | Specifies what kind of line decorations are added to the element.	 |
+|  text-decoration-style    | Specifies the style of the lines specified by the text-decoration-line property	 |
+| text-justify     | Specifies the justification method to use when the text-align property is set to justify.	 |
+| text-overflow     | Specifies how the text content will be displayed, when it overflows the block containers.	 |
+|text-shadow | 	Applies one or more shadows to the text content of an element.	 |
+|word-break  | 	Specifies how to break lines within words.	 |
+|word-wrap  | 	Specifies whether to break words when the content overflows the boundaries of its container. |
+
+
+支援度：
+[tab-size](https://caniuse.com/#search=tab-size)
+[text-align-last](https://caniuse.com/#search=text-align-last)
+[text-decoration-color](https://caniuse.com/#search=text-decoration-color)
+[ text-decoration-line ](https://caniuse.com/#search=text-decoration-line)
+[text-decoration-style ](https://caniuse.com/#search=text-decoration-style)
+[text-justify](https://caniuse.com/#search=text-justify)
+[text-overflow ](https://caniuse.com/#search=text-overflow)
+[text-shadow](https://caniuse.com/#search=text-shadow)
+[word-break ](https://caniuse.com/#search=word-break)
+[word-wrap](https://caniuse.com/#search=word-wrap)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-properties.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_text_effects.asp)
+
+## Transform
+
+| Property  | Description |
+| - | - |
+| transform     | 	Applies a 2D or 3D transformation to an element. |
+| transform-origin      | 	Defines the origin of transformation for an element. |
+| transform-style      | 		Specifies how nested elements are rendered in 3D space. |
+| perspective-origin      | 		Defines the origin (the vanishing point for the 3D space) for the perspective property. |
+| perspective      | 	Defines the perspective from which all child elements of the object are viewed. |
+| backface-visibility      | 	Specifies whether or not the "back" side of a transformed element is visible when facing the user. |
+
+
+支援度：[caniuse](https://caniuse.com/#search=Transform)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-transform-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_3dtransforms.asp)
+
+
+## Transitions
+
+| Property  | Description |
+| - | - |
+| transition     | 	Defines the transition between two states of an element. |
+| transition-delay     | 	Specifies when the transition effect will start. |
+| transition-duration     | 		Specifies the number of seconds or milliseconds a transition effect should take to complete. |
+| transition-property     | 	Specifies the names of the CSS properties to which a transition effect should be applied. |
+| transition-timing-function    | 	Specifies the speed curve of the transition effect. |
+
+
+支援度：[caniuse](https://caniuse.com/#search=Transitions)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-transition-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css3_transitions.asp)
+
+
+## Visual formatting Properties
+
+| Property  | Description |
+| - | - |
+| overflow-x     | 	Specifies how to manage the content when it overflows the width of the element's content area. |
+| overflow-y     | 	Specifies how to manage the content when it overflows the height of the element's content area. |
+| resize     | 	Specifies whether or not an element is resizable by the user. |
+| box-shadow     | 	Applies one or more drop-shadows to the element's box. |
+| box-sizing      | 	Alter the default CSS box model. |
+
+
+支援度：
+[overflow-x  ](https://caniuse.com/#search=overflow-x)
+[overflow-y ](https://caniuse.com/#search=overflow-y)
+[resize ](https://caniuse.com/#search=resize)
+[box-shadow](https://caniuse.com/#search=box-shadow)
+[box-sizing](https://caniuse.com/#search=box-sizing)
+
+
+>[TutorialRepublic](https://www.tutorialrepublic.com/css-reference/css3-overflow-x-property.php)
+
+>[w3schools](https://www.w3schools.com/css/css_overflow.asp)
+
+# CSS3 有哪些新的 selectors？
+
+
+|Pattern|Represents|
+|-|-|
+|E[foo^="bar"]|an E element whose "foo" attribute value begins exactly with the string "bar"|
+|E[foo＄="bar"]|an E element whose "foo" attribute value ends exactly with the string "bar"|
+|E[foo*="bar"]|an E element whose "foo" attribute value contains the substring "bar"	|
+|E:root|an E element, root of the document|
+|E:nth-child(n)|an E element, the n-th child of its parent|
+|E:nth-last-child(n)|an E element, the n-th child of its parent, counting from the last one|
+|E:nth-of-type(n)|an E element, the n-th sibling of its type|
+|E:nth-last-of-type(n)|an E element, the n-th sibling of its type, counting from the last one|
+|E:last-child|an E element, last child of its parent|
+|E:first-of-type|an E element, first sibling of its type|
+|E:last-of-type|an E element, last sibling of its type|
+|E:only-child|an E element, only child of its parent|
+|E:only-of-type|an E element, only sibling of its type|
+|E:empty|an E element that has no children (including text nodes)|
+|E:target|	an E element being the target of the referring URI|
+|E:enabled|a user interface element E which is enabled or disabled|
+|E:disabled|a user interface element E which is enabled or disabled|
+|E:checked|a user interface element E which is checked (for instance a radio-button or checkbox)|
+|E:not(s)|an E element that does not match simple selector s|
+|E ~ F|an F element preceded by an E element|
+
+
+引用來源：
+
+> [TutorialRepublic](https://www.tutorialrepublic.com/)
+> [w3schools](https://www.w3schools.com)
+> [w3.org - Selectors](https://www.w3.org/TR/selectors-3/)

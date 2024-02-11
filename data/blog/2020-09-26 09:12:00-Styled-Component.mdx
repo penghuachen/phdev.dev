@@ -1,0 +1,300 @@
+---
+title: Styled Component
+date: "2020-09-26 09:12:00"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+# Styled Component
+
+今天要學習的部分是在 React 中用來管理元件(Component)樣式(styling)的方式: styled component 與 CSS modules，而這兩種方式在使用上也不太一樣:
+
+
+- styled component: 是一套讓我們可以在 **JSX 中撰寫 css** 的 libaray(CSS-In-JS)
+- CSS modules: 透過**修改 webpack 的設定**，將 css 的 selector **當成是 module 的 property 來使用**
+
+讓我們趕緊看看怎麼使用吧!
+
+## 標籤樣板字面值(tagged template literal)
+
+由於 Styled Component 的撰寫方式是使用了 ES6 推出的功能: **標籤樣板字面值(tagged template literal)**，所以我們先來了解一下其使用的方式吧。
+
+首先先看看在 MDN 的定義:
+
+> 標籤樣板字面值是一種更高級的樣板字面值形式，允許你透過標籤函數操作樣板字面值的輸出。
+
+什麼是標籤韓式操作樣板字面值？相信閱讀起來一定不是那麼好理解，所以這邊我們首先先需要記住的部分是它的一些規則：
+
+- 標籤函數的第一個參數是一字串陣列
+- 其餘參數則是處理過的表達式
+
+在文件中提到了這兩個規則，接著，讓我們搭配一些簡單的範例來了解：
+
+```javascript
+function foo(arr, params) {
+  console.log(arr);
+  console.log(params);
+}
+
+foo`Hello tagged template literal!`;
+```
+
+**在函式名稱後接上樣板字面值的設定方式，就是前面提到的標籤函數**，這邊可以得到輸出的結果如下:
+
+![](https://i.imgur.com/PfB5VMh.png)
+
+這也符合上述描述到的第一個規則：「標籤函數的第一個參數是一字串陣列」，所以 `arr` 會得到一個陣列，而 `params` 此時會是 `undefined` 。
+
+接著，讓我們在修改上述的範例來看看其他的變化：
+
+```javascript
+var variables = 'tagged template literal!';
+function foo(arr, params) {
+  console.log(arr);
+  console.log(params);
+}
+
+foo`Hello ${ variables }`;
+```
+
+與前一個範例不同的是，這邊我們在標籤函式中寫入了一個變數 `variables`，此時在使用上會有一個很重要的差異: **字串陣列會儲存不是變數的字串值，並將是變數的部分作為其他參數的值。** 所以會得到如下方的結果:
+
+![](https://i.imgur.com/ofBIxn4.png)
+
+關於使用標籤樣板字面值(tagged template literal)的方式就到這裡，接著我們把主題拉回到 styled component 吧
+
+## Styled Component 初探與使用
+
+關於 Styled Component 的文件可以前往 [Styled Component](https://styled-components.com/docs/basics) 查看更多細節，這邊就先來學習如何使用。
+
+首先是安裝的部分，其實也很簡單，我們可以透過 npm 或者是 yarn 的方式安裝：
+
+```bash=
+npm install --save styled-components
+```
+
+```bash=
+yarn add styled-components
+```
+
+Styled Component 也有提供 CDN 的使用方式:
+
+```javascript
+<script src="https://unpkg.com/styled-components/dist/styled-components.min.js"></script>
+```
+
+接著，根據範例來學習吧!!
+
+這邊有一個很重要的觀念: **「撰寫 Styled Component 會直接建立出一個 React component 出來，而這個 component 是一個具有開發者設定樣式的元件。」** 這代表我們可以在使用像是 `props` 來做額外的操作。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/vigorous-volhard-vhmdl?file=/src/App.js)。
+
+### 基礎使用
+
+在程式碼中設定了 `Title`, `Wrapper` 兩個 React component，而寫法就如同一開始介紹的部分，是使用標籤樣板字面值(tagged template literal)撰寫，並在要使用這兩個樣式的區塊，像是使用 React component 般寫入即可。
+
+例如底下這段程式碼，建立兩個 styled component:
+
+1. `Title`: 設定了 `h1` 的樣式。
+2. `Wrapper`: 設定了 `section` 的樣式。
+
+```jsx=
+// ExampleOne.js
+
+import React from "react";
+// 引入 styled-components
+import styled from "styled-components";
+
+// 建立 styled component
+const Title = styled.h1`
+  font-size: 1.5em;
+  text-align: center;
+  color: palevioletred;
+`;
+
+// 建立 styled component
+const Wrapper = styled.section`
+  padding: 4em;
+  background: papayawhip;
+  width: 60%;
+  margin: 0 auto;
+`;
+
+const ExampleOne = () => (
+  <Wrapper>
+    <Title>Hello Styled components!</Title>
+  </Wrapper>
+);
+
+export default ExampleOne;
+```
+
+### 依據條件做不同的樣式渲染
+
+接著，還記得剛剛說的嗎? styled component 會是建立一個 React component，所以可以額外做一些像是透過**判斷條件後選擇要設定的樣式等設定。**
+
+這裡我們可以使用 `props` 的方式來達成需求：
+
+```jsx=
+// App.js
+
+export default function App() {
+  return (
+    <div className="App">
+      // ...略
+      <h2>條件判斷渲染樣式，元件: ExampleTwo</h2>
+      <ExampleTwo primary/>
+      <hr />
+    </div>
+  );
+}
+```
+
+```jsx=
+// ExampleTwo/index.js
+import React from "react";
+import styled from "styled-components";
+
+const CustomButton = styled.button`
+  font-size: 1em;
+  margin: 1em;
+  padding: 0.25em 1em;
+  border: 2px solid palevioletred;
+  border-radius: 3px;
+
+  background: ${(props) => (props.primary ? "palevioletred" : "white")};
+  color: ${(props) => (props.primary ? "white" : "palevioletred")};
+`;
+
+const ExampleTwo = (props) => {
+  return <CustomButton primary={props.primary}>Custom Button</CustomButton>;
+};
+export default ExampleTwo;
+```
+
+透過 `props` 得到的 `primary` 的值來判斷提供何種樣式，當判斷為:
+
+- `false`: `background: "white"`, `color: "palevioletred"`。
+- `true`: `background: "palevioletred"`, `color: "white"`。
+
+### 擴展(Extending)樣式
+
+我們也可以透過 styled component 的方式，在**基於一個元件上擴展樣式，建立一個全新的元件出來。**
+
+這個情境最簡單的例子來說，就好像當我們有兩個架構一樣的按鈕(Button)，而差別僅僅只在於背景顏色、文字顏色的差異時，這個時候 Styled Component 也可以做到這樣的需求:
+
+```jsx=
+import React from "react";
+import styled from "styled-components";
+
+const Button = styled.button`
+  width: auto;
+  padding: 10px;
+  margin-right: 10px;
+`;
+
+const BookingButton = styled(Button)`
+  background: palevioletred;
+  color: white;
+`;
+
+const CancelButton = styled(Button)`
+  background: blue;
+  color: white;
+`;
+
+const ExampleThree = () => (
+  <div>
+    <Button>基礎樣式的 Button</Button>
+    <BookingButton>擴展樣式的 BookingButton</BookingButton>
+    <CancelButton>擴展樣式的 CancelButton</CancelButton>
+  </div>
+);
+
+export default ExampleThree;
+```
+
+透過 `styled(Button)` 的方式，我們可以**將一個定義好的 Styled Component 作為另一個 Styled Component 的基礎樣式，並且再額外擴展屬於自己的樣式。**
+
+`Button` 作為這三個按鈕的基礎樣式，而 `BookingButton`、`CancelButton` 則是基於這個 `Button` 的樣式再擴展出自己的樣式(背景顏色、文字顏色)。
+
+### scss-like 的撰寫風格
+
+一定有人會想問，**可以在 styled component 中寫類似 scss 這種可以巢狀設定樣式的設定嗎？**
+
+答案是可以的！
+
+在 Styled Component 可以使用如同 scss 巢狀設定樣式的方式：
+
+```jsx=
+// ExampleFour/index.js
+import React from "react";
+import styled from "styled-components";
+
+const BookingSection = styled.section`
+  width: 500px;
+  height: 200px;
+  margin: 0 auto;
+  border: 1px solid #8d8d8d;
+
+  .booking-btn {
+    background: palevioletred;
+    color: white;
+    padding: 10px;
+  }
+`;
+
+const ExampleFour = () => (
+  <BookingSection>
+    <button className="booking-btn">這是一個按鈕</button>
+  </BookingSection>
+);
+
+export default ExampleFour;
+```
+
+在 `BookingSection` 的樣式中我們額外透過巢狀設定樣式的方式，設定了 `className` 為 `booking-btn` 的樣式，可以看到 `BookingSection` 中的 `button` 一樣可以使用到這個樣式。
+
+### 動畫的撰寫設定
+
+Styled Component 提供 `keyframes` helper 的方式來處理動畫的部分，使用方式與原生 css 相似：
+
+```jsx=
+// ExampleFive/index.js
+import React from "react";
+import styled, { keyframes } from "styled-components";
+
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const Rotate = styled.div`
+  display: inline-block;
+  border: solid;
+  animation: ${rotate} 2s linear infinite;
+  padding: 2rem 1rem;
+  font-size: 1.2rem;
+`;
+
+const ExampleFive = () => <Rotate />;
+
+export default ExampleFive;
+
+```
+這邊需要注意的是 `keyframes` helpers 一定要提供值才可以，不然會拋出錯誤。
+
+關於 Styled Component 的學習就到這裡囉
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [Styled Component](https://styled-components.com/docs/basics)
+- [標籤樣板字面值](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Template_literals)

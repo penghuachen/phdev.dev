@@ -1,0 +1,197 @@
+---
+title: 連續記錄挑戰Day51-使用Javascript操作DOM(Document Object Model) part1
+date: "2019-07-17 21:52:13"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+Outline:
+
+- 使用Javascript操作DOM(Document Object Model)
+    - 關於DOM的樣子
+    - 選取DOM元素
+        - 特定的id屬性
+            - document.getElementById('id')
+        - 表單元素的name屬性
+            - document.getElementByName(‘name’)
+        - 透過取得html tag名稱操作
+            - document.getElementByTagName
+        - class名稱
+            - document.getElementByClassName
+        - 搭配css selector選擇器
+            - document.querySelector(’#id / class / html tag’)
+            - document.querySelectorAll(‘class’)
+
+
+# 使用Javascript操作DOM(Document Object Model) part1
+
+DOM是W3C制訂的一個規範，是獨立於平台和語言的標準。並提供了一組DOM的API用於操作DOM使用，讓我們可以修改結構、樣式與內容
+
+## 關於DOM的樣子
+
+所有我們在透過html語言撰寫的程式碼的都會被轉為類似樹狀的結構圖，如下
+
+
+Ex:簡單的html架構與樹狀圖
+```html
+<html>
+    <head>
+        <title>Doucment</title>
+    </head>
+    <body>
+        <h1>An Document</h1>
+        <p>This is a <b>simple</b> 
+.</p>
+    </body>
+</html>
+```
+![](https://i.imgur.com/hpIdqUI.png)
+ 
+## 選取DOM元素
+
+有幾種方式可以用於選取元素(element)
+
+- 特定的id屬性
+- 表單元素的name屬性
+- 透過取得html tag名稱操作
+- class名稱
+- 搭配css selector選擇器
+
+### 特定的id屬性
+
+在html tag中我們可以透過 **id** 對該元素設定樣式，而在js中我們也可以透過取得該元素的id對那個元素作動態的操作
+
+- 語法：document.getElementById('id')
+
+
+Ex: document.getElementById的使用(使用編輯器編譯並開起網頁查看)
+```html
+<h1 id="title">This is a title.</h1>
+```
+
+```javascript
+  
+//透過id操作 h1 tag
+//為了更直觀呈現，使用了監聽事件的語法addEventListener
+//點擊文字查看效果
+let h1Title = document.getElementById('title');
+h1Title.addEventListener('click', hoverTitle, false);
+function hoverTitle(e) {
+  console.log(e);
+  h1Title.textContent = ' This is a new title.';
+}  
+
+```
+
+###  表單元素的name屬性
+
+表單元素都有一個name的屬性，所以我們可以透過下列語法操作表單元素
+
+- document.getElementByName('name')
+- 這個語法會回傳一個NodeList的物件(也就是array-like物件)，所以可以透過length這個特性進行一些操作
+
+Ex1: document.getElementsByName的使用(使用編輯器編譯並開起網頁查看)
+
+```html
+<form action="#">
+    <input type="text" name="usertext">
+    <input type="text" name="usertext">
+</form>
+```
+
+```javascript
+  
+//透過name屬性操作 表單元素
+//會取得NodeList物件，透過length特性改變輸入時的文字顏色為紅色
+let inputUsetText = document.getElementsByName('usertext');
+for (let i = 0; i < inputUsetText.length; i++) {
+  inputUsetText[i].style.color = '#f00';
+}  
+
+```
+
+
+### 透過取得html tag名稱操作
+
+- document.getElementByTagName
+- 這個語法會回傳一個NodeList的物件(也就是array-like物件)，所以可以透過length這個特性進行一些操作
+
+Ex2: document.getElementsByTagName的使用(使用編輯器編譯並開起網頁查看)
+
+```html
+<h2>This is a main title.</h2>
+<h2>This is a sub title.</h2>
+```
+
+```javascript  
+//透過選取 h2 tag操作h2
+//因為會回傳NodeList物件，所以可以透過length的特性將文字顏色改變為紅色
+//
+let h2Title = document.getElementsByTagName('h2');
+for (let i = 0; i < h2Title.length; i++) {
+    h2Title[i].style.color = "#f00";
+}  
+```
+
+### class名稱
+
+- document.getElementByClassName
+- 這個語法會回傳一個NodeList的物件(也就是array-like物件)，所以可以透過length這個特性進行一些操作
+
+Ex3: document.getElementsByClassName的使用(使用編輯器編譯並開起網頁查看)
+
+```html
+<h2 class="title">This is a main title.</h2>
+<h2 class="title">This is a sub title.</h2>
+```
+
+```javascript  
+//透過選取 class名稱 操作h2
+//因為會回傳NodeList物件，所以可以透過length的特性將文字顏色改變為紅色
+let h2Title = document.getElementsByClassName('title');
+for (let i = 0; i < h2Title.length; i++) {
+    h2Title[i].style.color = "#f00";
+}  
+```
+
+### 搭配css selector選擇器
+
+- document.querySelector('#id / class / html tag')
+    - 可以透過id、class或者html tag操作元素
+    - 如果有多個相同名稱的元素，但只會回傳第一個元素的結果
+- document.querySelectorAll('class')
+    - 可以用於多個相同名稱的元素
+    - 這個語法會回傳一個NodeList的物件(也就是array-like物件)，所以可以透過length這個特性進行一些操作
+
+Ex4: document.querySelector('#id / class / html tag')的使用(使用編輯器編譯並開起網頁查看)
+
+```html
+<h2 class="title">This is a main title.</h2>
+<h2 class="title">This is a sub title.</h2>
+```
+
+```javascript  
+//透過選取 class名稱 操作h2
+//因為會回傳NodeList物件，所以可以透過length的特性將文字顏色改變為紅色
+let h2Title = document.querySelector('.title');
+h2Title.style.color = "#f00";  
+```
+
+
+Ex5: document.querySelectorAll( ' class / html tag')的使用(使用編輯器編譯並開起網頁查看)
+
+```html
+<h2 class="title">This is a main title.</h2>
+<h2 class="title">This is a sub title.</h2>
+```
+
+```javascript  
+//透過選取 class名稱 操作h2
+//因為會回傳NodeList物件，所以可以透過length的特性將文字顏色改變為紅色
+let h2Title = document.querySelectorAll('.title');
+for(let i =0;i<h2Title.length;i++){
+    h2Title[i].style.color = "#f00";
+}  
+```
+

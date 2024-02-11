@@ -1,0 +1,61 @@
+---
+title: 連續記錄挑戰Day25- 透過label + checkbox實現純css手刻RWD選單
+date: "2019-06-21 22:44:37"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 透過label + checkbox實現RWD選單
+
+## 關於label (標籤)
+- 可以提升用戶體驗，透過label中的for屬性設定以及和其對應的id名稱，當用戶點擊label時，可以切換到對應的元素
+- 定義給 button, input, meter, output, progress, select, or textarea元素做使用
+- Ex:
+
+
+```html
+    //for 屬性設定與id需要相同
+    <p id="text">click</p>
+    <label for="text"> 
+        <textarea cols="30" rows="10"></textarea>
+    </label>
+```
+
+## 關於 checkbox (複選框)
+- 用於當選項需要可以重複勾選時使用
+- 透過checked屬性可以設定複選框預設值，checked="checked"意即預設為已經勾選複選框
+- Ex:
+
+```html
+    <p>請勾選：</p>
+    <input type="checkbox" checked="checked">
+```
+## 小測試：關於label + checkbox的簡單運用
+
+- Ex:
+
+```html
+    //透過點擊勾選框，點擊到label中的textarea
+    <span>請勾選checkbox</span>
+    <input type="checkbox" checked="checked" id="text">
+    <label for="text"> 
+        <textarea cols="30" rows="10"></textarea>
+    </label>
+```
+
+```html
+    label{
+      display: block;
+    }
+    input[type="checkbox"]:checked ~ label textarea{
+        background:#dda;
+    }
+```
+
+## 測試範例： 撰寫純css RWD選單 
+
+[測試範例](https://codepen.io/kids5346/pen/pXRMVv)
+
+
+  

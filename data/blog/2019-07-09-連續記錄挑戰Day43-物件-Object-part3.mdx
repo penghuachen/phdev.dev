@@ -1,0 +1,289 @@
+---
+title: 連續記錄挑戰Day43-物件-Object-part3
+date: "2019-07-09 21:51:40"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# Object 方法
+
+這個部分要來學習的是關於 Object 的一些方法，那就開始吧！
+
+
+## 取出列舉特性
+
+第一個方法: ==`for...in`==
+
+先來看一段關於 MDN對於 `for...in` 的解釋:
+
+> for...in 迴圈只迭代可列舉屬性。....迴圈將迭代全部可列舉屬性，包括了物件自身的和物件繼承自它的建構式之原型的可列舉屬性。(原型鏈上較接近物件的屬性覆蓋原型的屬性)
+
+
+意思是使用 `for...`  ==不只將物件自己的可列舉特性取出，也會將繼承而來的可列舉特性也一併取出==
+
+來看看個測試例子:
+
+```javascript
+var obj = {
+  sayHi:() => console.log('Hello!')
+}
+
+var obj2 = Object.create(obj);
+obj2.name = "Bill";
+obj2.habbit = "Read Books";
+
+
+for( key in obj2){
+  console.log(key);
+}
+```
+
+![](https://i.imgur.com/3MTrI0y.png)
+
+透過 `Object.create()` 讓 `obj` 傳入`obj2` 當作 `obj2` 的原型物件，此時使用 `for...in` 可以發現取出來的特性==包含了繼承而來的特性==
+
+第二個方法: ==`Obejct.keys()`==
+
+> MDN: Object.keys() 方法會回傳一個由指定物件所有可列舉之屬性組成的陣列，該陣列中的的排列順序與使用 for...in 進行迭代的順序相同（兩者的差異在於 for-in 迴圈還會迭代出物件自其原型鏈所繼承來的可列舉屬性）。
+
+在 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/keys) 的解釋中，可以歸納出幾個重點:
+
+1. 使用 `Object.keys() ` 會得到指定物件的所有可列舉特性所組成的陣列。
+2. 和 `for...in` 不同，並不會原型物件中繼承來的可列舉特性也一併取出。
+
+將上一個測試例子改寫一下:
+
+```javascript
+var obj = {
+  sayHi:() => console.log('Hello!')
+}
+
+var obj2 = Object.create(obj);
+obj2.name = "Bill";
+obj2.habbit = "Read Books";
+
+const keys = Object.keys(obj2);
+console.log(keys);
+```
+
+![](https://i.imgur.com/urdMhbY.png)
+
+第三個方法: ==`Object.getOwnPropertyNames()`==
+
+透過 `Object.getOwnPropertyNames()` ，能回傳所有可列舉、不可列舉的特性所組成的陣列。
+
+
+來個例子測試一下:
+
+```javascript
+var obj = {
+  name: 'Bill',
+  habbit: 'Read books'
+}
+
+Object.defineProperty(obj,'weight',{
+  value: '65kg',
+  enumerable:false
+})
+
+var prop = Object.getOwnPropertyNames(obj);
+console.log(prop);
+```
+
+![](https://i.imgur.com/bMYxano.png)
+
+將上述所提到取出列舉特性的部分做個表格歸納一下:
+
+|語法|可列舉|可列舉(原型物件)|不可列舉|
+|-|-|-|-|
+|`for...in`|O|O|X|
+|`Object.keys`|O|X|X|
+|`Object.getOwnPropertyNames`|O|X|O|
+
+## 物件的擴充性
+
+關於怎麼判斷某物件是否可以擴充，或者如何設定某物件的擴充性，以下有一些方法可以達成
+
+第一個要提的是: ==Object.isExtensible()==
+
+用來判斷某個物件是否具有擴充性
+
+```javascript
+var obj = {
+  name: "Bill",
+  habiit: "Read books"
+}
+
+console.log('obj物件是否具擴充性: ' + Object.isExtensible(obj)); // true
+```
+
+![](https://i.imgur.com/0ZZgXM3.png)
+
+
+接下來來看看不可擴充的情況
+
+第二個要提的是: ==Object.preventExtensions()==
+
+讓==物件的特性不能再被新增到物件中。==
+
+但需要注意的是，==物件依然可以刪除原本已存在的特性==
+
+寫個測試的例子驗證一下:
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read books"
+}
+
+Object.preventExtensions(obj);
+console.log('obj物件是否具擴充性: ' + Object.isExtensible(obj)); 
+
+obj.sayHi = () => console.log('Hello!');
+delete obj.name;
+
+var prop = Object.keys(obj);
+console.log('obj物件的特性有: ' + prop);
+```
+
+![](https://i.imgur.com/purg55i.png)
+
+上面的測試為了檢查擴充性，所以新增了一個 `sayHi` 方法給 `obj` 物件，而透過結果可以發現，這個新增的特性並沒有被新增到 `obj` 中。
+
+再來透過`delete` 刪除了 `obj` 物件的 `name` 特性，所以也就只剩下特性 `habbit` 了。
+
+第三個要提的是: ==Object.seal()==
+
+`Object.seal()` 有一些特性需要注意，如下:
+
+1. 物件變成不具擴充性(新特性無法加入)
+2. 密封(seal)的物件不能解密封
+3. 透過 `Object.isSealed()` 判斷該物件是否密封
+4. 現有特性無法被刪除，但可以修改特性的值
+5. 只對被指定的物件有效，該指定物件的原型物件則不起作用。
+
+來寫個測試例子:
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read books"
+}
+
+Object.seal(obj);
+console.log('obj物件是否已經被密封(sealed): ' + Object.isSealed(obj));
+
+// 查看 sayHi 方法能否被新增
+obj.sayHi = () => console.log('Hello!');
+console.log(obj);
+
+// 查看 name 特性是否有被刪除
+delete obj.name;
+console.log(obj);
+
+obj.name = "Jack";
+// 查看 name 的特性是否被修改
+console.log(obj);
+```
+
+![](https://i.imgur.com/0XDUqxO.png)
+
+第四個要提的是: ==Object.freeze()==
+
+`Object.freeze()` 有一些特性需要注意，如下:
+
+1. 物件變成不具擴充性(新特性無法加入)
+2. 透過 `Object.isFrozen()` 判斷該物件是否凍結
+3. 現有特性無法被刪除並唯讀(代表值無法被修改)
+4. 只對被指定的物件有效，該指定物件的原型物件則不起作用。
+
+來寫個測試例子:
+
+```javascript
+var obj = {
+  name: "Bill",
+  habbit: "Read books"
+}
+
+Object.freeze(obj);
+console.log('obj物件是否已經被凍結: ' + Object.isFrozen(obj));
+
+// 查看 sayHi 方法能否被新增
+obj.sayHi = () => console.log('Hello!');
+console.log(obj);
+
+// 查看 name 特性是否有被刪除
+delete obj.name;
+console.log(obj);
+
+obj.name = "Jack";
+// 查看 name 的特性是否被修改
+console.log(obj);
+```
+
+## 物件的取值器(getter)、設值器(setter)
+
+1. 取值器(getter) 實際上會呼叫一個隱藏的函式來取回一個值。
+2. 設值器(setter) 實際上會呼叫一個隱藏的韓式用來設定值的特性
+
+當兩者搭配運用時，就會將其定義成 「存取器描述器」(accseeor descriptor)。
+
+直接透過測試例子來看看怎麼運作:
+
+先看看取值器(getter)的使用:
+
+```javascript
+var obj = {
+  get sayHi() {
+    return 'Hello! ';
+  } 
+}
+
+const respond = obj.sayHi;
+console.log(respond);
+```
+
+取值器(getter) 會呼叫一個隱藏的函式(也就是 `sayHi` )，並回傳 `Hello!` 這個值給 `respond` 變數。
+
+
+再看看設值器(setter)的使用:
+
+```javascript
+var obj = {
+  name:this.name,
+  set getName(name) {
+    this.name = name;
+  } 
+}
+
+obj.getName = "Bill";
+console.log(obj.name);
+```
+
+1. 設值器(setter)會呼叫一個隱藏的函式(也就是 `getName` )，並將 `Bill` 這個值做為 `getName` 的參數傳入，此時 `obj` 物件 `name` 的特性值已變成 `Bill`
+2. 所以當我們想要取得 `name` 特性的值時，就可以拿到 `Bill` 。
+
+
+最後看看兩者搭配的使用:
+
+```javascript
+var obj = {
+  name:this.name,
+  
+  get sayHi() {
+    return 'Hello! ' + this.name;
+  },
+  
+  set getName(name) {
+    this.name = name;
+  } 
+}
+
+obj.getName = "Bill";
+const respond = obj.sayHi;
+console.log(respond);
+```
+
+1. 設值器(setter)會呼叫一個隱藏的函式(也就是 `getName` )，並將 `Bill` 這個值做為 `getName` 的參數傳入，此時 `obj` 物件 `name` 的特性值已變成 `Bill`
+2. 取值器(getter) 會呼叫一個隱藏的函式(也就是 `sayHi` )，並回傳 `Hello! Bill` 這個值給 `respond` 變數。

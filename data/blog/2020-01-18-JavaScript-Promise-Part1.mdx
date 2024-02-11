@@ -1,0 +1,138 @@
+---
+title: JavaScript Promise-Part1
+date: "2020-01-18 21:24:30"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+## 什麼是 `Promise`
+
+先來看看 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise) 怎麼解釋 Promise 的:
+
+
+> `Promise` 物件代表一個即將完成、或失敗的**非同步操作**，以及它所產生的值。
+
+
+## 建立 `Promise` 物件與簡易操作
+
+建立一個 `Promise` 物件的方式很簡單:透過 `new` 關鍵字即可。
+
+```javascript
+var timeUp = new Promise((resolve,reject)=>{
+  setTimeout(()=>resolve('時間到了!'),1000)
+});
+```
+
+如上面的程式碼，這樣就已經建立一個 `Promise` 物件。
+
+再來，要怎麼拿到 `時間到了!` 這個值呢?
+
+==如果要拿到`resolve()`中的 `時間到了!`這個值，必須要透過 `then(...)`的方式取出。==
+
+```javascript
+var timeUp = new Promise((resolve, reject) => {
+  setTimeout(() => resolve('時間到了!'), 1000)
+});
+
+timeUp.then(res => console.log(res));
+```
+
+可以預期到的結果是: ==當時間過了一秒之後，會顯示 `時間到了!`==
+
+在 `Promise` 物件中會有兩個參數， `resolve` 及 `reject` 。 這兩個參數處理著不一樣的事情。
+
+來看看 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise#%E8%AA%9E%E6%B3%95) 的語法:
+
+```javascript
+new Promise( /* executor */ function(resolve, reject) { ... } );
+```
+
+- ==`resolve` 是當執行非同步操作時，若成功完成時使用。==
+- ==`reject` 則是當執行非同步操作時，有錯誤時使用。==
+
+所以上面的例子可以知道， `setTimeout()` 的執行為非同步操作，且當經過1秒後，會執行裡面的程式碼 `resolve(時間到了!)`，接著再透過`then()` 取得成功完成後 `resolve` 的值 `時間到了!`。
+
+接下來來看看當非同步的操作有錯誤時， ` reject()` 的使用。
+
+==如果要拿到 `reject` 的值，可以使用 `catch()` 的語法取得==
+
+
+讓我們改寫一下上面的例子:
+
+```javascript
+var timeUp = time => {
+  return new Promise((resolve, reject) => {
+    if (time > 1)
+      setTimeout(() => resolve(`輸入的秒數為: ${time / 1000} 秒，大於1秒`), time);
+    else
+      reject('輸入的時間小於1秒');
+  })
+}
+
+timeUp(0)
+.then(res => console.log(res))
+.catch(err => console.log(err));
+
+timeUp(2000)
+.then(res => console.log(res))
+.catch(err => console.log(err));
+
+
+```
+
+當輸入的值小於1時，因為設定了條件判斷，所以會執行 `reject()`，然後透過 `catch()` 取得值 `輸入的時間小於1秒`。
+
+## `Promise` 物件的狀態
+
+`Promise` 物件的狀態會處於以下幾種狀態:
+
+- 等待(pending): 初始狀態，代表正在等待中
+- 實現(fulfilled):表示非同步操作成功且完成
+- 拒絕(rejected):表示非同步操作失敗了
+
+來看看 [MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise#%E6%8F%8F%E8%BF%B0) 關於 `Promise` 物件的狀態圖
+
+![Day26-1](https://i.imgur.com/EReOUrV.png)
+
+從這張圖可以獲得一些訊息:
+
+1. 一個處於等待(pending)狀態的 `Promise` 物件會有兩種狀態的轉換，那就是實現(fulfilled)或拒絕(rejected)
+2. 如果是實現(fulfilled)，代表非同步操作完成且成功;但如果拒絕(rejected)則代表非同步操作失敗。
+
+讓我們再多用幾個例子來更加了解 `Promise` 物件吧!
+
+- 測試例子一:
+```javascript
+var p3 = new Promise((resolve, reject) => resolve("B"));
+var p1 = new Promise((resolve, reject) => resolve(p3));
+var p2 = new Promise((resolve, reject) => resolve("A"));
+
+p1.then(v => console.log(v));
+p2.then(v => console.log(v));
+```
+
+`p2` 可以直接取得 `A` 的值，但是對於 `p1` 卻需要先解析 `p3` 後才能得到值 `B` 
+
+![Day26-2](https://i.imgur.com/NY93Ksi.png)
+
+
+
+- 測試例子二:
+
+```javascript
+var p = Promise.resolve(42);
+p.then(v => {
+  console.log(v);
+  return new Promise((resolve, reject) => resolve(v * 2));
+}).then(v => console.log(v));
+```
+
+所以執行流程如下:
+1. `p.then(...)` 取得 `v` 的值 `42`，並回傳一個另一個 `Promise` 物件
+2. 此時的 `then(...)` 會取得的是 `resolve(v * 2)` 的值，所以為 `84`
+
+![Day26-3](https://i.imgur.com/z8Bxh5I.png)
+
+
+

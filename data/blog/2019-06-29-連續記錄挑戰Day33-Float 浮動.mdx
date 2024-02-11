@@ -1,0 +1,101 @@
+---
+title: 連續記錄挑戰Day33-Float 浮動
+date: "2019-06-29 16:48:12"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# Float 浮動
+
+前言：
+
+浮動元素一直被用於當作網頁排版的技巧，但**浮動元素從來就不是為了排版而生**，所以必須要知道雖然可以這麼用，卻是誤用。
+
+
+關於 float 的一些特性，趁著有空的時候做個整理並且記錄放上來，也順帶和前面的 [連續記錄挑戰Day20-float和清除浮動的方法](https://penghuachen.github.io/2019/06/16/%E9%80%A3%E7%BA%8C%E8%A8%98%E9%8C%84%E6%8C%91%E6%88%B0Day20-float%E5%92%8C%E6%B8%85%E9%99%A4%E6%B5%AE%E5%8B%95%E7%9A%84%E6%96%B9%E6%B3%95/) 做個呼應。
+
+Outline
+
+- 什麼是浮動 Float?
+- 浮動的語法怎麼設定？
+- 浮動的相關規則
+    - 當元素設定為浮動時，其他內容會圍繞四周
+    - 浮動元素左/右的最外邊緣不能是容器左/右的最內邊緣
+    - 浮動元素的左外側邊界必須要在前一個已經設定浮動元素的右邊界，反之亦然。
+    - 浮動元素的上邊緣不能比容器高，且當浮動元素若位於兩個重疊邊界的範圍間，則浮動元素的放置位置會如同設定 display:block的效果。
+    - 浮動元素的上邊緣不能高於前一個浮動元素或區塊元素的上邊緣，且元素寬度加總大於容器寬度時，次排序的浮動元素會自動往下一排放置。
+    - 浮動元素若放置於行方框(例如p段落)中最前面時，浮動位置為該行方框的上緣，與行方框切齊，而並不會浮動到最上方。
+    - 浮動元素與margin負值:可以讓浮動元素移動到容器之外
+    - 浮動元素在行內方框(例如span)及區塊元素時的邊框、背景、內容的重疊情形
+- 什麼是clear?
+- clear語法怎麼設定？
+
+## 什麼是浮動 Float?
+
+**可以使元素脫離原本的文檔流向，使得容器高度會因為沒有元素無法撐開(高度=0)，但要記住依然會影響排版的結果。**
+
+
+## 浮動的語法怎麼設定？
+
+|語法|數值|
+|-|-|
+|float|left / right / none |
+
+
+## 浮動元素的相關放置規則
+
+1. 當元素設定為浮動時，其他內容會圍繞四周。
+[測試範例一](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+而且**不會發生 margin collpase 的情形**。而這必須討論關於BFC的建立與margin collpase之間的關係。詳細可以看此篇 [margin collapse由來與BFC原理](https://penghuachen.github.io/2019/06/02/%E9%80%A3%E7%BA%8C%E8%A8%98%E9%8C%84%E6%8C%91%E6%88%B0Day06-margin-collapse%E7%94%B1%E4%BE%86%E8%88%87BFC%E5%8E%9F%E7%90%86/)
+![](https://i.imgur.com/s4WfTBR.png)
+
+2. 浮動元素左/右的**最外邊緣**不能是容器左/右的**最內邊緣**
+[測試範例二](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+意思是浮動元素的最外邊緣最多就只到容器的最內邊緣而已
+    ![](https://i.imgur.com/MJEuVyZ.png)
+    
+3. 浮動元素的**左外側邊界必須要在前一個已經設定浮動元素的右邊界**，反之亦然。
+[測試範例三](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+為了避免浮動元素相互覆蓋，所以會讓次序後面的浮動元素緊貼著前一個。
+![](https://i.imgur.com/Ghvq8JR.png)
+
+4. 浮動元素的上邊緣不能比容器高，且當浮動元素若位於兩個重疊邊界的範圍間，則浮動元素的放置位置會如同設定 display:block的效果。
+    [測試範例四](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+![](https://i.imgur.com/Hnpxhh6.png)
+   
+5. 浮動元素的上邊緣不能高於前一個浮動元素或區塊元素的上邊緣，且元素寬度加總大於容器寬度時，次排序的浮動元素會自動往下一排放置。
+    [測試範例五](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+![](https://i.imgur.com/ufhPWED.png)
+   
+6. 浮動元素若放置於行方框(例如p段落)中最前面時，浮動位置為該行方框的上緣，與行方框切齊，而並不會浮動到最上方。
+    [測試範例六](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+![](https://i.imgur.com/x3u7rgR.png)
+   
+7. 浮動元素與margin負值:可以讓浮動元素移動到容器之外
+    [測試範例七](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+    瀏覽器為了找到浮動元素上方的內側邊界，所以會做此計算： 100px + (-15px) + 0padding = 85px
+    所以浮動元素的內側邊界會是在85px的位置，且沒有違反規則。是一個很有趣的特性
+![](https://i.imgur.com/hDiopOh.png)
+
+8. 浮動元素在行內方框(例如span)及區塊元素時的**邊框、背景、內容**的重疊情形
+    - 行內方框：邊框、背景、內容都會在浮動元素**之上**
+    - 區塊元素：邊框、背景會在浮動元素**之下**，但內容會在浮動元素**之上**。
+
+    [測試範例八](https://codepen.io/kids5346/pen/GbyzBr?editors=1100)
+  ![](https://i.imgur.com/fKjRMBs.png)
+  
+    
+## 什麼是clear?
+
+**用於清除浮動的語法**，在css2.1中引入了clearance，用來在上邊界加入空間並藉此將元素往下推超過浮動元素，達到清除浮動所造成的影響
+
+## clear語法怎麼設定？
+
+|語法|數值|
+|-|-|
+|clear|left / right / none |
+
+關於清除浮動的幾種方式，可參考這一篇 [連續記錄挑戰Day20-float和清除浮動的方法](https://penghuachen.github.io/2019/06/16/%E9%80%A3%E7%BA%8C%E8%A8%98%E9%8C%84%E6%8C%91%E6%88%B0Day20-float%E5%92%8C%E6%B8%85%E9%99%A4%E6%B5%AE%E5%8B%95%E7%9A%84%E6%96%B9%E6%B3%95/)
+
+  

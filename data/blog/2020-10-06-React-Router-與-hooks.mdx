@@ -1,0 +1,421 @@
+---
+title: React Router 與 hooks
+date: "2020-10-06 10:07:52"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# React Router 與 hooks
+
+在 React Router 的部分最後要介紹的是**使用 hooks 的方式。**
+
+
+透過 hooks 可以讓我們在設計 Router 上更加的有效率且方便。
+
+而今天這個部分會透過官方文件提供的部分範例來學習在 Router 中如何使用 hooks 的部分。
+
+接著就趕緊學習吧！
+
+## 第一個官方範例: 學習 `useParams`
+
+當我們在 Router 中使用**動態參數**的設計方式時，總是會需要取得 URL 上的 `id` 值。
+
+而 hooks 提供了 **`useParams`** 讓我們可以更方便的取得 `id` 值。 而不用再透過 `this.props.match.params` 的方式取得這個值。
+
+來看看官方提供的這個[範例](https://reactrouter.com/web/example/url-params)：
+
+```jsx=
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams
+} from "react-router-dom";
+
+// Params are placeholders in the URL that begin
+// with a colon, like the `:id` param defined in
+// the route in this example. A similar convention
+// is used for matching dynamic segments in other
+// popular web frameworks like Rails and Express.
+
+export default function ParamsExample(props) {
+  
+  return (
+    <Router>
+      <div>
+        <h2>Accounts</h2>
+
+        <ul>
+          <li>
+            <Link to="/netflix">Netflix</Link>
+          </li>
+          <li>
+            <Link to="/zillow-group">Zillow Group</Link>
+          </li>
+          <li>
+            <Link to="/yahoo">Yahoo</Link>
+          </li>
+          <li>
+            <Link to="/modus-create">Modus Create</Link>
+          </li>
+        </ul>
+
+        <Switch>
+          <Route path="/:id" children={<Child />} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function Child() {
+  // We can use the `useParams` hook here to access
+  // the dynamic pieces of the URL.
+  let { id } = useParams();
+  return (
+    <div>
+      <h3>ID: {id}</h3>
+    </div>
+  );
+}
+```
+
+在 Router 設計了動態參數的方式 `<Route path="/:id" children={<Child />} />`。
+
+而在 function `Child` 中透過存取 `useParams` 物件的 `id` 值，如果了解動態參數的配置方式的話，相信這個部分不會太難理解。
+
+## 第二個官方範例： 學習 `useRouteMatch`
+
+在 hooks 之前如果要確認是否符合匹配 URL 的話，需要透過 `this.props.match.url` 或者 `this.props.match.path` 的方式取得 `url` 或者 `path` 才能進行匹配。
+
+hooks 提供我們更簡便的方式處理這個部分，透過 `useRouteMatch` 方法。
+
+這邊看看官方提供的[範例](https://codesandbox.io/s/react-router-nesting-qzy12?from-embed):
+
+```jsx=
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
+  useRouteMatch
+} from "react-router-dom";
+
+// Since routes are regular React components, they
+// may be rendered anywhere in the app, including in
+// child elements.
+//
+// This helps when it's time to code-split your app
+// into multiple bundles because code-splitting a
+// React Router app is the same as code-splitting
+// any other React app.
+
+export default function NestingExample() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/topics">Topics</Link>
+          </li>
+        </ul>
+
+        <hr />
+
+        <Switch>
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route path="/topics">
+            <Topics />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function Home() {
+  return (
+    <div>
+      <h2>Home</h2>
+    </div>
+  );
+}
+
+function Topics() {
+  // The `path` lets us build <Route> paths that are
+  // relative to the parent route, while the `url` lets
+  // us build relative links.
+  let { path, url } = useRouteMatch();
+
+  return (
+    <div>
+      <h2>Topics</h2>
+      <ul>
+        <li>
+          <Link to={`${url}/rendering`}>Rendering with React</Link>
+        </li>
+        <li>
+          <Link to={`${url}/components`}>Components</Link>
+        </li>
+        <li>
+          <Link to={`${url}/props-v-state`}>Props v. State</Link>
+        </li>
+      </ul>
+
+      <Switch>
+        <Route exact path={path}>
+          <h3>Please select a topic.</h3>
+        </Route>
+        <Route path={`${path}/:topicId`}>
+          <Topic />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
+function Topic() {
+  // The <Route> that rendered this component has a
+  // path of `/topics/:topicId`. The `:topicId` portion
+  // of the URL indicates a placeholder that we can
+  // get from `useParams()`.
+  let { topicId } = useParams();
+
+  return (
+    <div>
+      <h3>{topicId}</h3>
+    </div>
+  );
+}
+```
+
+ Topics 元件設計了一個巢狀路由的路由配置，如果是之前的話，也許你會寫成這樣：
+ 
+ ```jsx=
+ function Topics(props) {
+  return (
+    <div>
+      <h2>Topics</h2>
+      <ul>
+        <li>
+          <Link to={`${props.match.url}/rendering`}>Rendering with React</Link>
+        </li>
+        <li>
+          <Link to={`${props.match.url}/components`}>Components</Link>
+        </li>
+        <li>
+          <Link to={`${props.match.url}/props-v-state`}>Props v. State</Link>
+        </li>
+      </ul>
+
+      <Switch>
+        <Route exact path={path}>
+          <h3>Please select a topic.</h3>
+        </Route>
+        <Route path={`${props.match.path}/:topicId`}>
+          <Topic />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+ ```
+ 
+ 上面的方式需要透過取得 `props` 中 `match` 物件中的 `url`, `path` 來設計匹配條件，而使用 `useRouteMatch` 相對簡單的多，這裡額外擷取重點區塊:
+ 
+ ```jsx=
+ function Topics() {
+  // The `path` lets us build <Route> paths that are
+  // relative to the parent route, while the `url` lets
+  // us build relative links.
+  let { path, url } = useRouteMatch();
+
+  return (
+    <div>
+      <h2>Topics</h2>
+      <ul>
+        <li>
+          <Link to={`${url}/rendering`}>Rendering with React</Link>
+        </li>
+        <li>
+          <Link to={`${url}/components`}>Components</Link>
+        </li>
+        <li>
+          <Link to={`${url}/props-v-state`}>Props v. State</Link>
+        </li>
+      </ul>
+
+      <Switch>
+        <Route exact path={path}>
+          <h3>Please select a topic.</h3>
+        </Route>
+        <Route path={`${path}/:topicId`}>
+          <Topic />
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+ ```
+
+透過 `useRouteMatch` 可以直接拿到 `path`, `url` 的值來設計匹配的部分。
+
+除了上面的使用方式，也可以額外傳入一些參數，所以也許會看到如下的寫法:
+
+```jsx=
+const isMatch = useRouteMatch("/PageA/PageAAnotherComponent");
+```
+
+除了可以接受字串形式的參數，也可以接受物件的方式:
+
+```jsx=
+const isMatch = useRouteMatch({
+  path: "/PageA/PageAAnotherComponent"
+});
+```
+
+## 第三個官方範例： 學習 `useLocation`
+
+location 物件可以提供我們取得當前應用程式所在的位置。
+
+而之前我們必須透過 `this.props.location` 的方式才可以取得 location 物件中的值，而現在可以透過 `useLocation` 的方式更簡單的取得。
+
+這邊看看官方提供的[範例](https://reactrouter.com/web/example/no-match):
+
+```jsx=
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Switch,
+  Redirect,
+  useLocation
+} from "react-router-dom";
+
+// You can use the last <Route> in a <Switch> as a kind of
+// "fallback" route, to catch 404 errors.
+//
+// There are a few useful things to note about this example:
+//
+// - A <Switch> renders the first child <Route> that matches
+// - A <Redirect> may be used to redirect old URLs to new ones
+// - A <Route path="*> always matches
+
+export default function NoMatchExample() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/old-match">Old Match, to be redirected</Link>
+          </li>
+          <li>
+            <Link to="/will-match">Will Match</Link>
+          </li>
+          <li>
+            <Link to="/will-not-match">Will Not Match</Link>
+          </li>
+          <li>
+            <Link to="/also/will/not/match">Also Will Not Match</Link>
+          </li>
+        </ul>
+
+        <Switch>
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route path="/old-match">
+            <Redirect to="/will-match" />
+          </Route>
+          <Route path="/will-match">
+            <WillMatch />
+          </Route>
+          <Route path="*">
+            <NoMatch />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function Home() {
+  return <h3>Home</h3>;
+}
+
+function WillMatch() {
+  return <h3>Matched!</h3>;
+}
+
+function NoMatch() {
+  let location = useLocation();
+
+  return (
+    <div>
+      <h3>
+        No match for <code>{location.pathname}</code>
+      </h3>
+    </div>
+  );
+}
+```
+
+這裡簡單描述一下這段程式碼的運作:
+
+1. 當路由匹配到 `/` 時，會渲染 `Home` 元件的內容
+2. 當路由匹配到 `/old-match` 時，會重導向至 `WillMatch` 元件的內容
+3. 當路由匹配到 `/will-match` 時，會渲染 `WillMatch` 元件的內容
+3. 當路由匹配到 `/will-not-match` 時，會匹配任意路徑的路由(`path="*"`)，所以會渲染`NoMatch` 元件的內容
+4. 當路由匹配到 `/also/will/not/match` 時，會匹配任意路徑的路由(`path="*"`)，所以會渲染`NoMatch` 元件的內容
+
+而在 `NoMatch` 元件中使用到了 `useLocation`，當我們需要取得目前應用程式的位置時，可以透過 `useLocation` 物件提供的 `pathname` 的值拿到。
+
+## 第四個官方範例： 學習 `useHistory`
+
+最後一個範例是學習如何透過 hooks 的方式取得 history 物件中提供的方法。
+
+這邊來看看[官方提供的程式碼](https://reactrouter.com/web/api/Hooks/usehistory):
+
+```jsx=
+function HomeButton() {
+  let history = useHistory();
+
+  function handleClick() {
+    history.push("/home");
+  }
+
+  return (
+    <button type="button" onClick={handleClick}>
+      Go home
+    </button>
+  );
+}
+```
+
+在 history 物件中有一些方法提供我們操作，而其中一個就是 `push`，這個方法可以讓我們在觸發某些行為時，將網頁導航至我們設定的位置。
+
+而範例程式碼則是透過點擊事件來呼叫 `push` 方法，並導航至 `Home` 元件、渲染 `Home` 元件內容。
+
+關於在 Router 中使用 hooks 的學習就暫時先到這裡囉！
+
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [React Router](https://reactrouter.com/web/api/Hooks)

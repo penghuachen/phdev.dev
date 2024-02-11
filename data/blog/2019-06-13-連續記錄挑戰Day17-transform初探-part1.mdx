@@ -1,0 +1,89 @@
+---
+title: 連續記錄挑戰Day17-transform初探- part1
+date: "2019-06-13 20:28:34"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# css 大全 - transform 初探 -part1
+
+
+## 轉換(transform)會使用到的兩種系統：
+
+- 笛卡爾座標系統：也稱為x/y/z座標系統
+    - 水平方向的x軸
+    - 垂直方向的Y軸
+    - 代表深度的Z軸｀
+
+
+- 球面系統：描述3D空間中的角度
+
+
+而：
+- 2D平面的旋轉實際上是描述對於Ｚ軸旋轉
+    - rotate(45deg) = rotateZ(45deg)
+- 相對於X軸旋轉會讓元素接近或遠離使用者
+- 相對於Y軸旋轉則會讓元素左右翻轉
+
+
+
+
+## 轉換(transform)語法與觀念
+- transform可以設定的語法：
+
+| none(Default)|translate()  |scale()  |rotate()  |skew()  |martrix()  |perspective()  |
+|      -       |    -        |   -     |   -      |   -    |   -       |      -        |
+|      -       |translate3d()|scale3d()|rotate3d()|skewX() |martrix3d()|      -        |
+|      -       |translateX() |scaleX() |rotateX() |skewY() |   -       |      -        |
+|      -       |translateY() |scaleY() |rotateY() |   -    |   -       |      -        |
+|      -       |translateZ() |scaleZ() |rotateZ() |   -    |   -       |      -        |
+
+
+- 其他設定：
+
+
+
+| transform-origin | transform-style | perspective | perspective-origin | backface-visibility | 
+|      ---         |    ---          |   ---       |   ---              |   ---               |
+|        -         |      -          |     -       |     -              |   -                 |
+
+
+
+
+- 適用於：區塊元素、設定為inline-block的元素以及 **部分行內元素** 
+    - 部分行內元素目前測試可以使用而且常見的有：
+        - img
+        - form表單的input、textarea
+    其餘如 span、 em等這類的行內元素則不能使用。 
+- 以bounding box尺寸為基準
+bounding box: 指的是邊框方框，也就是元素邊框的最外緣。
+而 svg 的bounding box 則會是 svg定義的 object bounding box。
+- 元素在透過轉換後可能會變大或者變小，但在頁面上所佔據的空間一樣不會變。
+
+- transform-list
+    可以同時在transform設定多個語法，**且排序的順序不同，呈現的效果也完全不同**
+    Ex: 
+    ```
+      transform:translateX(45deg) rotate(45deg);
+    ```
+
+- 轉換的效果不會疊加，如果需要有多個效果時，需要重複設定。
+    ```html
+        #ex01{
+            transform: rotate(30deg) skewX(-25deg);
+        }
+        //此時想要再加上一個效果: scaleY(2)，因為效果不會疊加，所以需要重複設定
+        #ex01{
+            transform: rotate(30deg) skewX(-25deg) scaleY(2);
+        }
+    ```
+    - **但有一種情形為例外：動畫轉換。轉換的效果會疊加，有以下幾種狀況會遇到：**
+        - transition (轉場) 
+        - 動畫(animation)
+        - :hover 等偽類元素的效果雖然不是透過transition觸發，但也屬於轉換的類型
+
+- transform也可以用在偽元素上
+
+
+  

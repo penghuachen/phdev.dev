@@ -1,0 +1,253 @@
+---
+title: 連續記錄挑戰Day53-使用Javascript操作DOM-Document-Object-Model-part2
+date: "2019-07-19 22:21:22"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# 使用Javascript操作DOM(Document Object Model) part2
+
+## node物件中的特性
+
+- parentNode : 當前節點的父節點，若沒有則為null
+- childNodes : 一個唯讀的類陣列物件
+- firstChild / lastChild : 一個節點的第一個/最後一個節點
+- nextSibling / previousSibling : 一個節點的下一個/前一個節點(具有共同父節點的的稱為兄弟節點)
+- nodeType:節點的類型，Document = 9 , Element = 1 ...等
+- nodeValue:Text / Comment節點的文字內容
+- nodeName:元素的tag name，會被轉為大寫
+
+
+Ex1:parentNode(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+
+```javascript
+//ul的父節點為body，所以會取得body的程式碼
+let getList = document.querySelector('.list');
+console.log(getList.parentNode);
+```
+
+Ex2:childNodes(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+
+```javascript
+//取得li的子節點，就是文字這個節點
+let getList = document.querySelector('.list li');
+//NodeList(1)
+console.log(getList.childNodes); 
+```
+
+Ex3:firstChild(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+
+```javascript
+//取得li的子節點，就是文字這個節點
+let getList = document.querySelector('.list');
+//#text
+console.log(getList.firstChild); 
+```
+
+
+Ex4:nextSibling(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li>string1</li>
+    <li class="secondLi">string2</li>
+    <ul class="secondUl">
+      <li>test</li>
+    </ul>
+</ul>
+```
+
+```javascript
+//取得li的子節點，就是文字這個節點
+let getList = document.querySelector('.secondLi');
+//取得下一個兄弟節點(都以ul.list為父節點)
+console.log(getList.nextSibling.nextSibling);
+```
+
+Ex5:nodeName(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li>string1</li>
+    <li class="secondLi">string2</li>
+    <ul class="secondUl">
+      <li>test</li>
+    </ul>
+</ul>
+```
+
+```javascript
+let getList = document.querySelector('.list');
+//取得節點的tag name
+console.log(getList.nodeName);
+```
+
+
+## 透過js動態操作HTML屬性並修改屬性值
+
+- 透過getAttribute 取得屬性的值
+    - elment.getAttribute("屬性名稱")
+- 透過setAttribute 設定屬性的值
+- 透過hasAttribute 查詢是否有設定屬性的值 
+- 透過removeAttribute 刪除屬性的值
+
+Ex1. 取得 a tag的值(使用編輯器編譯並開起網頁查看)
+```html
+<a href="#">Link</a>
+```
+```javascript
+let getLink =  document.querySelector('a');
+console.log(getLink.getAttribute("href"));
+```
+
+Ex2. 設定 a tag的屬性href，更改為google網址(使用編輯器編譯並開起網頁查看)
+```html
+<a href="#">Link</a>
+```
+```javascript
+let getLink =  document.querySelector('a');
+console.log(getLink.setAttribute("href","http://www.google.com"));
+```
+Ex3.查詢 a tag 是否有設定href屬性的值，有的話就回傳true(使用編輯器編譯並開起網頁查看)
+```html
+<a href="#">Link</a>
+```
+```javascript
+let getLink =  document.querySelector('a');
+console.log(getLink.hasAttribute("href"));
+```
+Ex4.刪除 a tag 的href屬性(使用編輯器編譯並開起網頁查看)
+```html
+<a href="#">Link</a>
+```
+```javascript
+let getLink =  document.querySelector('a');
+console.log(getLink.removeAttribute("href"));
+console.log(getLink);//href屬性已經被刪除
+```
+
+## 自定義屬性 data-*
+將額外的資訊加到html tag中通常都有用途，並透過dataset取得額外加入的資訊然後操作它。
+
+Ex.設定data-num="0"的元素，透過js取得其值。(使用編輯器編譯並開起網頁查看)
+```html
+<ul class="list">
+    <li data-num="0">string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+```javascript
+//進階運用可以用在取得自定義的值後，動態刪除該元素
+let getList =  document.querySelector('.list li');
+console.log(getList.dataset.num);
+
+```
+
+## textContent
+
+可以透過js操作元素的文字內容並修改
+
+Ex. 修改li的文字內容為:這是被修改過的文字內容
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+```javascript
+let el = document.querySelector('.list li');
+//只會修改到第一個的原因是因為使用querySelector語法只會抓取到第一個
+el.textContent = "這是被修改過的文字內容";
+```
+
+
+
+## innerHTML元素內容作為HTML
+
+innerHTML特性會回傳以markup字串呈現的元素內容，且會調用web解析器並以此新字串解析結果來取代該元素目前的內容。
+
+使用+=運算子重複地將部份文字附加至innerHTML特性的效能通常很低。
+
+Ex:透過innerHTML渲染頁面，並覆蓋原本網頁內容
+
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+```javascript
+//因為innerHTML會重新渲染頁面的關係，所以原本的ul就會不見
+let el = document.querySelector('body');
+el.innerHTML = '<a href="#">Link</a>';
+```
+
+## creatElement創建節點
+
+除了透過innerHTML之外，也可以透過這個方式將元素內容作為HTML的方法。
+
+這個方法會將新增的元素掛載到指定的元素底下。
+
+Ex:新增一個li元素到ul中
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li>string3</li>
+</ul>
+```
+
+```javascript
+//選取到ul元素
+let getList = document.querySelector('.list');
+//新增li元素
+let newElement = document.createElement('li');
+//加入文字內容
+newElement.textContent = '這是新增進來的元素';
+//將newElement掛載到ul(指的是getList)裡面
+getList.appendChild(newElement);
+```
+## removeChild刪除節點
+
+可以將DOM中的節點移除，使用時要注意要在**父節點在調用這個方法來刪除子節點**。
+
+Ex2:到ul中刪除一個li元素
+```html
+<ul class="list">
+    <li>string1</li>
+    <li>string2</li>
+    <li class="listLi">string3</li>
+</ul>
+```
+
+```javascript
+//選取到ul元素
+let getList = document.querySelector('.list');
+let listLi = document.querySelector('.listLi');
+//刪除 class名稱為listLi的元素
+getList.removeChild(listLi);
+```
+

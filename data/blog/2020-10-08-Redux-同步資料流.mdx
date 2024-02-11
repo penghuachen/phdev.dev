@@ -1,0 +1,271 @@
+---
+title: Redux 同步資料流
+date: "2020-10-08 10:24:24"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# Redux 同步資料流
+
+記得昨天 Redux 好朋友說今天要透過例子讓我更加了解運作的部分，而今天要先關於**處理同步資料時的運作方式。**
+
+
+此外，還特地從元件中的 state 、事件一步步開始說明，然後再把 state 中的資料與事件搬到 Redux 中，真的很貼心。
+
+接著讓我們看看提供的例子:
+
+## 一步步來: 從元件中開始
+
+這邊 Redux 好朋友先描述了關於這個測試例子的操作情境:
+
+1. **元件中 state 有一個狀態 number，初始值為 0**
+2. 有一個事件: incrementHandler，用來更新 number 的值，每次點擊按鈕時 ＋１。
+3. 有一個事件: decrementHandler，用來更新 number 的值，每次點擊按鈕時 -１。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/recursing-elbakyan-1zdw7?file=/src/App.js:276-292)
+
+## 好戲上場: 將 state 與事件搬到 Redux 中。
+
+接著就是今天的重頭戲，將 state 與事件搬到 Redux 中。
+
+這邊 Redux 好朋友再次幫我們條列的一個流程:
+1. 安裝 redux, react-redux
+2. 建立 Redux store 物件、 createStore 方法
+3. 在 store 資料夾中建立 rootReducer.js，並建立 Reducer 方法, 初始 state，將 Reducer 方法作為 createStore 參數傳入。
+4. 將 Redux store 物件透過 react-redux 中的 Provider 提供給 App 元件
+5. 在 React 元件中透過 redux 中的 connect 方法讓 React 元件可以和 redux store 連接。
+6. 透過在 React 元件中設定:
+    - mapStateToProps: 將 Redux store 物件 state 中需要的值提供給 React 元件。
+    - mapDispatchToProps: 在 React 元件中調用方法，透過方法 dispatch 一個 action，讓 Store 知道是哪一個事件需要被觸發並執行 state 的更新。
+
+
+接著讓我們看看在範例中依序的設定:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/zen-volhard-vwu29)
+
+首先是安裝 redux, react-redux，這部分應該沒有難度，只需要注意**版本的問題**，在 React 版本 > 16 以上才可以使用。
+
+接著會將幾個流程一次設定好，在 index.js 中:
+1. 建立 store 物件與引入  createStore 函式
+2. 在 src 資料夾中建立 store 資料夾，建立 rootReducer 方法並引入到 index.js
+3. 將 Redux store 物件透過 react-redux 中的 Provider 提供給 App 元件
+
+```jsx=
+// index.js
+
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import { createStore } from "redux";
+import { rootReducer } from "./store/rootReducer";
+import { Provider } from "react-redux";
+
+const rootElement = document.getElementById("root");
+const store = createStore(rootReducer);
+
+ReactDOM.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
+  rootElement
+);
+```
+
+接著我們在 React 元件中設定:
+
+1. 透過 react-redux 中的 connect 方法將 react 元件與 redux 的 store 連接。
+2. 先設定 mapStateToProps，將 Redux 中的 state，依據需求在 React 元件中 取得。
+3. 然後設定 mapDispatchToProps，透過 dispatch 一個 action，讓 store 知道是 action type 中 INCREMENTHANDLER、DECREMENTHANDLER 或 incrementTenNumberHandler 在元件中發出一個更新 state 的事件，而在 React 元件中，我們透過 props 的方式取得呼叫這些方法。
+4. 最後為了讓 state 的更新可以更加的有彈性，透過當箭頭函式 dispatch 一個 action 時，將 number 傳入作為 payload 的資料傳到 store 中，在更新上可以更加的有彈性。
+
+```jsx=
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import "./styles.css";
+
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <h2>數字: {this.props.number}</h2>
+        <button onClick={this.props.incrementHandler}>點擊 + 1</button>
+        <button onClick={this.props.decrementHandler}>點擊 - 1</button>
+        <button
+          onClick={() => {
+            this.props.incrementTenNumberHandler(this.props.number);
+          }}
+        >
+          由當前數字 + 10
+        </button>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (state) => {
+  return {
+    number: state.number
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    incrementHandler: () => dispatch({ type: "INCREMENTHANDLER" }),
+    decrementHandler: () => dispatch({ type: "DECREMENTHANDLER" }),
+    incrementTenNumberHandler: (number) =>
+      dispatch({
+        type: "INCREMENTTENNUMBERHANDLER",
+        payload: {
+          number
+        }
+      })
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+在 rootReducer 方法中的設定，透過**判斷 action.type 決定觸發哪一個更新 state 的流程。**
+
+```jsx=
+const initialState = {
+  number: 0
+};
+
+export const rootReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENTHANDLER":
+      return {
+        number: state.number + 1
+      };
+    case "DECREMENTHANDLER":
+      return {
+        number: state.number - 1
+      };
+    case "INCREMENTTENNUMBERHANDLER":
+      return {
+        number: action.payload.number + 10
+      };
+    default:
+      return state;
+  }
+};
+```
+
+以上就是一個 Redux 同步資料流的處理，基本上這樣子就是一個簡單又完整在 React 中使用 Redux 管理共同 state 的方式。
+
+而最後 redux 好朋友還偷偷告訴我們一個秘訣，為了讓 **lint 工具方便檢查到錯誤，以及讓開發團隊可以更好了解使用了哪些 action types 的時候，這邊透過新增一個 action-types 的檔案來管理。**
+
+方式很簡單，將所有目前使用到的 action 都在 action-types 集中管理，並透過匯出的方式在 React 元件、 Redux 中使用。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/stupefied-dust-9hqcy?file=/src/store/action-types.js)
+
+在 action-types 這隻檔案中會看到這樣子的管理：
+
+```jsx=
+export const INCREMENTHANDLER = "INCREMENTHANDLER";
+export const DECREMENTHANDLER = "DECREMENTHANDLER";
+export const INCREMENTTENNUMBERHANDLER = "INCREMENTTENNUMBERHANDLER";
+```
+
+在 rootReducer 中則會改寫如下:
+
+```jsx=
+import * as actionTypes from './action-types';
+
+const initialState = {
+  number: 0
+};
+
+export const rootReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actionTypes.INCREMENTHANDLER:
+      return {
+        number: state.number + 1
+      };
+    case actionTypes.DECREMENTHANDLER:
+      return {
+        number: state.number - 1
+      };
+    case actionTypes.INCREMENTTENNUMBERHANDLER:
+      return {
+        number: action.payload.number + 10
+      };
+    default:
+      return state;
+  }
+};
+```
+
+在 App.js 中則會改寫如下:
+
+```jsx=
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import * as actionTypes from "./store/action-types";
+import "./styles.css";
+
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <h2>數字: {this.props.number}</h2>
+        <button onClick={this.props.incrementHandler}>點擊 + 1</button>
+        <button onClick={this.props.decrementHandler}>點擊 - 1</button>
+        <button
+          onClick={() => {
+            this.props.incrementTenNumberHandler(this.props.number);
+          }}
+        >
+          由當前數字 + 10
+        </button>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (state) => {
+  return {
+    number: state.number
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    incrementHandler: () => dispatch({ type: actionTypes.INCREMENTHANDLER }),
+    decrementHandler: () => dispatch({ type: actionTypes.DECREMENTHANDLER }),
+    incrementTenNumberHandler: (number) =>
+      dispatch({
+        type: actionTypes.INCREMENTTENNUMBERHANDLER,
+        payload: {
+          number
+        }
+      })
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+所以當我們在 dispatch 一個 action 時如果有拼寫不對等等的錯誤時，可以得到類似以下的錯誤訊息：
+
+![](https://i.imgur.com/t4mBQa3.png)
+
+透過 lint 等工具可以讓我們更快知道問題發生的位置。
+
+以上就是 Redux 好朋友在今天跟我們分享的部分，但是它冷冷的補了一句：「你以為結束了嗎? 不，這其實剛開始...」。
+
+於是明天要進入的是 Redux 的另外一個重點: 非同步資料流。
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+我們明天見。
+
+## 資源
+
+- [React-Redux](https://react-redux.js.org/introduction/quick-start)
+- [Redux](https://redux.js.org/basics/usage-with-react)

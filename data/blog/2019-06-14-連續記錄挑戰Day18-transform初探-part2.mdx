@@ -1,0 +1,60 @@
+---
+title: 連續記錄挑戰Day18-transform初探- part2
+date: "2019-06-14 21:57:18"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# css 大全 - transform 初探 -part2
+
+## 函式用途與設定
+
+附上練習時的連結： [transform 語法練習](https://codepen.io/kids5346/pen/NZqzQx)，詳細tranform語法介紹如下：
+
+
+### translate():使**元素隨著座標軸移動**，而translateX()、translateY()也被稱為2D平移函式，原點為左上角。
+  |           函式           |        允許值         |
+  |            -            |         -            |
+  |translateX().translateY()| [length、percentage] |
+  |translateZ()             | [length]             |
+  |translate3d()            | [length、percentage] [length、percentage] [length]|
+  
+  - 此處percentage的**實際長度會依照元素本身的尺寸**為基準計算
+
+
+### scale():**能讓元素依據指定的數值變大或變小，負值可以使元素產生顛倒的效果**
+  |           函式            |      允許值              |
+  |            -             |         -               |
+  |scaleX().scaleY().scaleZ()| [number]                |
+  |scale3d()                 | [number、number、number] |
+    
+    
+    
+### rotate():**能讓元素朝某個軸或3D空間的任何向量旋轉**
+  |           函式               |      允許值              |
+  |            -                |         -               |
+  |rotateX().rotateY().rotateZ()| [angle]                |
+  |rotate3d()                   | [number、number、number、angle] |
+    
+  - rotate3d():前三個數值為空間向量的x.y.z的值，最後一個是角度的旋轉量
+      - Ex: rotate3d(0,0,1,45deg) = rotate(45deg) = rotateZ(45deg)
+      - **Ex:rotate(1,1,0,45deg) 不等於 rotateX(45deg) rotateY(45deg) rotateZ(0deg)**
+
+### skew():**能讓元素沿著x或者y軸傾斜，但沒有Z軸的傾斜**
+  |           函式         |      允許值      |
+  |            -          |         -       |
+  |skewX().skewY()        | [angle]         |
+
+  - skew(a,b)的行為是透過矩陣運算而達成，所以也不能等於是skew(a) + skew(b)
+
+### perspective():**能讓元素在3D空間中，藉由改變透視，看到由前到後深度的外觀。**
+  |           函式         |      允許值      |
+  |            -          |         -       |
+  |perspective()          | [length(正且非零的值)]         |
+
+
+
+
+
+    

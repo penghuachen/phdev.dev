@@ -1,0 +1,137 @@
+---
+title: 連續記錄挑戰Day52-箭頭函式(arrow function)
+date: "2019-07-18 23:18:14"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# ES6 箭頭函式(arrow function)
+
+今天要提的部分是關於 ES6的新語法，箭頭函式(arrow function)。
+
+它與ES6之前的函式有著一些差別:
+
+- 箭頭函式(arrow function) 特有寫法
+- 箭頭函式(arrow function) 沒有自己的this
+- 箭頭函式(arrow function) 沒有自己的arguments
+- 箭頭函式(arrow function) 不能用作建構式，因此沒有自己的prototype
+- 箭頭函式(arrow function)的this不因為 call()/apply()/bind()而被修改
+
+
+## 箭頭函式(arrow function)的特有寫法
+
+箭頭函式有著全新樣貌的寫法，整理如下:
+
+```javascript
+let arrowFunc = () =>{console.log('test');}
+let arrowFunc2 = a => {console.log(a);}
+let arrowFunc3 = a => console.log(a);
+let arrowFunc4 = (a,b)=>{console.log(a+b);}
+let arrowFunc5 = ()=>({name:"Bill"});
+```
+
+1. 如果==沒有參數==，可以只寫 `()`，如 `arrowFunc`
+2. 如果==只有一個參數==，可以不寫 `()`，如 `arrowFunc2`
+3. 如果==程式碼行數只有單行==，可以不需要 `{}`，如 `arrowFunc3`
+4. 如果==有兩個參數以上==，則必須寫 `()`，如 `arrowFunc4`
+5. 如果是==物件格式==，因為 `{}` 在箭頭函式中有意義， 所以必須要用 `()` 將整個物件包住，如`arrowFunc5`
+
+## 箭頭函式(arrow function)沒有自己的this
+
+因為箭頭函式沒有自己的 `this`，所以依照範疇鍊(scope chain)的觀念會往外層找。
+
+來看看測試例子：
+
+```javascript
+let obj = {
+    name:'Jin',
+    callName:function (){
+        setTimeout(()=>{
+           console.log(this);
+           console.log(this.name);
+        },1000)
+    }
+}
+obj.callName();
+```
+
+`setTimeout` 裡面為一個箭頭函式，所以會往外層的匿名函式尋找 `this` ，並拿來使用。而匿名函式的 `this` 因為是透過方法調用所以指向 `obj()`。
+
+![](https://i.imgur.com/p3vJcRs.png)
+
+但如果是下面這個例子的話:
+
+```javascript
+let name='Bill';
+let obj = {
+    name:'Jin',
+    callName:()=>{
+       console.log(this);
+       console.log(this.name);
+    }
+}
+obj.callName();
+```
+因為箭頭函式的外層作用域就是全域，所以 `this` 指向全域，也得到全域變數 `name` 的值 `Bill`
+
+![](https://i.imgur.com/rxiHoiz.png)
+
+## 箭頭函式(arrow function)沒有arguments
+
+直接看看箭頭函式與 ES6之前的函式使用 `arguments` 的差別
+
+```javascript
+let arguments = [1, 2, 3];
+
+let arr = () => arguments[0];
+console.log(arr()); 
+
+let arr2 = function(a,b){
+    return arguments;
+} 
+console.log(arr2(1,2)); 
+```
+
+對於箭頭函式而言 `arguments` 只是單純的一個變數。但對於ES6之前的函式 `arguments`則是一個物件
+
+![](https://i.imgur.com/eCTu9Ba.png)
+
+## 箭頭函式(arrow function) 不能用作建構式，也沒有自己的prototype
+
+```javascript
+var car = () => {};
+var toyota = new car(); 
+```
+
+箭頭函式用於建構式會報錯。
+
+![](https://i.imgur.com/JpwA4m4.png)
+
+也沒有自己的 prototype
+
+```javascript
+var Foo = () => {};
+console.log(Foo.prototype); 
+```
+
+![](https://i.imgur.com/rQ4gCjv.png)
+
+## 箭頭函式(arrow function)的this不因為call/apply/bind而被修改
+
+
+```javascript
+let test = function(){
+    console.log(this);
+}
+test.call('可以改變函式的this');
+
+let test2 = ()=>{
+    console.log(this);
+}
+test2.call('無法改變函式的this，而且this指向window物件');
+```
+
+可以看到箭頭函式的 `this` 指向全域，沒有因為使用 `call()` 而被修改
+
+![](https://i.imgur.com/1WDW13j.png)

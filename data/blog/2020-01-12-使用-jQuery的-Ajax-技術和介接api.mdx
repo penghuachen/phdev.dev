@@ -1,0 +1,168 @@
+---
+title: 使用 jQuery的 $.Ajax() 技術和介接api
+date: "2020-01-12 10:06:51"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+## 什麼是 jQuery ?
+
+既然要使用jQuery的語法，那不免要先提一下什麼是jQuery才行。
+
+
+所以就讓我們先簡單了解jQuery是什麼，以及簡單的使用吧!
+
+> jQuery是一套跨瀏覽器的JavaScript函式庫，簡化HTML與JavaScript之間的操作。[1]由約翰·雷西格（John Resig）在2006年1月的BarCamp NYC上釋出第一個版本。
+> ...
+> jQuery的語法設計使得許多操作變得容易，如操作文件（document）、選擇文件物件模型（DOM）元素、建立動畫效果、處理事件、以及開發Ajax程式。
+> [wiki jQuery](https://zh.wikipedia.org/wiki/JQuery)
+
+從維基百科的解釋可以知道，jQuery在==操作DOM、動畫效果、事件處理以及Ajax部分，都可以有比寫原生JavaScript還要更快速的處理方式。==
+
+因為jQuery本身將那些功能都已經封裝好提供我們使用了。
+
+## 怎麼使用 jQuery ?
+
+使用的方式也很簡單，有兩種方式:
+- 透過CDN引入
+```javascript
+<script src="https://code.jquery.com/jquery-3.4.1.js"
+integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="crossorigin="anonymous"></script>
+```
+- 將jQuery程式碼下載到電腦裡
+  [jQuery官網連結](https://jquery.com/download/)
+  
+將jQuery引入到編輯器後就可以使用囉!
+
+
+## jQuery 的 `$.ajax()` 
+
+進入到這篇的主題 `$.ajax()` 。
+
+這邊只會將有使用到的參數部分做說明，剩下的就待客倌們好好研究囉!
+
+先來看看一段測試碼，
+
+```javascript
+$.ajax({
+  url:,
+  method:,
+  dataType:,
+  data:
+  
+  success:function(res){console.log(res)},
+  error:function(err){console.log(err)},
+});
+```
+
+上面前四個參數 `url`、`method`、`dataType`、`data` 是在向遠端要求資料時很重要的參數，來看看用途:
+
+- url: 要請求資料的網址
+- method: 請求資料的方式(Ex:`POST` / `GET` / `PUT`...等)
+- dataType: 請求資料的類型(Ex:xml, json, script, or html...等)
+- data: 如果需要傳送資料時，則將資料設定在這裡。
+
+基本上述已經建立好了一個向遠端請求資料的格式，但這裡還少了一點東西。
+
+那就是提供成功或失敗訊息讓我們可以知道結果為何。
+
+- `success`: 當成功接收到資料時，`success` 會執行並顯示結果。
+- `error` :  當接收資料失敗時，`error` 會執行並顯示結果。
+ 
+以上大概就是這次會用到的設定，接下來來看看這次的實作吧!
+
+## 實作：透過 `$.ajax()` 介接高雄市政府資料開放平台的Open Data
+
+這個例子會透過 `$.ajax()` 的 `GET` 方法取得高雄市政府資料開放平台的Open Data
+
+記得要透過前面提到的方式**先將 jQuery 引入才可以正常使用喔**！
+
+> [電動機車充電站名稱及充電站地址](https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json)
+
+可以將程式碼貼到自己的編輯器中查看結果
+
+```html
+<!-- css part -->
+<style>
+    body {
+      background: #f0d0d0;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 48px;
+    }
+
+    .charge-list {
+      display: flex;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .charge-list li {
+      box-sizing: border-box;
+      flex: 0 1 24%;
+      padding: 10px;
+      margin: 0 1% 2% 0;
+      border-radius: 10px;
+      transition: all .4s;
+    }
+
+    .charge-list li:hover {
+      margin-top: -1%;
+    }
+
+    .charge-list li:nth-child(n) {
+      background: #aaaadd;
+    }
+
+    .charge-list li:nth-child(2n) {
+      background: #ddddaa;
+    }
+
+    .charge-list li:nth-child(3n) {
+      background: #dad;
+    }
+
+    .charge-list li:nth-child(3n+1) {
+      background: #aaf;
+    }
+  </style>
+```
+```html
+<!-- html -->
+  <h1>高雄市電動機車充電站名稱及充電站地址一覽表</h1>
+  <ul class="charge-list"></ul>
+```
+
+```javascript
+ const endpoint = 'https://data.kcg.gov.tw/dataset/a98754a3-3446-4c9a-abfc-58dc49f2158c/resource/48d4dfc4-a4b2-44a5-bdec-70f9558cd25d/download/yopendata1070622opendatajson-1070622.json';
+  $.ajax({
+    type: "GET",
+    url: endpoint,
+    success: function (response) {
+      const charge = [];
+      charge.push(...response);
+      createDomElement(charge);
+    },
+    error: function (thrownError) {
+      console.log(thrownError);
+    }
+  });
+
+  function createDomElement(charge) {
+    const domElements = charge.map( place => {
+      return `
+    <li>
+      <p class="location">位置： ${ place.Location }</p>
+      <p class="address">地址：${ place.Address }</p>
+    </li>
+  `;
+    }).join("");
+
+    const chargeList = document.querySelector('.charge-list');
+    chargeList.innerHTML = domElements;
+  }
+```

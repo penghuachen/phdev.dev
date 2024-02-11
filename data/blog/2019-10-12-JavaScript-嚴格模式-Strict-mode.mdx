@@ -1,0 +1,325 @@
+---
+title: JavaScript 嚴格模式(Strict mode)
+date: "2019-10-12 13:11:12"
+tags: ['Javascript']
+draft: false
+summary: ''
+---
+
+# JavaScript 嚴格模式(Strict mode)
+
+## 簡單介紹
+
+嚴格模式(strict mode) 在ES5被引進，提供開發者能夠在語法更為嚴謹、受限的模式下進行開發，彌補了 JavaScript 的一些重要缺陷。
+
+也提供了更強大的檢查與更高的安全性。
+
+
+
+## 怎麼使用嚴格模式(strict mode)
+
+當設定 `'use strict'` 或者 `"use strict"`，就代表後續的程式碼處於嚴格模式下，但依據設定的位置不同，則嚴格模式的有效範圍也不同:
+
+
+1. **在全域設定的話，代表全部的程式碼都會處於嚴格模式(strict mode)**;
+2. **在函式中設定，則嚴格模式(strict mode)的有效範圍則侷限在該函式底下的所有程式碼。**
+
+來看看測試例子:
+
+```javascript
+"use strict"
+
+a = 3 ;
+function test(){
+  b = 5;
+}
+test();
+```
+
+![Day17-1](https://lh3.google.com/u/0/d/1zAcwGbgwK0z1c7v5LfczTTIh8JeNsUkJ=w1318-h1530-iv1)
+
+```javascript
+"use strict"
+
+function test(){
+  b = 5;
+}
+test();
+```
+
+![Day17-2](https://lh3.google.com/u/0/d/1F0ZNp5G7x074b7VvpeZEO4e6eqknIU4y=w1318-h1530-iv1)
+
+從上面兩個結果可以得到，==在全域設定嚴格模式(strict mode)==，則所有的程式碼都會在嚴格模式的有效範圍內。
+
+接下再來看看另外一個例子:把 `'use strict'` 寫在函式內
+
+```javascript
+a = 3;
+
+function test(){
+"use strict"
+  b = 5;
+}
+test();
+```
+
+![Day17-3](https://lh3.google.com/u/0/d/1_kinMnwLL7ZOgXk_8zANZFERPHGUvVYe=w1318-h1530-iv1)
+
+
+從結果可以得知: ==嚴格模式(strict mode)設定在函式內時，則影響的範圍就只有函式內而已==，而全域變數 `a`因為不在嚴格模式(strict mode)的有效範圍內，所以會依照原本的方式，被隱性的宣告成全域變數(不會報錯)。
+
+## 細談嚴格模式(strict mode)
+
+再來要來提提在於嚴格模式(strict mode)下，是什麼做了調整，調整了什麼
+
+1. 嚴格模式(strict mode)中，==不允許使用 `with` 述句==
+
+```javascript
+'use strict'
+
+var a, x, y;
+var r = 10;
+
+with (Math) {
+  a = PI * r * r;
+  x = r * cos(PI);
+  y = r * sin(PI / 2);
+}
+```
+
+![Day17-4](https://lh3.google.com/u/0/d/1449bRfcUASFY4l-R2515c4LX6DePVwki=w1318-h1530-iv1)
+
+`with()` 述句會增加程式碼閱讀的困難度，以及變數的查詢，所以在嚴格模式(strict mode)被撇除。
+
+2. 嚴格模式(strict mode)中，==所有變數都必須被宣告==，否則會報錯(ReferenceError)。 但在非嚴格模式則視為隱性的宣告全域變數。
+
+```javascript
+a = 3;
+
+function test(){
+"use strict"
+  b = 5;
+}
+test();
+```
+
+![Day17-3](https://lh3.google.com/u/0/d/1_kinMnwLL7ZOgXk_8zANZFERPHGUvVYe=w1318-h1530-iv1)
+
+如同前面所提，所有的變數都必須被宣告才可以。
+
+3. 嚴格模式(strict mode)中，==不是當作方法的函式==:
+    - `this` 值為 `undefined`
+    - 若是使用 `call()`,`apply()`,`bind()`等方法指定`this`那麼 `this` 的值就依照其語法設定而決定。
+    - 但若是使用 `call()`,`apply()`,`bind()`等方法指定`this`，但參數為`null`、`undefined`，則 `this` 為 `null`、`undefined`。不會像非嚴格模式下會自動轉成全域物件。
+
+在非嚴格模式下， `this` 會指向全域物件，所以可以取得全域變數 `age` 的值。
+
+```javascript
+var age = 22;
+
+function getAge(){
+  console.log(this);
+  console.log(this.age);
+}
+getAge();
+```
+
+![Day17-5](https://lh3.google.com/u/0/d/1p0OWjsc8Q17tCupphpdddfqWYFHhBS_9=w1318-h1530-iv1)
+
+透過如 `call()` 設定 `this` 的值，當值為 `null` 時，則指向全域物件，所以可以獲得和前一個一樣的結果
+
+```javascript
+var age = 22;
+
+function getAge(){
+  console.log(this);
+  console.log(this.age);
+}
+getAge.call(null);
+```
+
+![Day17-5](https://lh3.google.com/u/0/d/1p0OWjsc8Q17tCupphpdddfqWYFHhBS_9=w1318-h1530-iv1)
+
+
+但在嚴格模式下， `this` 會是 `undefined` ，所以想取得全域變數 `age` 的值就會報錯。
+
+```javascript
+'use strict'
+
+var age = 22;
+
+function getAge(){
+  console.log(this);
+  console.log(this.age);
+}
+getAge();
+```
+
+![Day17-6](https://lh3.google.com/u/0/d/1KzyZ5Xj6Y7vmBkPAMNvnhN7QDmcWJBQB=w1318-h1530-iv1)
+
+如果透過 `call()` 設定 `this` 的值，當值為 `null` 時 `this` 值就為 `null` ，不會指向全域物件。
+
+
+```javascript
+'use strict'
+
+var age = 22;
+
+function getAge(){
+  console.log(this);
+}
+getAge.call(null);
+```
+
+![Day17-7](https://lh3.google.com/u/0/d/1im7leUYSYwC4I9A8CxYogllAdrJ5cbQi=w1318-h1530-iv1)
+
+4. 嚴格模式(strict mode)中，==對於不可寫入(nonwritable)的物件或不可擴充(nonextensible)的物件嘗試建立新特性會報錯。==  但在非嚴格模式下雖然會失敗，但不會有錯誤訊息。
+
+
+```javascript
+var obj = {};
+Object.defineProperty(obj,"age",{
+  value: 22,
+  writable: false,
+  configurable: false
+})
+
+obj.age = 25;
+console.log(obj);
+```
+
+![Day17-8](https://lh3.google.com/u/0/d/1XSXaX1AeVCn34z46UDSzXzTkdSarStqO=w1318-h1530-iv1)
+
+但在嚴格模式下，就會提供相關的錯誤訊息了。
+
+```javascript
+'use strict'
+var obj = {};
+Object.defineProperty(obj,"age",{
+  value: 22,
+  writable: false,
+  configurable: false
+})
+
+obj.age = 25;
+console.log(obj);
+```
+
+- 物件為唯讀(read only)時，提供相關的錯誤訊息。
+
+![Day17-9](https://lh3.google.com/u/0/d/17mSmQexVVwJ7tHOY7tR8qmbleH2KO9Wm=w1318-h1530-iv1)
+
+- 物件為非擴充性，提供相關的錯誤訊息。
+
+```javascript
+'use strict'
+var obj = {};
+Object.defineProperty(obj,"age",{
+  value: 22,
+  writable: false,
+  configurable: false
+})
+
+Object.seal(obj);
+obj.name = "Bill";
+console.log(obj);
+```
+
+
+
+![Day17-10](https://lh3.google.com/u/0/d/1mpdZPMScqf7NACZvCUrouLoxVAnw4Esp=w1318-h1530-iv1)
+
+
+5. 嚴格模式(strict mode)中，==在 `eval()` 不能宣告變數或者定義函式。== 但在非嚴格模式下可以。
+
+在非嚴格模式下，在 `eval()` 中宣告變數是被允許的。
+```javascript
+eval('var age = 22');
+console.log(age);
+```
+
+![Day17-11](https://lh3.google.com/u/0/d/1mpdZPMScqf7NACZvCUrouLoxVAnw4Esp=w1318-h1530-iv1)
+
+但在嚴格模式，直接在 `eval()` 中宣告變數則會報錯。
+
+```javascript
+'use strict'
+eval('var age = 22');
+console.log(age);
+```
+
+![Day17-12](https://lh3.google.com/u/0/d/1Kf3OhUWYA1Wjvcdj4KriJuGmAm5X_B0a=w1318-h1530-iv1)
+
+6. 嚴格模式(strict mode)中的 `arguments` 物件:
+    - 是唯讀的
+    - 對於`arguments.callee` 、 `arguments.caller` 存取會報錯
+ 
+```javascript
+'use strict'
+function test(a,b){
+  console.log(arguments);
+  console.log(arguments.callee);
+}
+test(1,2);
+```
+
+![Day17-13](https://lh3.google.com/u/0/d/1SiAioSAJZplGBmB0Ajr6kkpvys8KeG2S=w1318-h1530-iv1)
+
+
+7. ==在ES6之前== ，嚴格模式(strict mode)中==對於物件特性重複宣告會報錯==，但非嚴格模式中不會發生錯誤。 但==ES6之後並不會有任何錯誤訊息提示==。
+
+
+>[MDN: strict mode](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Strict_mode#Converting_mistakes_into_errors)
+
+![Day17-14](https://lh3.google.com/u/0/d/14PH2cLdZjGjgqwcY1WTtq7B0Hsge40TZ=w1318-h1530-iv1)
+
+
+8. 嚴格模式(strict mode)中， ==`delete` 如果不是用於刪除物件特性，就會報錯。== 但在非嚴格模式下則是不會有錯誤訊息，但會回傳 `false`
+
+非嚴格模式下，使用 `delete` 用於刪除非物件的特性，只會回傳`false`
+
+```javascript
+var age = 22;
+delete age;
+```
+
+![Day17-15](https://lh3.google.com/u/0/d/1EGEEZEzrB7FzQtnZPfzSRfy2o-jPLgAv=w1318-h1530-iv1)
+
+
+但嚴格模式下就會報錯。
+
+```javascript
+'use strict'
+var age = 22;
+delete age;
+```
+
+![Day17-16](https://lh3.google.com/u/0/d/1LLTkoNbpjlVoVRwswQD6c5MDjdOXCjC0=w1318-h1530-iv1)
+
+
+9.  嚴格模式(strict mode)中， ==函式的參數若是重複命名會報錯。== 但在非嚴格模式下則不會。
+
+非嚴格模式下，下列的程式碼並不會報錯。
+
+```javascript
+function test(a,a){
+  console.log(a);
+}
+test(1,2);
+```
+
+但嚴格模式下，參數重複命名就會提示相關錯誤訊息。
+
+```javascript
+'use strict'
+function test(a,a){
+  console.log(a);
+}
+test(1,2);
+```
+
+![Day17-17](https://lh3.google.com/u/0/d/1woKbq0D_cgRBT76yjFigjm-XJaBK3GFa=w1052-h1530-iv1)
+
+10. 嚴格模式(strict mode)中，八進位整數字面值(以0開頭，後面不接x)是不被允許的。但在非嚴格模式下有些實作會允許。
+
+

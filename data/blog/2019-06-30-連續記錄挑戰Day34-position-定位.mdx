@@ -1,0 +1,107 @@
+---
+title: 連續記錄挑戰Day34-position 定位
+date: "2019-06-30 15:35:58"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 定位 position
+
+
+Outline
+
+- 什麼是定位(position)？
+- 定位(position)的語法設定
+- 定位(position)的偏移(offset)
+- 定位(position)的各語法定義
+    - position:relative 相對定位
+    - position:static
+    - position:fixed 固定定位
+    - position:absolute 絕對定位
+    - position:sticky 黏貼定位
+    - z-index
+
+
+## 什麼是定位(position)？
+
+可以讓我們將元素輕易的放置在需求的位置上，是一個非常好用的技巧。
+
+而定位的參考基準會依照語法設定的不同，其參考基準點也不同。
+
+
+## 定位(position)的語法設定
+
+|語法|數值|
+|-|-|
+|position|relative / absolute / static(Default) / sticky / fixed|
+|offset| top / right / bottom / left|
+
+## 定位(position)的偏移(offset)
+
+先了解關於定位的補償，在對於後續語法的理解個人認為更能快速理解。
+
+- 偏移的用意？
+    **可以描述被定位元素的邊界和其對應的容器區塊的距離。**
+    舉個例子： top表示**被定位元素邊界範圍的上側邊與容器上側邊的距離**，所以top為正值時，元素向下移動。
+    
+    ![](https://i.imgur.com/76aoQLa.png)
+
+    [測試範例一](https://codepen.io/kids5346/pen/ewVBbb)
+    
+    而 其他方向的補償:right/ bottom / left 觀念同於 top的解說。
+
+## 定位(position)的各語法定義
+
+### 1.position:relative 相對定位
+
+做此設定時，元素會以**目前自身所處的位置為參考基準**，並透過偏移的設定移動相對的距離。
+[測試範例二](https://codepen.io/kids5346/pen/ewVBbb)
+
+![](https://i.imgur.com/9tTlySF.png)    
+
+### 2. position:static 
+元素會依照區塊元素及行內元素該有的文檔流向排序。不會有定位的效果，也是position的預設值。
+
+
+### 3. position:fixed 固定定位
+固定定位的元素，其參考基準為viewport，也就是**相對瀏覽器視窗來定位。**
+[測試範例三](https://codepen.io/kids5346/pen/ewVBbb)
+    
+![](https://i.imgur.com/jRNNGlk.png)
+
+### 4.position:absolute 絕對定位
+- **使元素脫離原本的文檔流向，並透過補償(offset)決定元素的位置**    
+- 絕對定位的元素和其他未被定位的內容並不會相互避開，因此會有這蓋其他元素的可能性。
+[測試範例四](https://codepen.io/kids5346/pen/ewVBbb)
+![](https://i.imgur.com/B4Rz4bg.png)
+
+- 設定為絕對定位的元素，元素本身會成為其子元素的參考基準
+[測試範例五](https://codepen.io/kids5346/pen/ewVBbb)
+![](https://i.imgur.com/Kp7o3yC.png)
+
+- 可以透過補償(offset)決定元素的寬高
+[測試範例六](https://codepen.io/kids5346/pen/ewVBbb)
+![](https://i.imgur.com/aQkQfFV.png)
+
+- 當定位為fixed / absolute時的盒模型(box model)：
+    ![](https://i.imgur.com/0AfEbmY.png)
+    **由左至右的總寬度 = left + margin-left + border-left + padding-left + width + padding-right + border-right + margin-right + right**
+    (詳細可以參考規範的此處：[8.1 The width of absolute or fixed positioned](https://www.w3.org/TR/css-position-3/))
+
+    而之所以margin能和絕對定位/固定定位搭配使用的緣故，是因為**margin用於分配明確空間後的剩餘空間，而絕對定位/固定定位可達成確定明確空間的條件**。
+    ![](https://i.imgur.com/0O0uQ4q.png)
+    [測試範例七](https://codepen.io/kids5346/pen/ewVBbb)
+
+### 5. position:sticky 黏貼定位
+- 符合sticky觸發條件時：元素會被移除文檔流，行為如同絕對定位，**但差異是會保留原本元素原本的位置**
+![](https://i.imgur.com/4GdJikA.png)
+- 不符合sticky觸發條件時：元素回到原本的位置
+![](https://i.imgur.com/8dTkpSb.png)
+[測試範例八](https://codepen.io/kids5346/pen/ewVBbb)
+
+### 6. z-index 
+可以調整元素彼此重疊的情形。**數字越大，順序越上面**
+[測試範例九](https://codepen.io/kids5346/pen/ewVBbb)
+
+  

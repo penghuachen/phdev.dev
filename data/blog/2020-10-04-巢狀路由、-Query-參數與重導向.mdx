@@ -1,0 +1,400 @@
+---
+title: 巢狀路由、 Query 參數與重導向
+date: "2020-10-04 10:09:12"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# 巢狀路由、 Query 參數與重導向
+
+今天要學習的是關於如何在 React router 中**設定巢狀路由、設定 Query 參數以及重導向(Redirect)。**
+
+
+今天學習的部分都可以參考測試例子來幫助理解。
+
+接著就趕緊今天的學習吧!
+
+## 巢狀路由(Nesting Route)
+
+按照慣例，一樣先將測試範例中的情境描述一下，加速進入狀況:
+
+1. 設置兩個按鈕作為第一層 Router 切換畫面使用，此時也會看到預設寫在 PageA 元件中的兩個按鈕:
+
+![](https://i.imgur.com/K4HQ4bw.png)
+
+2. 接著當點擊 PageA 元件中任一個按鈕的時候，顯示對應的元件內容，以Page A Nested Component 為例：
+
+![](https://i.imgur.com/4QvsUuS.png)
+
+以上是簡單的巢狀路由使用的方式，接著讓我們來看看在 PageA 元件中是怎麼設定巢狀路由吧！
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/happy-tu-5puv5?file=/src/App.js)。
+
+首先是第一層的路由設置，相信大家已經知道怎麼使用了。
+
+1. 透過 `<BrowserRouter>` 將 App 元件內容包住，才可以使用 Router 相關的元件(`<Route>`,`<NavLink>`, `Switch`)。
+2. 在 `<NavLink>` 中配置要切換的路由路徑， `to="/PageA"`, `to="/PageB"`，以及當按鈕為 active 時的樣式設定(`activeClassName="link"`)。
+3. 在 `<Switch>` 中配置 `<Route>` ，用來渲染符合路徑匹配的元件內容。
+
+```jsx=
+// App.js
+import React from "react";
+import "./styles.css";
+import {
+  BrowserRouter as Router,
+  Route,
+  NavLink,
+  Switch
+} from "react-router-dom";
+import PageA from "./containers/PageA";
+import PageB from "./containers/PageB";
+
+export default function App() {
+  return (
+    <Router>
+      <div className="App">
+        <nav>
+          <NavLink activeClassName="link" to="/PageA">
+            Link-A
+          </NavLink>
+          <NavLink activeClassName="link" to="/PageB">
+            Link-B
+          </NavLink>
+        </nav>
+        <Switch>
+          <Route path="/pageA" component={PageA} />
+          <Route path="/pageB" component={PageB} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+```
+
+接著來看看 PageA 元件中的路由配置，而這邊也是今天巢狀路由的重點:
+
+```jsx=
+import React, { Component } from "react";
+import "./index.css";
+import { Route, NavLink, Switch } from "react-router-dom";
+import PageAComponent from "../../components/PageAComponent";
+import PageAAnotherComponent from "../../components/PageAAnotherComponent";
+
+class PageA extends Component {
+  render() {
+    return (
+      <>
+        <h1>Page A Component</h1>
+        <nav>
+          <NavLink
+            className="nonactive-link"
+            activeClassName="nested-link"
+            // 重點觀察位置
+            to={this.props.match.url + "/PageAComponent"}
+          >
+            Nested Link - A Nested Component
+          </NavLink>
+          <NavLink
+            className="nonactive-link"
+            activeClassName="nested-link"
+            // 重點觀察位置
+            to={this.props.match.url + "/PageAAnotherComponent"}
+          >
+            Nested Link - A Another Nested Component
+          </NavLink>
+        </nav>
+        <Switch>
+          <Route
+            // 重點觀察位置
+            path={this.props.match.url + "/:cmp"}
+            // 重點觀察位置
+            render={(props) => {
+              // console.log(props);
+              // 以目前需求簡化成如下判斷式
+              if (props.location.pathname === "/PageA/PageAAnotherComponent") {
+                return <PageAAnotherComponent />;
+              } else {
+                return <PageAComponent />;
+              }
+            }}
+          />
+        </Switch>
+      </>
+    );
+  }
+}
+
+export default PageA;
+```
+
+為了更聚焦在重點觀察的位置，這邊我們擷取每一部分的程式碼出來:
+
+```jsx=
+<NavLink
+  className="nonactive-link"
+  activeClassName="nested-link"
+  // 重點觀察位置
+  to={this.props.match.url + "/PageAComponent"}
+>
+  Nested Link - A Nested Component
+</NavLink>
+```
+
+首先是巢狀路由中的配置方式，在 `to={this.props.match.url + "/PageAComponent"}` 中可以發現這裡使用了 `this.props.match.url` 來設定路由路徑，所以讓我們看看這個 `this.props.match` 的物件內容:
+
+![](https://i.imgur.com/qef9qbR.png)
+
+從圖中可以得知，`this.props.match.url`拿到的值為 `/PageA`。
+
+緊接著我們在後方加上了 `/PageAComponent`，所以當我們點擊對應的按鈕時，此時會取得的路由路徑為: `/PageA/PageAComponent`，而到這裡，我們已經成功配置好路由的路徑。
+
+接著我們要做什麼呢? 相信大家都猜到了，沒錯，我們接著要配置可以渲染元件內容的 `<Route>`:
+
+```jsx=
+<Switch>
+  <Route
+    // 重點觀察位置
+    path={this.props.match.url + "/:cmp"}
+    // 重點觀察位置
+    render={(props) => {
+      // console.log(props);
+      // 以目前需求簡化成如下判斷式
+      if (props.location.pathname === "/PageA/PageAAnotherComponent") {
+        return <PageAAnotherComponent />;
+      } else {
+        return <PageAComponent />;
+      }
+    }}
+  />
+</Switch>
+```
+
+以這個測試範例的巢狀路由為例，會得到如下的路由路徑：
+
+1. `/PageA/PageAComponent`
+2. `/PageA/PageAAnotherComponent`
+
+所以這邊在 `path` 中的設定，我們可以搭配路由參數的方式，簡化
+`<Route>` 的配置。
+
+接著這邊遇到了一個小問題: 在原本的方式中，我們透過 component 的寫法來渲染對應的元件內容:
+
+```jsx=
+<Switch>
+  <Route path="/pageA" component={PageA} />
+  <Route path="/pageB" component={PageB} />
+</Switch>
+```
+
+但是這樣的的方式並沒有辦法讓我們可以條件選擇要渲染的元件內容。
+
+所以這邊我們要使用另外一種在 Router 中渲染元件內容的方式， 這邊我們使用 `render` 方法。
+
+在 `render` 方法中， React Router 允許我們傳入 route 的 props 到這個函式中，於是我們可以透過判斷當前的路由來條件選擇要渲染的元件內容。
+
+以上就是關於巢狀路由的簡單使用方式，接著讓我們往下繼續學習 Query 參數。
+
+## Query 參數
+
+Query 參數最常應用的地方之一，就是有切換分頁行為的時候，當我們在切換分頁時，常常會看到類似這種 `http://xxxx/search?page=5` 的 url:
+
+而這邊我們也透過一個簡單的測試範例來呈現這樣的 url 吧！
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/headless-moon-iut38?file=/src/App.js)。
+
+```jsx=
+import React, { Component } from "react";
+import "./styles.css";
+import { BrowserRouter as Router, Link, Route } from "react-router-dom";
+
+const parsingQueryParams = (paramsString) => {
+  const searchParams = new URLSearchParams(paramsString);
+  for (let p of searchParams) {
+    return p;
+  }
+};
+
+const Item = (props) => {
+  const [param, value] = parsingQueryParams(props.location.search);
+  return (
+    <div>
+      Query 的參數為: {param}，值為 {value}
+    </div>
+  );
+};
+
+export default class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div className="App">
+          <nav>
+            <Link
+              to={{
+                pathname: "/item",
+                search: "?page=1"
+              }}
+            >
+              模擬切換至 page 1
+            </Link>
+            <Link
+              to={{
+                pathname: "/item",
+                search: "?page=2"
+              }}
+            >
+              模擬切換至 page 2
+            </Link>
+          </nav>
+          <Route path="/Item" component={Item} />
+        </div>
+      </Router>
+    );
+  }
+}
+```
+
+這邊一樣我們將將上方的程式碼的重點擷取出來:
+
+```jsx=
+<Link
+  to={{
+    pathname: "/item",
+    search: "?page=2"
+  }}
+>
+  模擬切換至 page 2
+</Link>
+```
+
+`to` 除了可以接受字串格式之外，也可以接收物件格式，而所有可接受的格式為:
+
+```jsx=
+<Link
+  to={{
+    pathname: "/courses",
+    search: "?sort=name",
+    hash: "#the-hash",
+    state: { fromDashboard: true }
+  }}
+/>
+```
+
+其中 `search` 就是用來設置 query 參數的位置。
+
+當我們設定好 query 參數後，我們可以在點擊 `<Link>` 時發現到 url 在點擊時會是如下呈現:
+
+![](https://i.imgur.com/Q9tpkxm.png)
+
+而另外一個值得學習的部分是，如何快速解析 query 參數，這邊我可以透過上方完整程式碼中的 `parsingQueryParams` 方法來處理:
+
+```jsx=
+const parsingQueryParams = (paramsString) => {
+  // 重點觀察位置
+  const searchParams = new URLSearchParams(paramsString);
+  for (let p of searchParams) {
+    return p;
+  }
+};
+```
+
+透過建立一個 URLSearchParams 物件，並傳入如 `/item?page=2` 的字串，可以透過 `for..of` 的方式得到一個陣列值:
+
+這裡借用上方的函式來執行看看會得到什麼結果:
+
+```jsx=
+const result = parsingQueryParams('?page=2');
+console.log(result); // ["page", "2"]
+```
+
+當我們需要處理 url 的 Query 參數時，這會是一個很好用的方式。
+
+但需要注意的是這個方法在 IE 中並不支援，在使用時要注意。
+
+## 重導向
+
+今天最後要學習的是重導向(Redirect)，最常使用的情境大概就在於當使用者權限不足時，必須將使用者導航至首頁或者登入頁等等。
+
+這邊我們一樣透過一個模擬情境來學習這個部分。
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/patient-paper-g5yl4?file=/src/App.js)。
+
+首先我們會有一個登入畫面:
+
+![](https://i.imgur.com/PlHR2YM.png)
+
+接著輸入帳號密碼之後，可以成功跳轉至 Home 元件內容中
+
+![](https://i.imgur.com/STUtJYl.png)
+
+在 Home 元件內容中，設定一個用來模擬當頁面切換但驗證卻失敗的時候，跳轉回到登入畫面
+
+![](https://i.imgur.com/eGEqnYe.png)
+
+接著這邊擷取重點程式碼來觀察：
+
+首先是路由的配置:
+
+```jsx=
+<div className="App">
+  {/* 重要觀察位置 */}
+  <Redirect to="/Login" />
+  {this.state.auth ? (
+    <Route
+      to="/Home"
+      render={(props) => (
+        <Home loginFailed={this.loginFailed} {...props} />
+      )}
+    />
+  ) : (
+    <Route
+      to="/Login"
+      render={(props) => <Login login={this.login} {...props} />}
+    />
+  )}
+</div>
+```
+
+當進入這個網頁時，透過 `<Redirect>` 將路由導航至登入畫面，路經變成 `/Login`，而網頁內容的部分則透過 state 中的 auth 判斷渲染的元件內容。
+
+接著我們透過點擊登入按鈕時，修改 state 中 auth 的值，並將路由導航至 Home 元件：
+
+```jsx=
+login = () => {
+  // 重要觀察位置
+  this.setState({ auth: true }, () => {
+    if (this.state.auth) {
+      alert("模擬登入成功!!");
+      this.props.history.push("/Home");
+    }
+  });
+  // console.log(this.props);
+};
+```
+
+這邊需要注意的部分是透過 `withRouter` 這個 HOC 元件將 App 元件包住，才可以在 App 元件中使用到 route 物件中的方法 push。
+
+然後在 Home 元件中設定了一個用來模擬身份失效時，導航至登入畫面的按鈕，觸發身份失敗時回到登入畫面的方法。
+
+```jsx=
+loginFailed = () => {
+  // 重要觀察位置
+  this.setState({ auth: false }, () => {
+    if (!this.state.auth) {
+      alert("身份驗證失敗，回到登入畫面!!");
+      this.props.history.push("/Login");
+    }
+  });
+};
+```
+
+重導向的使用基本上不難，所以就搭配著簡單的驗證方式來學習與理解囉。
+
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+## 資源
+
+- [React Router](https://reactrouter.com/web/guides/quick-start)

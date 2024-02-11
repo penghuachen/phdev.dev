@@ -1,0 +1,60 @@
+---
+title: 連續記錄挑戰Day24-css counter
+date: "2019-06-20 19:41:06"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# counter
+
+## What is counter ?
+
+![](https://i.imgur.com/CuHNMP8.png)
+
+counters是由css所維護的"變量"，而且可以透過css規則增量並追蹤被使用的次數。counters也允許我們調整內容的外觀。
+
+
+
+## How to use counter?
+
+- counter-reset : 啟動或者重置一個計數器
+     - Ex : 
+    ```html
+        .container{
+            counter-reset:num;
+        }
+    ```
+- counter-increment ： 設定該計數器所要的增量，**設定在子層的偽元素裡**
+    - Ex : 
+    ```html
+         /* value 可以設定每次要增量的數值，這裡的num和容器中counter-reset的名稱相同 */
+        
+        h2:after{
+            counter-increment : num value;
+            content: "num " counter(num) ": ";
+        }
+    ```
+- counter() : 透過此函式將變量帶入到content
+- content : 寫入counter產生的變量以及所需要的文字內容
+    - Ex : 
+        ```html
+             /* value 可以設定每次要增量的數值，這裡的num和容器counter-reset的名稱相同 */
+
+            h2{
+                counter-increment : num value;
+                content: "num " counter(num) ": ";
+            }
+        ```
+> 引用： [w3school](https://www.w3schools.com/css/css_counters.asp)
+
+
+## Demo
+
+透過counter自訂清單編號的樣式
+
+[Demo](https://codepen.io/kids5346/pen/oVmaxa)
+
+
+
+  

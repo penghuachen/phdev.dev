@@ -1,0 +1,53 @@
+---
+title: 連續記錄挑戰Day08-calc()原理與應用
+date: "2019-06-04 19:29:22"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+
+# 這次要記錄的是如何應用calc()。
+
+ 
+記錄的順序依序為:
+1. 怎麼使用？
+2. 需要注意的細節？
+3. 支援度？
+
+
+
+
+## 怎麼使用 calc()?
+
+calc() 這個語法可以幫我們自動計算出數值，真的是很棒，而使用的方式也很簡單，在要設定的樣式裡將需要計算數值的部分改由calc()計算即可。
+
+ex: width:calc(100% - 50px);
+
+width會得到一個值 = **瀏覽器自動計算得到的值 - 50px**。
+
+這個語法可以使用的範圍也很廣：
+- length
+- frequency
+- angle
+- time
+- number
+- integer
+
+## 需要注意的細節？
+
+- 可以使用不同單位混合計算，如上面提到的舉例。但是像是 calc(100% - 45deg)這類的計算會是無效的。
+- 使用時在**運算符號兩側需要空格**，否則會出錯。
+
+
+
+## 支援度？
+只要版本大於 ie 9 / ie edge 12 / firefox 4 / chrome 19 / safari 6 以上皆有支援
+
+
+> REF : [can i use](https://caniuse.com/#search=calc)
+
+> REF : [MDN](https://developer.mozilla.org/zh-CN/docs/Web/CSS/calc)
+
+
+  

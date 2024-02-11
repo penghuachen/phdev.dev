@@ -1,0 +1,219 @@
+---
+title: Context API
+date: "2020-09-30 10:53:50"
+tags: ['React', '第十二屆 iT邦幫忙鐵人賽']
+draft: false
+summary: ''
+---
+
+# Context API
+
+今天要學習的部分是 Context API 的簡單使用。
+
+在一般的使用情境中，我們都透過傳遞 `props` 到子元件中，讓子元件可以使用父層的資料，但隨著專案的複雜度提升等等的因素，可能會有需要**傳遞多層 `props` 的情況發生**，這時候可在開發與維護時都會造成一定的疏漏或困擾。
+
+
+而透過這個 API 提供的方法，可以讓我們在 class component 或者 function component 中解決因為 **多層傳遞 props 可能會造成的問題。**
+
+而用法上其實也很清楚易懂，趕緊往下學習吧!
+
+## Context API 的使用
+
+這裡我們將流程大致順過一次:
+
+1. 使用 Context API 的第一步，就是**先建立一個 Context 物件，讓元件可以訂閱這個 Context 物件**。
+2. 透過 **`Context.Provider `的方式讓訂閱的元件可以使用到這個 `Context` 物件中，我們指定的值**(**這邊要設定在使用元件 Tag 的地方**)。
+3. **最後透過 `Context.Consumer` 的方式在元件中使用這個 `Context` 物件中的值。**
+4. 在 class-based component 中需要定義 **`static contextType = MyContext;`** 或者 `Component.contextType = MyContext;` 才可以在元件中使用 `this.context`
+5. 在 function component 中，可以透過 **`{ context => { React element, component } }`** 的方式使用 `context` 物件
+
+最後需要注意的一點時， **Context 物件可以放入的不是單純只有值，函式、物件及陣列等等都可以在這裡設定，並且讓所有使用到這個 Context 物件的地方都可以享用這些設定**
+
+為了可以更清楚差別，這邊我們先撰寫一個正常傳遞 `props` 的方式:
+
+相關測試範例，[點擊前往](https://codesandbox.io/s/cranky-minsky-ylh80)。
+
+```jsx=
+// App.js
+import React, { useState } from "react";
+import "./styles.css";
+import Card from "./components/Card";
+const App = () => {
+  const [state, setTextState] = useState({
+    text: "Initial value"
+  });
+
+  const changeTextHandler = () => {
+    setTextState({
+      text: "change text by props data"
+    });
+  };
+
+  return (
+    <div className="App">
+      <Card text={state.text} changeTextHandler={changeTextHandler} />
+    </div>
+  );
+};
+
+export default App;
+```
+
+```jsx=
+// Card.
+import React, { Component } from "react";
+import "./index.css";
+
+class Card extends Component {
+  render() {
+    return (
+      <div className="card" onClick={this.props.changeTextHandler}>
+        {this.props.text}
+      </div>
+    );
+  }
+}
+
+export default Card;
+```
+
+上面這個方式相信大家已經熟悉用法，接著我們透過 Context API 來達成。
+
+我們先透過 **`React.createContext` 建立一個 Context 元件**，這裡面可以設定好預設值
+
+```jsx=
+// Context.js
+import React from "react";
+
+const Context = React.createContext({
+  text: "",
+  changeTextByContextAPI: () => {},
+  changeTextByContextAPIInFuncComponent: () => {},
+  changeTextByUseContextInFuncComponent: () => {}
+});
+
+export default Context;
+
+```
+
+接著我們來看看在 class-based component 與 function component 中的寫法
+
+首先是 class-based component，使用的重點在於:
+
+1. `Context.Provider`
+2. `static contextType = Context;` or `Card2.contextType = Context;`
+3. `Context.Consumer, {context => { React element / component }}`
+
+備註: 2, 3 擇一使用即可
+
+透過上述設定方式可以讓我們在**class-based component 中的任何地方都可以透過取得 this.context 的值**
+
+```jsx=
+// App.js
+import React, { useState } from "react";
+import "./styles.css";
+import Card2 from "./components/Card2";
+import Context from "./components/Context";
+const App = () => {
+  const [state, setTextState] = useState({
+    contextText: "Initial value"
+  });
+
+  const changeTextByContextAPI = () => {
+    setTextState({
+      ...state,
+      contextText: "change text by Context Provider/Consumer"
+    });
+  };
+
+  return (
+    <div className="App">
+      <h2>透過 Context.Provider 提供 Coontext 物件的值到 card 元件中</h2>
+      <p>此為 Class-based component</p>
+      <Context.Provider
+        value={{
+          ...state,
+          changeTextByContextAPI
+        }}
+      >
+        <Card2 />
+      </Context.Provider>
+    </div>
+  );
+};
+
+export default App;
+```
+
+```jsx=
+// Card2.js
+import React, { Component } from "react";
+import "./index.css";
+import Context from "../Context";
+
+class Card2 extends Component {
+  // 可以這麼宣告來使用 this.context
+  //static contextType = Context;
+  
+  render() {
+    return (
+      <div className="card" onClick={this.context.changeTextByContextAPI}>
+        {this.context.contextText}
+      </div>
+      // 這個方式也可以
+      {/* <Context.Consumer>
+        {(context) => (
+          <div
+            className="card"
+            onClick={context.changeTextByContextAPIInFuncComponent}
+          >
+            {context.contextTextInFuncComponent}
+          </div>
+        )}
+      </Context.Consumer> */}
+    );
+  }
+}
+
+// 也可以選擇這種方式來使用 this.context
+Card2.contextType = Context;
+export default Card2;
+```
+
+接著是在 function component 中的寫法，使用重點:
+
+1. `Context.Provider`
+2. `Context.Consumer`, `{context => { React element / component }}`
+
+```jsx=
+// Card3.js
+
+import React from "react";
+import "./index.css";
+import Context from "../Context";
+
+const Card3 = () => {
+  return (
+    <Context.Consumer>
+      {(context) => (
+        <div
+          className="card"
+          onClick={context.changeTextByContextAPIInFuncComponent}
+        >
+          {context.contextTextInFuncComponent}
+        </div>
+      )}
+    </Context.Consumer>
+  );
+};
+
+export default Card3;
+```
+
+鐵人賽文章與程式碼同步發佈於:
+- [Github](https://github.com/penghuachen/React_30)
+
+
+## 資源
+
+- [Context](https://zh-hant.reactjs.org/docs/context.html#dynamic-context)

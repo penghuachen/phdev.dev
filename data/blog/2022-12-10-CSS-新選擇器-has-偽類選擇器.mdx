@@ -1,0 +1,92 @@
+---
+title: CSS 新選擇器 :has() 偽類選擇器
+date: "2022-12-10 22:00:53"
+tags: ['把玩CSS']
+draft: false
+summary: ''
+---
+
+`:has()` 是一個全新的 css 選擇器，這個選擇器允許我們在滿足條件的情況下匹配父元素，來看看這個例子：
+
+```html
+<a href="#">
+  <img src="https://fakeimg.pl/250x100/">
+  一段有文字＋圖片的連結
+</a>
+
+ 
+
+<a href="#">一段只有文字的連結</a>
+```
+
+```css=
+a:has(img) {
+  color: red;
+}
+
+a {
+  border: solid;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+```
+
+當 `a` 中有 `img` 的時候，此時 `a` 的文字顏色為紅色，呈現效果如下：
+
+![](https://i.imgur.com/w8U00zd.png)
+
+當然也可以搭配其他的選擇器一起使用，例如今天想要將 `section` 中沒有 `h1` 元素的區塊，調整文字顏色為藍色時：
+
+```html
+<section>
+  <h1>Lorem ipsum dolor sit amet.</h1>
+</section>
+
+<section>Lorem ipsum dolor sit amet.</section>
+```
+
+```css=
+section:not(:has(h1)) {
+  color: blue;
+}
+```
+
+![](https://i.imgur.com/jR5j5eE.png)
+
+而如果今天想要依據後面的元素來選擇前面的元素也是沒有問題，例如當如果 `h1` 後面的兄弟元素為 `p` 時， `h1` 的文字顏色為紅色
+
+```html
+<section>
+  <h2>heading</h2>
+  <p>Lorem ipsum dolor sit amet.</p>
+</section>
+
+<section>
+  <h2>heading</h2>
+  <span>Lorem ipsum dolor sit amet.</span>
+</section>
+```
+
+```css=
+section h2:has(+ p) {
+  color: red;
+}
+```
+
+![](https://i.imgur.com/dsAo8wW.png)
+
+搭配其他偽類(如 `:hover`) 也可以正常使用，我們稍微改寫一下前一個例子，當如果 `h1` 後面的兄弟元素為 `p` 並且被 hover 時， `h1` 的文字顏色為紅色
+
+```css=
+section h2:has(+ p:hover) {
+  color: red;
+}
+```
+
+![](https://i.imgur.com/7hNr1if.png)
+
+`:has()` 讓我們在選取元素上的靈活度又多了一些，在撰寫 css 的部分又多了一樣利器可以使用囉！
+
+## 參考
+- [:has()](https://developer.mozilla.org/en-US/docs/Web/CSS/:has)
+- [来了，来了，CSS :has()伪类她来了](https://www.zhangxinxu.com/wordpress/2022/08/css-has-pseudo-class/)

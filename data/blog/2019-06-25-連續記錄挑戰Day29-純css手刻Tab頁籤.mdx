@@ -1,0 +1,55 @@
+---
+title: 連續記錄挑戰Day29-純css手刻Tab頁籤
+date: "2019-06-25 18:49:48"
+tags: ['把玩CSS', 'HTML']
+draft: false
+summary: ''
+---
+
+# 純css手刻Tab頁籤
+
+今天有個版面需要做出簡單的Tab頁籤切換，而爬資料的時候發現可以透過純css手刻出來，所以就運用了這個技巧，也順道將學習的重點摘錄上來。
+
+
+## 重點觀念：
+
+CSS selctor target : 透過 a 標籤的錨點與元素的id做對應，當使用 :target selector時，可以針對元素作樣式的改變。 
+
+Ex: css :target 的運用
+```html
+    <p>css target selector</p>
+
+    <a href="#test">Test</a>
+    <a href="#test2">Test</a>
+
+    <div id="test"></div>
+    <div id="test2"></div>
+```
+```css
+    /*當點擊到 id="test" 的元素時，因為使用了:target selector，所以可以藉此改變該元素的樣式*/
+    #test:target{
+      width: 50px;
+      height: 50px;
+      background:#f00;
+    }
+
+    #test2:target{
+      width: 50px;
+      height: 50px;
+      background:#00f;
+    }
+
+```
+
+## 手刻Tab頁籤的思維：
+
+1.css target selector：透過id與a link 中href的值對應，當選取到時，可以將樣式套用在對象上。
+
+2.透過 ~ 選取器 + :not選取器以及將內容的順序調整為->內容2->內容3->內容1，這樣才能實現當點擊tab2/tab3時，tab1因為沒有被點擊到而隱藏。
+
+3.當點擊到Tab2或Tab3時，顯示對應的區塊
+
+[練習](https://codepen.io/kids5346/pen/vqZaXP)
+
+
+>[:target selector](https://www.w3schools.com/cssref/sel_target.asp)
