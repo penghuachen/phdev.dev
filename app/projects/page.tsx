@@ -1,6 +1,8 @@
 import projectsData from '@/data/projectsData'
+// @ts-ignore
 import toolsData from '@/data/toolsData'
 import Card from '@/components/Card'
+// @ts-ignore
 import { genPageMetadata } from 'app/seo'
 
 export const metadata = genPageMetadata({ title: 'Projects' })
@@ -31,6 +33,7 @@ export default function Projects() {
                     description={d.description}
                     imgSrc={d.imgSrc}
                     href={d.href}
+                    techStacks={d.techStacks}
                   />
                 ))
               ) : (
@@ -54,6 +57,7 @@ export default function Projects() {
                     description={d.description}
                     imgSrc={d.imgSrc}
                     href={d.href}
+                    techStacks={d.techStacks}
                   />
                 ))
               ) : (

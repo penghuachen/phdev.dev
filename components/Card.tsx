@@ -1,8 +1,11 @@
+// @ts-ignore
 import Image from './Image'
+// @ts-ignore
 import Link from './Link'
+// @ts-ignore
 import TechStack from './TechStacks'
 
-const Card = ({ title, description, imgSrc, href, techStacks = [] }) => {
+const Card = ({ title, description, imgSrc, href, techStacks }) => {
   return (
     <div className="md  p-4 md:w-1/2">
       <div

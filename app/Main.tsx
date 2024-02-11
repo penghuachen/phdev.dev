@@ -1,5 +1,8 @@
+// @ts-ignore
 import Link from '@/components/Link'
+// @ts-ignore
 import Tag from '@/components/Tag'
+// @ts-ignore
 import siteMetadata from '@/data/siteMetadata'
 import { formatDate } from 'pliny/utils/formatDate'
 // import NewsletterForm from 'pliny/ui/NewsletterForm'

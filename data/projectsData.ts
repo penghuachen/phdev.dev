@@ -1,4 +1,7 @@
-const projectsData = [
+// @ts-ignore
+import { Project } from '@/types/projects'
+
+const projectsData: Project[] = [
   // {
   //   title: 'A Search Engine',
   //   description: `What if you could look up any information in the world? Webpages, images, videos

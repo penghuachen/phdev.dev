@@ -1,9 +1,13 @@
 import siteMetadata from '@/data/siteMetadata'
+// @ts-ignore
 import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/logo.svg'
+// import Logo from '@/data/logo.svg'
 import Link from './Link'
+// @ts-ignore
 import MobileNav from './MobileNav'
+// @ts-ignore
 import ThemeSwitch from './ThemeSwitch'
+// @ts-ignore
 import SearchButton from './SearchButton'
 
 const Header = () => {

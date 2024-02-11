@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Mail, Github, Facebook, Youtube, Linkedin, Twitter, Mastodon } from './icons'
 
 const components = {
