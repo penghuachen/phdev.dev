@@ -7,7 +7,7 @@ const siteMetadata = {
     '分享前、後端程式開發的心得與技術文章、Side Projects 與小工具，另外也會分享一些閱讀心得 ✌️✌️✌️',
   language: 'zh-TW',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
+  siteUrl: 'https://phdev-dev.vercel.app',
   siteRepo: 'https://github.com/penghuachen/phdev.dev',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/twitter-card.png',
