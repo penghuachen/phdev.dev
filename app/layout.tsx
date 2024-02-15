@@ -2,7 +2,6 @@ import 'css/tailwind.css'
 import 'pliny/search/algolia.css'
 
 import { Space_Grotesk } from 'next/font/google'
-import Script from 'next/script'
 import { Analytics, AnalyticsConfig } from 'pliny/analytics'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import Header from '@/components/Header'
@@ -65,18 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${space_grotesk.variable} scroll-smooth`}
       suppressHydrationWarning
     >
-      <head>
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-LND5HS6DC1" />
-        <Script id="google-analytics">
-          {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-LND5HS6DC1');
-        `}
-        </Script>
-      </head>
+      <head></head>
       <link rel="icon" sizes="16x16" href="/static/favicons/favicon.svg" />
       {/*<link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />*/}
       {/*<link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />*/}
