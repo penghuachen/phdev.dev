@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-YVYRTYX6SM" />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-LND5HS6DC1" />
         <Script id="google-analytics">
           {`
           window.dataLayer = window.dataLayer || [];
