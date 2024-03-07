@@ -1,0 +1,180 @@
+---
+title: 在 Google Cloud VM 上架設你自己的套件管理伺服器(npm library server)
+date: "2024-03-07 13:51:04"
+tags: ['Verdaccio', 'Node.js', 'Npm', 'Google Cloud']
+draft: false
+summary: ''
+---
+
+import PostGuideline from '@/components/PostGuideline';
+
+<PostGuideline/>
+
+
+## 於 Google Cloud 中啟用服務、建立 VM (Virtual Machine, 虛擬機)、SSH 連線 VM
+
+在 Google Cloud 中啟用 **Compute Engine API**，並且建立一台用來安裝 `npm` library 用的 VM。
+
+建立 VM 後，透過 Terminal 連線 VM
+
+### 啟用服務、建立 VM、機器設定
+
+啟用 API
+
+![](/static/images/post-images/2024-03-07/1.png)
+
+自訂名稱、區域、可用區
+
+![](/static/images/post-images/2024-03-07/2.png)
+
+選擇機器規格
+
+![](/static/images/post-images/2024-03-07/3.png)
+
+設定可以接受的特定網路流量，因為是測試用，所以設定成 http
+
+![](/static/images/post-images/2024-03-07/4.png)
+
+
+### 透過 Terminal 執行 SSH 連線
+
+首先，於 中繼資料 - 安全殼層金鑰 設定用來連線的 ssh public key
+
+![](/static/images/post-images/2024-03-07/5.png)
+
+然後，透過 terminal 使用剛剛設定的 ssh public key 進行連線
+
+```bash
+# for example: ssh -i ~/.ssh/ssh-public-key hello@127.127.127.127
+ssh -i ~/.ssh/ssh-public-key username@ip
+```
+
+## 建置 VM 環境
+
+在往下執行之前，需要替新建立的 VM 做些環境建置。 這邊我們需要更新 Linux 系統、安裝 `node.js` 、 `git` 、`nginx` 等。
+
+### 更新 Linux 系統
+
+```bash
+sudo apt update
+```
+
+### 安裝 `curl` 工具、並透過 `curl` 安裝 `node.js` (這邊以 v18 安裝)
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+### 透過 `node -v` 檢查 `node.js` 是否安裝成功
+
+```bash
+node -v
+```
+
+### 安裝 `git`
+
+```bash
+sudo apt-get install git
+```
+
+### 安裝 `nginx`
+
+```bash
+sudo apt install nginx
+```
+
+### 剛建立的 vm 可能沒有以下套件，需要額外安裝
+
+```bash
+sudo apt-get install xdg-utils
+sudo apt-get install w3m
+```
+
+## `verdaccio`：建立和管理私有的 `npm` 倉庫
+
+![](/static/images/post-images/2024-03-07/6.png)
+
+`Verdaccio` 是一個開源的 Node.js 模組，這邊透過導入 `Verdaccio` 來建立自己和管理私有的 `npm` 套件，後續我們建立的套件都會註冊在這個私有的倉庫中。
+
+導入 `Verdaccio` 的方式有兩種：全域安裝或是透過文件提到的 **[Programmatic API](https://github.com/verdaccio/verdaccio/tree/6.x?tab=readme-ov-file#programmatic-api) 來導入，**而這邊會透過建立一個 `node.js` 專案用來啟用 `Verdaccio` 。
+
+此外，我們還需要設定反向代理才能夠透過 ip 方式存取這個 `npm` library server
+
+### 於 VM 中建立 `node.js` 專案
+
+註：實務上可能會透過如 Github action 等服務將 Node.js 專案透過像是 SCP 方式複製到 VM 中，這邊先簡化此段流程
+
+### 建立 `node.js` 專案
+
+```bash
+mkdir verdaccio
+cd verdaccio
+
+npm init -y
+npm i verdaccio
+
+touch index.js
+vim index.js
+```
+
+### 引入 `verdaccio` ，於 `index.js` 中撰寫以下程式碼
+
+```jsx
+ const {runServer} = require('verdaccio');
+ const app = await runServer(); // default configuration
+
+ // 可以自動 config 並提供 config 路徑進行設定
+ // const app = await runServer('./config/config.yaml');
+
+ // 也可以透過一個物件(configuration)進行設定
+ // const app = await runServer({ configuration });
+
+ app.listen(4873, (event) => {
+   console.log('verdaccio is running successfully!!')
+ });
+```
+
+### 修改 `library.json` `script` ，用來啟用 `verdaccio`
+
+```json
+{
+  "script": {
+    "server": "node index.js"
+  }
+}
+```
+
+### 設定反向代理
+
+參考： https://verdaccio.org/docs/reverse-proxy
+
+```bash
+# /etc/nginx/sites-available/default
+location / {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header X-NginX-Proxy true;
+        proxy_pass http://localhost:4873;
+        proxy_redirect off;
+}
+```
+
+記得 `reload`
+
+```bash
+/etc/nginx/sites-available/default
+```
+
+### 新增 npm 倉庫的使用者
+
+```bash
+npm adduser --registry http://localhost:4873
+```
+
+### 透過 ip 存取網頁
+
+![](/static/images/post-images/2024-03-07/7.png)
+
+到這邊已經完成，下個篇幅來聊聊如何建立第一個 npm library
