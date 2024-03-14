@@ -1,5 +1,5 @@
 const techStacksIcons = {
-  'Shell Script': '/static/images/icons/techStacks/shell-script.svg',
+  'Shell Script': '/static/images/icons/techStacks/shell-script-icon.svg',
 }
 
 const TechStacks = ({ techStacks }) => {
