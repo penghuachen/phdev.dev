@@ -1,0 +1,634 @@
+---
+title: 開發屬於你的第一個 npm 套件
+date: "2024-03-20 09:51:04"
+tags: ['Node.js', 'Npm', 'Google Cloud', 'unit-test']
+draft: false
+summary: ''
+---
+
+import PostGuideline from '@/components/PostGuideline';
+
+<PostGuideline/>
+
+## 撰寫自己常用的共用函式庫 (utils function library)
+
+本段落開始設計共用函式庫，以**三個驗證表單欄位使用的函式**作為此 npm library 的共用函式
+
+![Untitled](/static/images/post-images/2024-03-20/1.png)
+
+首先，先執行 `npm init -y` ，建立這個專案的相關描述。建立完成後，接著我們開始規劃以下三個方向的 utils：
+
+### 撰寫驗證 form 表單欄位的表單規則
+
+### `validateCountries` 驗證國家是否存在
+
+```jsx
+export default function validateCountries(country) {
+  const countryList = [
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "American Samoa",
+    "Andorra",
+    "Angola",
+    "Anguilla",
+    "Antarctica",
+    "Antigua and Barbuda",
+    "Argentina",
+    "Armenia",
+    "Aruba",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas (the)",
+    "Bahrain",
+    "Bangladesh",
+    "Barbados",
+    "Belarus",
+    "Belgium",
+    "Belize",
+    "Benin",
+    "Bermuda",
+    "Bhutan",
+    "Bolivia (Plurinational State of)",
+    "Bonaire, Sint Eustatius and Saba",
+    "Bosnia and Herzegovina",
+    "Botswana",
+    "Bouvet Island",
+    "Brazil",
+    "British Indian Ocean Territory (the)",
+    "Brunei Darussalam",
+    "Bulgaria",
+    "Burkina Faso",
+    "Burundi",
+    "Cabo Verde",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Cayman Islands (the)",
+    "Central African Republic (the)",
+    "Chad",
+    "Chile",
+    "China",
+    "Christmas Island",
+    "Cocos (Keeling) Islands (the)",
+    "Colombia",
+    "Comoros (the)",
+    "Congo (the Democratic Republic of the)",
+    "Congo (the)",
+    "Cook Islands (the)",
+    "Costa Rica",
+    "Croatia",
+    "Cuba",
+    "Curaçao",
+    "Cyprus",
+    "Czechia",
+    "Côte d'Ivoire",
+    "Denmark",
+    "Djibouti",
+    "Dominica",
+    "Dominican Republic (the)",
+    "Ecuador",
+    "Egypt",
+    "El Salvador",
+    "Equatorial Guinea",
+    "Eritrea",
+    "Estonia",
+    "Eswatini",
+    "Ethiopia",
+    "Falkland Islands (the) [Malvinas]",
+    "Faroe Islands (the)",
+    "Fiji",
+    "Finland",
+    "France",
+    "French Guiana",
+    "French Polynesia",
+    "French Southern Territories (the)",
+    "Gabon",
+    "Gambia (the)",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Gibraltar",
+    "Greece",
+    "Greenland",
+    "Grenada",
+    "Guadeloupe",
+    "Guam",
+    "Guatemala",
+    "Guernsey",
+    "Guinea",
+    "Guinea-Bissau",
+    "Guyana",
+    "Haiti",
+    "Heard Island and McDonald Islands",
+    "Holy See (the)",
+    "Honduras",
+    "Hong Kong",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran (Islamic Republic of)",
+    "Iraq",
+    "Ireland",
+    "Isle of Man",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Japan",
+    "Jersey",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kiribati",
+    "Korea (the Democratic People's Republic of)",
+    "Korea (the Republic of)",
+    "Kuwait",
+    "Kyrgyzstan",
+    "Lao People's Democratic Republic (the)",
+    "Latvia",
+    "Lebanon",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Liechtenstein",
+    "Lithuania",
+    "Luxembourg",
+    "Macao",
+    "Madagascar",
+    "Malawi",
+    "Malaysia",
+    "Maldives",
+    "Mali",
+    "Malta",
+    "Marshall Islands (the)",
+    "Martinique",
+    "Mauritania",
+    "Mauritius",
+    "Mayotte",
+    "Mexico",
+    "Micronesia (Federated States of)",
+    "Moldova (the Republic of)",
+    "Monaco",
+    "Mongolia",
+    "Montenegro",
+    "Montserrat",
+    "Morocco",
+    "Mozambique",
+    "Myanmar",
+    "Namibia",
+    "Nauru",
+    "Nepal",
+    "Netherlands (the)",
+    "New Caledonia",
+    "New Zealand",
+    "Nicaragua",
+    "Niger (the)",
+    "Nigeria",
+    "Niue",
+    "Norfolk Island",
+    "Northern Mariana Islands (the)",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Palau",
+    "Palestine, State of",
+    "Panama",
+    "Papua New Guinea",
+    "Paraguay",
+    "Peru",
+    "Philippines (the)",
+    "Pitcairn",
+    "Poland",
+    "Portugal",
+    "Puerto Rico",
+    "Qatar",
+    "Republic of North Macedonia",
+    "Romania",
+    "Russian Federation (the)",
+    "Rwanda",
+    "Réunion",
+    "Saint Barthélemy",
+    "Saint Helena, Ascension and Tristan da Cunha",
+    "Saint Kitts and Nevis",
+    "Saint Lucia",
+    "Saint Martin (French part)",
+    "Saint Pierre and Miquelon",
+    "Saint Vincent and the Grenadines",
+    "Samoa",
+    "San Marino",
+    "Sao Tome and Principe",
+    "Saudi Arabia",
+    "Senegal",
+    "Serbia",
+    "Seychelles",
+    "Sierra Leone",
+    "Singapore",
+    "Sint Maarten (Dutch part)",
+    "Slovakia",
+    "Slovenia",
+    "Solomon Islands",
+    "Somalia",
+    "South Africa",
+    "South Georgia and the South Sandwich Islands",
+    "South Sudan",
+    "Spain",
+    "Sri Lanka",
+    "Sudan (the)",
+    "Suriname",
+    "Svalbard and Jan Mayen",
+    "Sweden",
+    "Switzerland",
+    "Syrian Arab Republic",
+    "Taiwan",
+    "Tajikistan",
+    "Tanzania, United Republic of",
+    "Thailand",
+    "Timor-Leste",
+    "Togo",
+    "Tokelau",
+    "Tonga",
+    "Trinidad and Tobago",
+    "Tunisia",
+    "Turkey",
+    "Turkmenistan",
+    "Turks and Caicos Islands (the)",
+    "Tuvalu",
+    "Uganda",
+    "Ukraine",
+    "United Arab Emirates (the)",
+    "United Kingdom of Great Britain and Northern Ireland (the)",
+    "United States Minor Outlying Islands (the)",
+    "United States of America (the)",
+    "Uruguay",
+    "Uzbekistan",
+    "Vanuatu",
+    "Venezuela (Bolivarian Republic of)",
+    "Viet Nam",
+    "Virgin Islands (British)",
+    "Virgin Islands (U.S.)",
+    "Wallis and Futuna",
+    "Western Sahara",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe",
+    "Åland Islands"
+  ];
+
+  const isValidCountry = countryList.includes(country);
+
+  const result = {
+    message: "Country is valid",
+    isValid: true,
+    country: country
+  };
+
+  if (isValidCountry === false) {
+    return Promise.reject({
+      ...result,
+      message: "Country is not valid",
+      isValid: false
+    });
+  }
+
+  return Promise.resolve(result);
+}
+
+```
+
+### `validateEmail` 驗證 Email 是否正確
+
+```jsx
+
+export default function validateEmail(email) {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+  const isValid = emailRegex.test(email);
+
+  const result = {
+    message: "Email is valid",
+    isValid: true,
+    email: email
+  };
+
+  if (isValid === false) {
+    return Promise.reject({
+      ...result,
+      message: "Email is not valid",
+      isValid: false
+    });
+  }
+
+  return Promise.resolve(result);
+}
+
+```
+
+### `validatePassword` 驗證 Password 是否正確
+
+```jsx
+
+export default function validatePassword(password) {
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+  const isValid = passwordRegex.test(password);
+
+  const result = {
+    message: "Password is valid",
+    isValid: true,
+  };
+
+  if (isValid === false) {
+    return Promise.reject({
+      message: "Password is not valid",
+      isValid: false
+    });
+  }
+
+  return Promise.resolve(result);
+}
+
+```
+
+## 導入 Jest  單元測試框架，撰寫單元測試
+
+導入 [Jest 測試框架](https://jestjs.io/docs/getting-started)，建立測試環境
+
+首先，安裝 jest：
+
+```bash
+npm install --save-dev jest
+```
+
+安裝 Babel，並於 `babel.config.js` 設定：
+
+```bash
+npm install --save-dev babel-jest @babel/core @babel/preset-env
+```
+
+```jsx
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+};
+```
+
+接著在 package.json 中的 `scripts` 修改為：
+
+```json
+{
+  "scripts": {
+    "test": "jest"
+  }
+}
+```
+
+接著在 `form-validations-utils` 中建立 `__test__` 資料夾，到這邊為止，我們已經完成導入測試框架的基礎設定，可以開始撰寫測試案例囉！
+
+## 替共用函式撰寫單元測試案例
+
+替自己設計的函式撰寫測試案例，確保程式碼品質
+
+### 替 `validateCountries` 撰寫單元測試案例
+
+```jsx
+describe('formValidationsUtils.validateCountries 函式 ', () => {
+  test('Canada 是合法的國家名稱', async () => {
+    const result = await formValidationsUtils.validateCountries('Canada');
+    expect(result.isValid).toBe(true);
+    expect(result.message).toBe('Country is valid');
+    expect(result.country).toBe('Canada');
+  });
+
+  test('Canadaaa 不是合法的國家名稱', async () => {
+    try {
+      await formValidationsUtils.validateCountries('Canadaaa');
+    } catch (error) {
+      expect(error.isValid).toBe(false);
+      expect(error.message).toBe('Country is not valid');
+      expect(error.country).toBe('Canadaaa');
+    }
+  });
+})
+```
+
+### 替 `validateEmail` 撰寫單元測試案例
+
+```jsx
+describe('formValidationsUtils.validateEmail', () => {
+  test('aaa@gmail.com 是合法的 Email', async () => {
+    const result = await formValidationsUtils.validateEmail('aaa@gmail.com');
+    expect(result.isValid).toBe(true);
+    expect(result.message).toBe('Email is valid');
+    expect(result.email).toBe('aaa@gmail.com');
+  });
+
+  test('aaa 不是合法的 Email', async () => {
+    try {
+      await formValidationsUtils.validateEmail('aaa');
+    } catch (error) {
+      expect(error.isValid).toBe(false);
+      expect(error.message).toBe('Email is not valid');
+      expect(error.email).toBe('aaa');
+    }
+  });
+})
+```
+
+### 替 `validatePassword` 撰寫單元測試案例
+
+```jsx
+describe('formValidationsUtils.validatePassword', () => {
+  test('abc12345678 是合法的 Password', async () => {
+    const result = await formValidationsUtils.validatePassword('abc12345678');
+    expect(result.isValid).toBe(true);
+    expect(result.message).toBe('Password is valid');
+  });
+
+  test('12345678 不是合法的 Password', async () => {
+    try {
+      await formValidationsUtils.validatePassword('12345678');
+    } catch (error) {
+      expect(error.isValid).toBe(false);
+      expect(error.message).toBe('Password is not valid');
+    }
+  });
+})
+```
+
+## 撰寫共用函式使用文件
+
+建立 `README[.md](http://markdown.md)` ，幫我們開發的 npm 套件 撰寫使用說明文件。
+
+另外文件寫法取決於你要提供的資訊，這邊簡單描述這個 npm 套件的使用方式。
+
+## @ph/utils
+
+### 安裝
+
+```bash
+`npm install @ph/utils`
+```
+
+### 函式
+
+| 函式 | 描述 |
+| --- | --- |
+| `validateCountries` | 驗證國家是否存在 |
+| `validateEmail` | 驗證 Email 是否正確 |
+| `validatePassword` | 驗證 Password 是否正確 |
+
+### 使用
+
+```javascript
+import { formValidationsUtils } from "@ph/utils";
+
+const result = await formValidationsUtils.validateCountries('Canada');
+
+console.log(result); // { valid: true, message: 'Country is valid', country: 'Canada' }
+```
+
+## 登入自架的 npm library server、發佈套件前置測試並自動化更新版本
+
+終於到了要發布套件的最後一步囉！ 不過在發布之前，我們還需要決定更新的版本號，並前在發布前跑過所有測試案例，確保程式碼品質後才做發布！
+
+### 撰寫更新版本號 `scripts`
+
+這邊我們定義 `major` 、`minor`、 `patch` 的使用時機（參考[標準語義化版本 Semantic Versioning定義](https://semver.org/lang/zh-TW/)）：
+
+- `major`：當你做了不相容的 API 修改。
+- `minor`：當你做了向下相容的功能性新增。
+- `patch`：當你做了向下相容的問題修正。
+
+```json
+  "scripts": {
+    "update-major-version": "npm version major",
+    "update-minor-version": "npm version minor",
+    "update-patch-version": "npm version patch",
+    "test": "jest"
+  },
+```
+
+剛建立的專案，在 package.json 中的 version 應該會是 `0.0.0` ，這邊讓我們執行 `npm run update-major-version` 更新版本
+
+### 透過 **`prepublishOnly` 於**發布套件前測試
+
+```json
+ "scripts": {
+    "update-major-version": "npm version major",
+    "update-minor-version": "npm version minor",
+    "update-patch-version": "npm version patch",
+    "test": "jest",
+    "prepublishOnly": "npm run test"
+  }
+```
+
+### 登入並發布套件
+
+由於我們是要發布在自架的的 npm library server，所以記得使用 `--registry` 指定位置。
+
+在發布套件之前，會先經過單元測試做發布前的確認。
+
+這邊讓我們發布到在「在 Google Cloud VM 上架設你自己的套件管理伺服器(`npm` package server)」文章中所建立的 npm library server
+
+登入
+
+```bash
+npm login --registry http://ip
+```
+
+發布套件
+
+```bash
+npm publish --registry http://ip
+```
+
+![Untitled](/static/images/post-images/2024-03-20/2.png)
+
+發布前執行所有測試案例
+
+![Untitled](/static/images/post-images/2024-03-20/3.png)
+
+發布套件資訊
+
+![發布成功](/static/images/post-images/2024-03-20/4.png)
+
+發布成功
+
+## 於專案中使用你開發的第一個 npm 套件
+
+在專案中測試你的套件是否可以正常使用
+
+### 安裝套件，注意安裝的來源是我們自架的 npm library server
+
+```bash
+npm install @ph/utils --registry http://ip
+```
+
+### 執行其中一個 function，以 `validateCountries` **為例
+
+```jsx
+import { formValidationsUtils } from "@ph/utils";
+
+const result = await formValidationsUtils.validateCountries("Canada"); // return Promise
+
+console.log(result);
+```
+
+到這裡，我們已經完成開發套件、發布套件以及在專案中使用套件囉！
+
+## 難免有意外，你的套件需要做些更新
+
+來看看如何更新套件，以及需要做什麼事情讓使用套件的開發者可以了解變更了什麼
+
+這邊透過 https://github.com/cookpete/auto-changelog 來產生變更記錄
+
+首先，先安裝 https://github.com/cookpete/auto-changelog
+
+```bash
+npm install auto-changelog --save-dev
+```
+
+然後在 `package.json` 中設定，自動比對版本之間新增的 commit，作為變更記錄的內容。
+
+這邊只展示簡單產生 changelog 的方式，需要注意的是當我們執行版本號更新時，就會執行 `version` 這個指令，並產生 `CHANGELOG.md`
+
+```json
+  "scripts": {
+    "update-major-version": "npm version major",
+    "update-minor-version": "npm version minor",
+    "update-patch-version": "npm version patch",
+    "test": "jest",
+    "prepublishOnly": "npm run test",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
+  },
+```
+
+指令執行完成後，可以看到 `CHANGELOG.md`  以及對應的一些內容
+
+```bash
+### Changelog
+
+All notable changes to this project will be documented in this file. Dates are displayed in UTC.
+
+Generated by [`auto-changelog`](https://github.com/CookPete/auto-changelog).
+
+#### v1.0.2
+
+- docs: add usage description
+
+#### v1.0.1
+
+> 5 March 2024
+
+- 3rd: install auto-changelog to auto generate changlog
+- init
+- docs: fix usage description
+
+<!-- auto-changelog-above -->
+
+```
+
+![Untitled](/static/images/post-images/2024-03-20/5.png)
+
+到這裡我們已經開發出第一個自己設計的 npm 套件，並且發布到自架的 npm library server，然後在專案中使用套件，以及了解如何更新套件以及如何讓使用套件的開發者了解變更了什麼 ✌️✌️✌️
