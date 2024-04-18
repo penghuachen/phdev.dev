@@ -1,0 +1,146 @@
+---
+title: 使用 npm link 快速測試本地 npm 套件
+date: "2024-04-17 09:51:04"
+tags: ['Node.js', 'Npm', 'unit-test']
+draft: false
+summary: ''
+---
+
+import PostGuideline from '@/components/PostGuideline';
+
+<PostGuideline / >
+
+  ## 從 `npm` docs 來看 `npm link` 的用途
+
+在「[開發屬於你的第一個 npm 套件](https://phdev.dev/blog/2024-03-20-%E9%96%8B%E7%99%BC%E5%B1%AC%E6%96%BC%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20npm%20%E5%A5%97%E4%BB%B6)」一文中，我們開發了一個 npm 套件，並成功發布在我們自己架設的 npm library server 上
+
+不過就像我們常在軟體專案中遇到需求新增、變更等情況，套件也一樣會遇到類似的情況，為了滿足各種使用情境，我們必須更新自己開發的 npm 套件
+
+但是在開發階段如果每次測試套件都要發布一次是很麻煩的，所以今天透過介紹 npm link 的使用方式來看看如何在本地快速開發、除錯 npm 套件
+
+### `symbolic link`（符號連結）是什麼？
+
+在切入主題之前，有些觀念我們需要先理解，符號連結(symbolic link)就是其中一個
+
+> Symbolic link 就是在建立一個獨立的檔案，而這個檔案會讓資料的讀取指向他 link 的那個檔案的檔名
+- 鳥哥私房菜 **第七章、Linux 磁碟與檔案系統管理**
+>
+
+這代表我們可以透過建立 Symbolic link，將專案中所使用的 `npm` 套件先改成指向我們本地的 `npm` 套件，如此一來就可以即時開發以及除錯我們的 `npm` 套件
+
+舉個例子來說，今天有一個原始檔案為 `file.txt`，我們透過一個名為 `link.txt` 的符號連結指向 `file.txt`，當我們讀取 `link.txt` 時，實際上是取得 `file.txt` 的檔案內容。
+
+(註：這裡沒有將 `inode` 的概念加入，`inode` 觀念可參考：[維基百科-inode](https://zh.wikipedia.org/zh-tw/Inode) 、[鳥哥私房菜 **第七章、Linux 磁碟與檔案系統管理**](https://linux.vbird.org/linux_basic/centos7/0230filesystem.php))
+
+<img src="https://www.mermaidchart.com/raw/e79121ac-cbd9-4582-88c1-065da170ab27?theme=light&version=v0.1&format=svg" className="mx-auto" width="300"  />
+
+### 如何使用 `npm link` ?
+
+在了解什麼是 `symlink` 之後，接著我們來看看透過 `npm link` 的方式建立符號連結。
+
+在 `npm` 中，建立符號連結可以是兩個步驟，也可以簡化成單一步驟，不過需要注意的關鍵之處在於**建立符號連結的位置。**
+
+在兩步驟中：
+
+- 首先，在**該 npm 套件專案**中，執行 `npm link` ，此時會在全域中建立一個符號連結。（`{prefix}/lib/node_modules/<package>`），這邊要注意的是如果有使用到 `nvm` 的話，會直接在 `npm link` 執行當下的 `node` 版本的全域中建立符號連結。（可以透過觀察 `nvm` 底下的 `node` 版確認）
+- 接著，在**要使用該套件的專案**中**，**執行 `npm link package-name` ，會在專案中的 `node_modules` 裡面看到一個連結到全域 `package-name`  的符號連結
+
+<img src="https://www.mermaidchart.com/raw/69768b85-66e2-4bdd-a96b-77d231f704e9?theme=light&version=v0.1&format=svg" className="mx-auto" width="400"  />
+
+如果是簡化成單一步驟，其實也很簡單，就是在指定**使用該套件的專案中，**使用 **`npm link package-name` 達成。**
+
+這邊需要注意一個小細節， `package-name` 是以 `package.json` 中 `name` 為主，而不是套件專案名稱喔！
+
+## 如何使用 `npm link` 在本地快速測試開發的套件
+
+透過「[開發屬於你的第一個 npm 套件](https://phdev.dev/blog/2024-03-20-%E9%96%8B%E7%99%BC%E5%B1%AC%E6%96%BC%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20npm%20%E5%A5%97%E4%BB%B6)」一文所建立的 `npm` 套件，實際操作一次開發、除錯的部分吧！
+
+首先，我們先定義好以下情境：
+
+- `@ph/utils` :我們先前開發的 **npm 套件專案**
+- `projectA` ：模擬實際有**安裝 `@ph/utils` 套件的專案**
+
+接著，我們我們先在 `projectA` 中先安裝 `@ph/utils@1.0.2`
+
+```bash
+npm install @ph/utils@1.0.2 --registry http://ip
+```
+
+某天，當我們在使用這個套件時，突然發現了一個可能需要的使用情境：「**以 Taiwan 國家為舉例，今天使用者如果輸入 `taiwan`、`tAIWan` 之類的話，會因為英文大小寫關係導致回傳一個被 reject 的 Promise 物件**」。
+
+(註：雖然這個需求可能見仁見智，不過為了透過簡單的舉例讓讀者更好理解，這邊就先假設這個情境是需要的吧 XD!)
+
+如果我們想要讓使用者可以在輸入 `taiwan`、`tAIWan` 這類的值時也可以正常判斷的話，我們需要修改一下驗證 `validateCountries` function 的實作。
+
+這邊讓我們修改套件的實作，完整程式碼的部分可以參考「[開發屬於你的第一個 npm 套件](https://phdev.dev/blog/2024-03-20-%E9%96%8B%E7%99%BC%E5%B1%AC%E6%96%BC%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20npm%20%E5%A5%97%E4%BB%B6)」一文，這邊只顯示調整的部分：
+
+![Untitled](/static/images/post-images/2024-04-18/1.png)
+
+鋪陳這麼長，總算是要進入重點啦 XD!
+
+參考前面所提到的步驟，首先我們先在 `@ph/utils` 中執行 `npm link` ，建立一個用來指向 `@ph/utils` 的符號連結
+
+以 macOS 系統搭配 nvm 來說，我目前使用的 node 版本為 `v18.17.0` ，因此可以在 global `.nvm` 資料夾中的 `v18.17.0` 找到建立的 symbolic link
+
+```bash
+/Users/{username}/.nvm/versions/node/v18.17.0/lib/node_modules/@ph/utils
+```
+
+然後在 `projectA` 中執行 `npm link @ph/utils` ，可以觀察到 `node_modules` 原本安裝的 `@ph/utils` 已經透過 symbolic link 方式連結到本地 global 的 `@ph/utils` 。
+
+接著我們就可以在 `projectA` 中快速測試本次變更囉！
+
+```jsx
+// projectA/index.js
+import { formValidationsUtils } from "@ph/utils";
+
+try {
+  const result = await formValidationsUtils.validateCountries("cuba"); // return Promise
+  console.log(result);
+} catch (error) {
+  console.log(error);
+}
+
+```
+
+讀者可以嘗試自己修改 npm 套件，然後看看在 `projectA` 中目前透過 symbolic link 連結的 `@ph/utils` 是否也即時修改唷！
+
+開發測試後沒有問題的話，我們一樣為替本次的實作加上測試案例。
+
+```jsx
+ test('canada 是合法的輸入值，國家名稱為 Canada', async () => {
+    const result = await formValidationsUtils.validateCountries('canada');
+    expect(result.isValid).toBe(true);
+    expect(result.message).toBe('Country is valid');
+    expect(result.country).toBe('Canada');
+  });
+```
+
+到這裡我們已經完成在本地透過 npm link 快速測試套件變更，後續的流程就如同「[開發屬於你的第一個 npm 套件](https://phdev.dev/blog/2024-03-20-%E9%96%8B%E7%99%BC%E5%B1%AC%E6%96%BC%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20npm%20%E5%A5%97%E4%BB%B6)」一文中提到的流程，更新版本號、登入 npm library server 、發布 npm 套件以及在 `projectA` 中安裝新版的 `@ph/utils@1.0.3`
+
+## 開發後，移除 global 中的 `@ph/utils` ，`projectA`
+
+需要記得於開發完成後，移除 global 中的 `@ph/utils` ，以及 `projectA` 專案中透過 npm link 連結的 `@ph/utils`
+
+### 步驟：
+
+- 執行 `npm remove -g @ph/utils`
+- 在 `projectA` 執行 `npm unlink @ph/utils`
+- 在 `projectA` 安裝新版本 npm 套件 `npm install @ph/utils@1.0.3`
+
+## `npm link` 使用須知
+
+`npm link` 很好用，避免我們不斷透過 `npm publish` 更新套件，但有些注意事項我們需要了解一下
+
+1. 如果透過 `nvm` 管理多個 node.js 版本，需要注意使用 `npm link` 時，建立的 symbolic link 實際上會是在「**當下執行 `npm link` 的 node.js 版本**」，以 macOS 來說，可以透過 `/Users/{username}/.nvm/versions/node/v18.17.0/lib/node_modules/library-name` 確認
+2. `npm link` 失敗時並**不會報錯**，如果在我們自己架設的 npm library server 找不到該套件，就會直接退回到 npm 官方提供的位置進行安裝，如果 npm 官方也找不到該套件才會有錯誤訊息
+
+## 參考來源
+
+- [鳥哥私房菜 **第七章、Linux 磁碟與檔案系統管理**](https://linux.vbird.org/linux_basic/centos7/0230filesystem.php)
+- **[如何使用 npm link 進行 node module 測試](https://etrexkuo.medium.com/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-npm-link-%E9%80%B2%E8%A1%8C-node-module-%E6%B8%AC%E8%A9%A6-9d3b98db768c)**
+- **[4个避免使用npm link的理由](https://juejin.cn/post/7092227756603228173)**
+
+
+
+
