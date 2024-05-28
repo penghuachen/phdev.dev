@@ -132,7 +132,10 @@ try {
 
 `npm link` 很好用，避免我們不斷透過 `npm publish` 更新套件，但有些注意事項我們需要了解一下
 
-1. 如果透過 `nvm` 管理多個 node.js 版本，需要注意使用 `npm link` 時，建立的 symbolic link 實際上會是在「**當下執行 `npm link` 的 node.js 版本**」，以 macOS 來說，可以透過 `/Users/{username}/.nvm/versions/node/v18.17.0/lib/node_modules/library-name` 確認
+1. 如果透過 `nvm` 管理多個 node.js 版本，需要注意使用 `npm link` 時，建立的 symbolic link 實際上會是在「**當下執行 `npm link` 的 node.js 版本**」，以 macOS 來說，可以透過以下方式確認：
+```bash
+ls -l /Users/{username}/.nvm/versions/node/v18.17.0/lib/node_modules/@ph/utils
+```
 2. `npm link` 失敗時並**不會報錯**，如果在我們自己架設的 npm library server 找不到該套件，就會直接退回到 npm 官方提供的位置進行安裝，如果 npm 官方也找不到該套件才會有錯誤訊息
 
 ## 參考來源
