@@ -1,0 +1,123 @@
+---
+title: Vue3 + Vite：開發第一個屬於你的 vue 套件
+date: "2024-09-10 09:51:04"
+tags: ['Vue3', 'Vite', 'Vitest', 'Unit Test']
+draft: false
+summary: ''
+---
+
+import PostGuideline from '@/components/PostGuideline';
+
+<PostGuideline / >
+
+
+## 開發一個 Progress Bar 元件
+
+首先，我們先來開發一個 Progress Bar 元件。
+
+程式碼可參考[測試專案](https://github.com/penghuachen/vue3-progress-bar-for-test)。
+
+![](/static/images/post-images/2024-09-06/1.gif)
+
+
+## 為品質做把關：撰寫元件單元測試
+
+使用 Vitest 搭配 Vue test utils 進行元件的單元測試。
+
+撰寫單元測試的工具有很多，這邊我們使用 Vitest 搭配 Vue test utils 進行元件的單元測試，並介紹本次主要用到的一些語法：
+
+### Vue test utils
+
+- `mount`：掛載要測試的元件，這邊掛載 App 元件，透過模擬使用者點擊按鈕的方式來測試 Progress Bar 元件。
+
+### Vitest
+
+- `useFakeTimers`: 使用假的計時器，用來加速測試速度
+- `useRealTimers`：使用真實的計時器，可以在模擬完計時相關的測試後，使用此方法來恢復真實的計時器
+- `advanceTimersByTimeAsync` ： 當如果計時器中有非同步的操作，可以透過此方法來模擬時間快進
+
+程式碼可參考[測試專案](https://github.com/penghuachen/vue3-progress-bar-for-test/blob/main/src/components/__test__/ProgressBar.spec.js)
+
+### 備註
+
+這邊使用 `advanceTimersByTimeAsync` 來模擬時間前進而非 `advanceTimersByTime`，目前推測是因為在 Progress Bar 的實作中，是透過在 `setInterval` 中使用 `emit` 來觸發事件，且由於 vue 在渲染機制上並不是同步更新，這會導致使用 `advanceTimersByTime` 來模擬時間前進時，無法正確更新 `progressValue` 的值。
+
+## 通過 Vite 配置 lib 模式，完成元件的打包設置
+
+了解本次 lib 模式的設定，並透過 vite.config.js 進行設定。
+
+在 Vite 中，可以透過在 vite.config.ts 中在 `build` 中設定定義 `lib` 模式，來打包元件。
+
+程式碼可參考[測試專案](https://github.com/penghuachen/vue3-progress-bar-for-test/blob/main/vite.config.js)
+
+其中有幾個比較重要的設定：
+
+### `build.lib`
+
+- `entry`：指定打包的入口檔案
+- `name`：指定打包後的全域變數名稱
+- `formats`：指定打包的格式，例如：`es`、`cjs`、`umd` 等
+- `fileName`：指定打包後的檔案名稱
+
+### `build.rollupOptions`
+
+- `external`：指定那些你想不想要打包進去套件的外部套件
+- `output`：在 UMD 的模式下，替這些指定使用外部的套件定義一個全域變數
+
+## 於 package.json 中設定入口
+
+在 package.json 中設定入口檔案，讓使用者可以透過 `import` 或 `require` 的方式引入套件。
+
+```json
+{
+  "main": "./dist/my-lib.cjs.js",
+  "module": "./dist/my-lib.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/my-lib.es.js",
+      "require": "./dist/my-lib.cjs.js"
+    },
+    "./umd": "./dist/my-lib.umd.js",
+    "./iife": "./dist/my-lib.iife.js"
+  },
+  "files": [
+    "dist"
+  ]
+}
+```
+
+上述設定解釋如下：
+
+- `main`：指定 CommonJS 的入口檔案
+- `module`：指定 ES Module 的入口檔案
+- `exports`：指定入口檔案，讓使用者可以透過 `import` 或 `require` 的方式引入套件
+    - `.` ：指定入口檔案
+    - `./umd`：指定 UMD 的入口檔案
+    - `./iife`：指定 IIFE 的入口檔案
+- `files`：指定要發布的檔案
+
+這樣的設定可以讓我們的套件可以在不同的環境中使用。
+
+例如我們想要使用 umd 的方式引入套件，可以透過以下方式引入：
+
+```javascript
+import MyLib from 'my-lib/umd';
+```
+
+
+## 撰寫 README.md 、RELEASE.md
+
+透過 README.md 、RELEASE.md 來說明套件的使用方式、版本更新等資訊。
+
+此部份可參考 [測試專案](https://github.com/penghuachen/vue3-progress-bar-for-test) 的 README.md 、RELEASE.md。
+
+## 發布至 NPM server，於專案中安裝並使用
+
+這部分可參考 [開發屬於你的第一個 npm 套件](https://phdev.dev/blog/2024-03-20-%E9%96%8B%E7%99%BC%E5%B1%AC%E6%96%BC%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20npm%20%E5%A5%97%E4%BB%B6) 一文中後半的篇幅，本文不多加贅述。
+
+## 參考來源
+
+- **[Vitest-快速起步](https://cn.vitest.dev/guide/)**
+- **[Vue-Test-Utils](https://test-utils.vuejs.org/guide/)**
+
+
